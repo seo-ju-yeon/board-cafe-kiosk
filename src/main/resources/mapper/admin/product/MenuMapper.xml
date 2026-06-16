@@ -1,0 +1,243 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="org.example.board_cafe_kiosk_2603.mapper.admin.product.MenuMapper">
+
+    <sql id="selectMenuWithCategory">
+        SELECT m.id,
+               m.category_id,
+               c.name AS category_name,
+               m.name,
+               m.price,
+               m.description,
+               m.image_url,
+               m.is_available,
+               m.is_deleted,
+               m.created_at
+        FROM menu m
+                 LEFT JOIN category c ON m.category_id = c.id
+    </sql>
+
+    <!-- 원칙적으로는 VO 기반
+     category_name은 menu에 없는 컬럼. JOIN으로 가져온 값이라 MenuResponseDTO에 직접 매핑-->
+
+    <!-- 전체 메뉴 목록 조회 (소프트 삭제 제외) -->
+    <select id="findAll" resultType="org.example.board_cafe_kiosk_2603.dto.admin.product.MenuResponseDTO">
+        <include refid="selectMenuWithCategory"/>
+        WHERE m.is_deleted = false
+        ORDER BY m.category_id, m.id
+    </select>
+
+    <!-- category_id 기준 메뉴 목록 조회 -->
+    <select id="findByCategoryId" resultType="org.example.board_cafe_kiosk_2603.dto.admin.product.MenuResponseDTO">
+        <include refid="selectMenuWithCategory"/>
+        WHERE m.category_id = #{categoryId}
+        AND m.is_deleted = false
+        ORDER BY m.id
+    </select>
+
+    <!-- category type 기준 메뉴 목록 조회 (FOOD / DRINK / GUEST) -->
+    <select id="findByType" resultType="org.example.board_cafe_kiosk_2603.dto.admin.product.MenuResponseDTO">
+        <include refid="selectMenuWithCategory"/>
+        WHERE c.type = #{type}
+        AND m.is_deleted = false
+        ORDER BY m.id
+    </select>
+
+    <!-- 판매 가능 여부 기준 메뉴 목록 조회 -->
+    <select id="findByIsAvailable" resultType="org.example.board_cafe_kiosk_2603.dto.admin.product.MenuResponseDTO">
+        <include refid="selectMenuWithCategory"/>
+        WHERE m.is_available = #{isAvailable}
+        AND m.is_deleted = false
+        ORDER BY m.id
+    </select>
+
+    <!-- PK로 메뉴 단건 조회 -->
+<!--    <select id="findById" resultType="org.example.board_cafe_kiosk_2603.dto.admin.product.MenuResponseDTO">-->
+<!--        <include refid="selectMenuWithCategory"/>-->
+<!--        WHERE m.id = #{id}-->
+<!--        AND m.is_deleted = false-->
+<!--    </select>-->
+
+    <!-- PK로 메뉴 단건 조회 (삭제 여부 무관) -->
+    <select id="findByIdIncludeDeleted" resultType="org.example.board_cafe_kiosk_2603.dto.admin.product.MenuResponseDTO">
+        <include refid="selectMenuWithCategory"/>
+        WHERE m.id = #{id}
+    </select>
+
+    <!-- 소프트 삭제 여부 기준 메뉴 목록 조회 (숨김 탭용) -->
+    <select id="findByIsDeleted" resultType="org.example.board_cafe_kiosk_2603.dto.admin.product.MenuResponseDTO">
+        <include refid="selectMenuWithCategory"/>
+        WHERE m.is_deleted = #{isDeleted}
+        ORDER BY m.id
+    </select>
+
+    <!-- 메뉴 등록 -->
+    <insert id="insert">
+        INSERT INTO menu (category_id, name, price, description, image_url, is_available)
+        VALUES (#{categoryId}, #{name}, #{price}, #{description}, #{imageUrl}, #{isAvailable})
+    </insert>
+
+    <!-- 메뉴 수정 -->
+    <update id="update">
+        UPDATE menu
+        SET category_id  = #{categoryId},
+            name         = #{name},
+            price        = #{price},
+            description  = #{description},
+            image_url    = #{imageUrl},
+            is_available = #{isAvailable}
+        WHERE id = #{id}
+          AND is_deleted = false
+    </update>
+
+    <!-- 메뉴 소프트 삭제 (숨김)-->
+    <update id="softDelete">
+        UPDATE menu
+        SET is_deleted = true
+        WHERE id = #{id}
+    </update>
+
+    <!-- 메뉴 복원 (숨김 해제) -->
+    <update id="restore">
+        UPDATE menu
+        SET is_deleted = false
+        WHERE id = #{id}
+    </update>
+
+    <!-- 판매 상태 토글 -->
+    <update id="toggleAvailable">
+        UPDATE menu
+        SET is_available = NOT is_available
+        WHERE id = #{id}
+          AND is_deleted = false
+    </update>
+
+    <!--=========페이지============-->
+    <!-- category type 기준 메뉴 목록 조회 - 페이징 -->
+    <select id="findByTypePaged" resultType="org.example.board_cafe_kiosk_2603.dto.admin.product.MenuResponseDTO">
+        <include refid="selectMenuWithCategory"/>
+        WHERE c.type = #{type}
+        AND m.is_deleted = false
+        ORDER BY m.id
+        LIMIT #{pageRequestDTO.size} OFFSET #{pageRequestDTO.skip}
+    </select>
+
+    <!-- category type 기준 메뉴 수 -->
+    <select id="countByType" resultType="int">
+        SELECT COUNT(*)
+        FROM menu m
+                 LEFT JOIN category c ON m.category_id = c.id
+        WHERE c.type = #{type}
+          AND m.is_deleted = false
+    </select>
+
+    <!-- category type + category_id 기준 메뉴 목록 조회 - 페이징 -->
+    <select id="findByTypeAndCategoryIdPaged" resultType="org.example.board_cafe_kiosk_2603.dto.admin.product.MenuResponseDTO">
+        <include refid="selectMenuWithCategory"/>
+        WHERE c.type = #{type}
+        AND m.category_id = #{categoryId}
+        AND m.is_deleted = false
+        ORDER BY m.id
+        LIMIT #{pageRequestDTO.size} OFFSET #{pageRequestDTO.skip}
+    </select>
+
+    <!-- category type + category_id 기준 메뉴 수 -->
+    <select id="countByTypeAndCategoryId" resultType="int">
+        SELECT COUNT(*)
+        FROM menu m
+                 LEFT JOIN category c ON m.category_id = c.id
+        WHERE c.type = #{type}
+          AND m.category_id = #{categoryId}
+          AND m.is_deleted = false
+    </select>
+
+    <!-- 소프트 삭제 여부 기준 메뉴 목록 조회 - 페이징 (숨김 탭용) -->
+    <select id="findByIsDeletedPaged" resultType="org.example.board_cafe_kiosk_2603.dto.admin.product.MenuResponseDTO">
+        <include refid="selectMenuWithCategory"/>
+        WHERE m.is_deleted = #{isDeleted}
+        ORDER BY m.id
+        LIMIT #{pageRequestDTO.size} OFFSET #{pageRequestDTO.skip}
+    </select>
+
+    <!-- 소프트 삭제 여부 기준 메뉴 수 -->
+    <select id="countByIsDeleted" resultType="int">
+        SELECT COUNT(*) FROM menu WHERE is_deleted = #{isDeleted}
+    </select>
+
+    <!-- 소프트 삭제 여부 + category_id 기준 메뉴 목록 조회 - 페이징 -->
+    <select id="findByIsDeletedAndCategoryIdPaged"
+            resultType="org.example.board_cafe_kiosk_2603.dto.admin.product.MenuResponseDTO">
+        <include refid="selectMenuWithCategory"/>
+        WHERE m.is_deleted = #{isDeleted}
+        AND m.category_id = #{categoryId}
+        ORDER BY m.id
+        LIMIT #{pageRequestDTO.size} OFFSET #{pageRequestDTO.skip}
+    </select>
+
+    <!-- 소프트 삭제 여부 + category_id 기준 메뉴 수 -->
+    <select id="countByIsDeletedAndCategoryId" resultType="int">
+        SELECT COUNT(*)
+        FROM menu m
+        WHERE m.is_deleted = #{isDeleted}
+          AND m.category_id = #{categoryId}
+    </select>
+
+    <insert id="insertGameMenuIfNotExists">
+        INSERT INTO menu (category_id, name, price, description, is_available, is_deleted)
+        SELECT #{categoryId}, #{name}, 0, #{description}, true, false
+        WHERE NOT EXISTS (
+            SELECT 1
+            FROM menu
+            WHERE name = #{name}
+              AND price = 0
+              AND is_deleted = false
+        )
+    </insert>
+
+    <update id="updateGameMenuDescriptionByName">
+        UPDATE menu
+        SET description = #{description}
+        WHERE name = #{name}
+          AND price = 0
+          AND is_deleted = false
+    </update>
+
+    <update id="renameGameMenuName">
+        UPDATE menu
+        SET name = #{newName}
+        WHERE name = #{oldName}
+          AND price = 0
+          AND is_deleted = false
+    </update>
+
+    <!-- 1. 게임 이름으로 menu.id 조회                                      -->
+    <!-- GameServiceImpl.tryUpsertEmbeddingByGameName() 에서 사용           -->
+    <!-- game 이름이 menu.name 과 동일하게 저장되어 있는 구조 기준           -->
+    <select id="findMenuIdByGameName" parameterType="String" resultType="Integer">
+        SELECT m.id
+        FROM menu m
+                 JOIN category c
+                      ON m.category_id = c.id
+                          AND c.type = 'GAME'
+        WHERE m.name = #{gameName}
+          AND m.is_deleted = FALSE
+        LIMIT 1
+    </select>
+
+    <!-- 2. game.id → category_id → menu.id 경로로 menu.id 조회             -->
+    <!-- GameItemServiceImpl.tryUpsertEmbeddingByGameId() 에서 사용          -->
+    <!-- game과 menu가 동일한 category_id를 공유하는 구조 기준               -->
+    <select id="findMenuIdByGameId" parameterType="int" resultType="Integer">
+        SELECT m.id
+        FROM menu m
+                 JOIN game g ON g.name = m.name
+                 JOIN category c ON m.category_id = c.id AND c.type = 'GAME'
+        WHERE g.id = #{gameId}
+          AND m.is_deleted = FALSE
+        LIMIT 1
+    </select>
+
+</mapper>

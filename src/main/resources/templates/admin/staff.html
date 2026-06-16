@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="ko"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/admin_layout}">
+
+<head>
+    <title>Staff Management</title>
+    <th:block layout:fragment="head-extra">
+        <link rel="stylesheet" th:href="@{/css/admin/staff.css}">
+    </th:block>
+</head>
+
+<body>
+<th:block layout:fragment="content">
+    <div class="header-container">
+        <div><h1 class="page-title">직원 관리</h1></div>
+        <button class="btn btn-primary" onclick="openStaffModal()">+ 새 직원 추가</button>
+    </div>
+
+    <div class="tab-container">
+        <div class="tab-item" th:classappend="${filter == 'all'} ? 'active'"
+             onclick="filterTab('all')">
+            전체 <span id="count-all" class="tab-count" th:text="${countAll}">0</span>
+        </div>
+        <div class="tab-item" th:classappend="${filter == 'active'} ? 'active'"
+             onclick="filterTab('active')">
+            활성화 <span id="count-active" class="tab-count" th:text="${countActive}">0</span>
+        </div>
+        <div class="tab-item" th:classappend="${filter == 'inactive'} ? 'active'"
+             onclick="filterTab('inactive')">
+            비활성화 <span id="count-inactive" class="tab-count" th:text="${countInactive}">0</span>
+        </div>
+    </div>
+
+    <div class="table-container">
+        <table class="macro-massage-table">
+            <thead>
+            <tr>
+                <th>Staff ID</th>
+                <th>이름</th>
+                <th>권한</th>
+                <th>상태</th>
+                <th>등록일</th>
+                <th style="text-align: right;">관리</th>
+            </tr>
+            </thead>
+            <tbody id="staffTableBody">
+            <tr th:each="staff : ${responseDTO.dtoList}"
+                th:classappend="${!staff.isActive} ? 'is-disabled'">
+                <td style="font-weight:600; color:var(--primary-blue);" th:text="${staff.loginId}"></td>
+                <td th:text="${staff.name}"></td>
+                <td>
+                    <span th:if="${staff.role.name() == 'ADMIN'}">🛡️ Admin</span>
+                    <span th:unless="${staff.role.name() == 'ADMIN'}">👤 Staff</span>
+                </td>
+                <td>
+        <span class="status-badge"
+              th:classappend="${staff.isActive} ? 'status-active' : 'status-inactive'"
+              th:text="${staff.isActive} ? '활성화' : '비활성'"></span>
+                </td>
+                <td th:text="${#temporals.format(staff.createdAt, 'yyyy-MM-dd HH:mm')}"></td>
+                <td style="text-align: right;">
+                    <button th:if="${staff.isActive}" class="btn-text text-danger"
+                            th:attr="onclick=|toggleStatus(this, ${staff.id})|">비활성화</button>
+                    <button th:unless="${staff.isActive}" class="btn-text text-active"
+                            th:attr="onclick=|toggleStatus(this, ${staff.id})|">활성화</button>
+                </td>
+            </tr>
+            <tr th:if="${#lists.isEmpty(responseDTO.dtoList)}">
+                <td colspan="6" style="text-align:center; color:#aaa; padding:40px;">
+                    등록된 직원이 없습니다.</td>
+            </tr>
+            </tbody>
+        </table>
+        <div style="display:flex; justify-content:center; margin-top:20px; gap:8px; padding-bottom:15px;">
+            <a th:if="${responseDTO.prev}"
+               th:href="@{/admin/staff(page=${responseDTO.start - 1}, filter=${filter})}"
+               class="btn-text">이전</a>
+
+            <th:block th:each="num : ${#numbers.sequence(responseDTO.start, responseDTO.end)}">
+                <a th:href="@{/admin/staff(page=${num}, filter=${filter})}"
+                   th:text="${num}"
+                   th:class="${responseDTO.page == num} ? 'btn-primary' : 'btn-text'">
+                </a>
+            </th:block>
+
+            <a th:if="${responseDTO.next}"
+               th:href="@{/admin/staff(page=${responseDTO.end + 1}, filter=${filter})}"
+               class="btn-text">다음</a>
+        </div>
+    </div>
+
+    <div id="staffModal" class="modal-overlay" onclick="closeStaffModal()">
+        <div class="modal-content" onclick="event.stopPropagation()">
+            <h3 style="margin-bottom: 24px; text-align: center;">새 직원 등록</h3>
+            <form id="staffForm">
+                <div class="form-group">
+                    <label>이름</label>
+                    <input type="text" id="staffName" placeholder="실명을 입력하세요 (예: 홍길동)">
+                </div>
+                <div class="form-group">
+                    <label>Staff ID (로그인 계정)</label>
+                    <input type="text" id="staffId" placeholder="사용할 아이디를 입력하세요" autocomplete="off">
+                    <div id="idStatusMsg" class="status-msg"></div>
+                </div>
+
+                <div class="form-group">
+                    <label>이메일 (OTP 및 본인 인증용)</label>
+                    <input type="email" id="staffEmail" placeholder="example@email.com">
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group" style="flex:1">
+                        <label>권한</label>
+                        <select id="staffRole">
+                            <option value="STAFF">Staff (일반)</option>
+                            <option value="ADMIN">Admin (관리자)</option>
+                        </select>
+                    </div>
+                    <div class="form-group" style="flex:1">
+                        <label>임시 비밀번호</label>
+                        <input type="password" id="tempPw" placeholder="비밀번호 설정">
+                    </div>
+                </div>
+            </form>
+            <div style="display: flex; gap: 12px; margin-top: 24px;">
+                <button class="btn-text" style="flex:1" onclick="closeStaffModal()">취소</button>
+                <button class="btn-primary" id="btnSubmit" style="flex:1.5" onclick="saveStaff()">직원 등록 완료</button>
+            </div>
+        </div>
+    </div>
+</th:block>
+
+<th:block layout:fragment="scripts">
+    <script th:src="@{/js/admin/staff.js}"></script>
+</th:block>
+</body>
+</html>

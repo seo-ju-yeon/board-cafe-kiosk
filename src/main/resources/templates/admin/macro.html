@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="ko"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+      layout:decorate="~{layout/admin_layout}">
+
+<head>
+    <title>Macro Management</title>
+    <th:block layout:fragment="head-extra">
+        <link rel="stylesheet" th:href="@{/css/admin/macro.css}">
+    </th:block>
+</head>
+
+<body>
+<th:block layout:fragment="content">
+    <span id="isAdminOrSuper" sec:authorize="hasAnyRole('ADMIN', 'SUPER')" style="display:none;"></span>
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
+        <h1 class="page-title">매크로 메시지 관리</h1>
+
+        <!-- 매크로 등록 버튼: ADMIN, SUPER 가능-->
+        <button id="btnAddMacro" class="btn-add"
+                sec:authorize="hasAnyRole('ADMIN', 'SUPER')"
+                onclick="openAddModal()">
+            + 새 매크로 등록
+        </button>
+
+        <!-- 매크로 등록 버튼: STAFF 불가능 -->
+        <button id="btnAddMacroDisabled" class="btn-add"
+                sec:authorize="hasRole('STAFF')"
+                style="opacity: 0.4; cursor: not-allowed;"
+                onclick="alert('관리자 권한이 필요합니다.'); return false;">
+            + 새 매크로 등록
+        </button>
+
+    </div>
+
+    <div class="tabs">
+        <button th:each="entry, stat : ${macroGroups}"
+                th:if="${entry.key == 'STAFF_TO_TABLE'}"
+                class="tab-btn"
+                th:classappend="${stat.first} ? 'active' : ''"
+                th:data-dir="${entry.key}"
+                th:data-tid="'content-' + ${stat.index}"
+                onclick="openTab(event)"
+                th:text="${entry.key == 'STAFF_TO_TABLE' ? '직원 → 테이블' : entry.key}">
+        </button>
+    </div>
+
+    <div class="table-container">
+        <div th:each="entry, stat : ${macroGroups}"
+             th:if="${entry.key == 'STAFF_TO_TABLE'}"
+             th:id="'content-' + ${stat.index}"
+             class="tab-content"
+             th:style="${stat.first} ? 'display: block' : 'display: none'">
+
+            <table class="macro-massage-table">
+                <thead>
+                <tr>
+                    <th>메시지 내용</th>
+                    <th style="text-align: right;">관리</th>
+                </tr>
+                </thead>
+                <tbody th:id="'tbody-' + ${entry.key}">
+                <tr th:each="macro : ${entry.value}">
+                    <td class="messageText" th:text="${macro.messageText}"></td>
+                    <td style="text-align: right;">
+
+                        <!-- 삭제 버튼: ADMIN, SUPER 가능 -->
+                        <button type="button" class="btn-delete"
+                                sec:authorize="hasAnyRole('ADMIN', 'SUPER')"
+                                th:data-id="${macro.id}" onclick="deleteMacro(this)">
+                            삭제
+                        </button>
+
+                        <!-- 삭제 버튼: STAFF 불가능 -->
+                        <button type="button" class="btn-delete"
+                                sec:authorize="hasRole('STAFF')"
+                                style="opacity: 0.4; cursor: not-allowed;"
+                                onclick="alert('관리자 권한이 필요합니다.'); return false;">
+                            삭제
+                        </button>
+
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+        <div class="pagination" id="macroPagination"></div>
+    </div>
+
+    <div class="modal-overlay" id="addMacroModal">
+        <div class="modal-content">
+            <h3>새 매크로 등록</h3>
+            <div style="margin-top:15px;">
+                <label>전송 방향</label>
+                <select id="newDirection" class="form-control">
+                    <option value="STAFF_TO_TABLE">직원 → 테이블</option>
+                </select>
+            </div>
+            <div style="margin-top:15px;">
+                <label>메시지 내용</label>
+                <input type="text" id="newMessageText" class="form-control" autocomplete="off">
+            </div>
+            <div class="modal-actions">
+                <button class="btn-cancel" onclick="closeAddModal()">취소</button>
+                <button class="btn-add" onclick="submitNewMacro()">저장</button>
+            </div>
+        </div>
+    </div>
+</th:block>
+
+<th:block layout:fragment="scripts">
+    <script th:src="@{/js/admin/macro.js}"></script>
+</th:block>
+</body>
+</html>

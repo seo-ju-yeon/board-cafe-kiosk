@@ -1,0 +1,158 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="org.example.board_cafe_kiosk_2603.mapper.admin.product.GameMapper">
+
+    <!-- 게임 대여 가능 수량(NORMAL)만 카운트 -->
+    <sql id="selectGameWithCategory">
+        SELECT g.id,
+               g.category_id,
+               c.name       AS category_name,
+               g.name,
+               g.min_players,
+               g.max_players,
+               g.play_time,
+               g.is_active,
+               g.image_url,
+               MAX(CASE WHEN m.price = 0 AND m.is_deleted = FALSE THEN m.description END) AS description,
+               COUNT(CASE WHEN gi.status = 'NORMAL' THEN 1 END) AS game_item_count
+        FROM game g
+                 LEFT JOIN category c ON g.category_id = c.id
+                 LEFT JOIN menu m ON m.name = g.name
+                                AND m.price = 0
+                                AND m.is_deleted = FALSE
+                 LEFT JOIN game_item gi ON g.id = gi.game_id
+    </sql>
+
+    <!-- 전체 게임 목록 조회 -->
+    <select id="findAll" resultType="org.example.board_cafe_kiosk_2603.dto.admin.product.GameResponseDTO">
+        <include refid="selectGameWithCategory"/>
+        GROUP BY g.id, g.category_id, c.name, g.name,
+        g.min_players, g.max_players, g.play_time, g.is_active
+        ORDER BY g.category_id, g.id
+    </select>
+
+    <!-- category_id 기준 게임 목록 조회 -->
+    <select id="findByCategoryId" resultType="org.example.board_cafe_kiosk_2603.dto.admin.product.GameResponseDTO">
+        <include refid="selectGameWithCategory"/>
+        WHERE g.category_id = #{categoryId}
+        GROUP BY g.id, g.category_id, c.name, g.name,
+        g.min_players, g.max_players, g.play_time, g.is_active
+        ORDER BY g.id
+    </select>
+
+    <!-- 활성 여부 기준 게임 목록 조회 -->
+    <select id="findByIsActive" resultType="org.example.board_cafe_kiosk_2603.dto.admin.product.GameResponseDTO">
+        <include refid="selectGameWithCategory"/>
+        WHERE g.is_active = #{isActive}
+        GROUP BY g.id, g.category_id, c.name, g.name,
+        g.min_players, g.max_players, g.play_time, g.is_active
+        ORDER BY g.id
+    </select>
+
+    <!-- PK로 게임 단건 조회 -->
+    <select id="findById" resultType="org.example.board_cafe_kiosk_2603.dto.admin.product.GameResponseDTO">
+        <include refid="selectGameWithCategory"/>
+        WHERE g.id = #{id}
+        GROUP BY g.id, g.category_id, c.name, g.name,
+        g.min_players, g.max_players, g.play_time, g.is_active
+    </select>
+
+    <select id="findByNames" resultType="org.example.board_cafe_kiosk_2603.dto.admin.product.GameResponseDTO">
+        <include refid="selectGameWithCategory"/>
+        WHERE g.name IN
+        <foreach collection="names" item="name" open="(" separator="," close=")">
+            #{name}
+        </foreach>
+        GROUP BY g.id, g.category_id, c.name, g.name,
+        g.min_players, g.max_players, g.play_time, g.is_active
+        ORDER BY g.id
+    </select>
+
+    <!-- 게임 등록 -->
+    <insert id="insert" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO game (category_id, name, min_players, max_players, play_time, is_active, image_url)
+        VALUES (#{categoryId}, #{name}, #{minPlayers}, #{maxPlayers}, #{playTime}, #{isActive}, #{imageUrl})
+    </insert>
+
+    <!-- 게임 수정 -->
+    <update id="update">
+        UPDATE game
+        SET category_id = #{categoryId},
+            name        = #{name},
+            min_players = #{minPlayers},
+            max_players = #{maxPlayers},
+            play_time   = #{playTime},
+            is_active   = #{isActive},
+            image_url   = #{imageUrl}
+        WHERE id = #{id}
+    </update>
+
+    <!-- 게임 삭제 (game_item ON DELETE CASCADE 로 자동 삭제) -->
+    <delete id="delete">
+        DELETE
+        FROM game
+        WHERE id = #{id}
+    </delete>
+
+    <!-- 게임 활성 상태 토글 -->
+    <update id="toggleActive">
+        UPDATE game
+        SET is_active = NOT is_active
+        WHERE id = #{id}
+    </update>
+
+    <!--===============페이지============= -->
+    <!-- 전체 게임 목록 조회 - 페이징 -->
+    <select id="findAllPaged" resultType="org.example.board_cafe_kiosk_2603.dto.admin.product.GameResponseDTO">
+        <include refid="selectGameWithCategory"/>
+        GROUP BY g.id, g.category_id, c.name, g.name,
+        g.min_players, g.max_players, g.play_time, g.is_active
+        ORDER BY g.category_id, g.id
+        LIMIT #{size} OFFSET #{skip}
+    </select>
+
+    <!-- 전체 게임 수 -->
+    <select id="countAll" resultType="int">
+        SELECT COUNT(*) FROM game
+    </select>
+
+    <!-- category_id 기준 게임 목록 조회 - 페이징 -->
+    <select id="findByCategoryIdPaged" resultType="org.example.board_cafe_kiosk_2603.dto.admin.product.GameResponseDTO">
+        <include refid="selectGameWithCategory"/>
+        WHERE g.category_id = #{categoryId}
+        GROUP BY g.id, g.category_id, c.name, g.name,
+        g.min_players, g.max_players, g.play_time, g.is_active
+        ORDER BY g.id
+        LIMIT #{pageRequestDTO.size} OFFSET #{pageRequestDTO.skip}
+    </select>
+
+    <!-- 활성 여부 기준 게임 목록 조회 - 페이징 -->
+    <select id="findByIsActivePaged" resultType="org.example.board_cafe_kiosk_2603.dto.admin.product.GameResponseDTO">
+        <include refid="selectGameWithCategory"/>
+        WHERE g.is_active = #{isActive}
+        <if test="categoryId != null">
+            AND g.category_id = #{categoryId}
+        </if>
+        GROUP BY g.id, g.category_id, c.name, g.name,
+        g.min_players, g.max_players, g.play_time, g.is_active
+        ORDER BY g.id
+        LIMIT #{pageRequestDTO.size} OFFSET #{pageRequestDTO.skip}
+    </select>
+
+    <!-- 활성 여부 기준 게임 수 -->
+    <select id="countByIsActive" resultType="int">
+        SELECT COUNT(*) FROM game
+        WHERE is_active = #{isActive}
+        <if test="categoryId != null">
+            AND category_id = #{categoryId}
+        </if>
+    </select>
+
+    <!-- category_id 기준 게임 수 -->
+    <select id="countByCategoryId" resultType="int">
+        SELECT COUNT(*) FROM game WHERE category_id = #{categoryId}
+    </select>
+</mapper>

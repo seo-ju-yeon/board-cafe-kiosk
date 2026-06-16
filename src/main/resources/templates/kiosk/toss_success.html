@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <title>결제 완료 - Board Game Cafe</title>
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <link rel="stylesheet" th:href="@{/css/kiosk/toss_success.css}">
+</head>
+<body>
+<div class="container">
+  <i data-lucide="circle-check-big" class="check-icon"></i>
+  <h1>결제 완료!</h1>
+
+  <div class="amount"
+       th:text="'₩' + ${#numbers.formatInteger(finalAmount, 1, 'COMMA')}">₩0</div>
+
+  <div class="point-badge"
+       th:if="${earnedPoints != null and earnedPoints > 0}"
+       th:text="'🎁 ' + ${earnedPoints} + 'P 적립 완료!'">🎁 0P 적립 완료!</div>
+
+  <p class="order-no" th:text="'주문번호: #' + ${orderId}">주문번호: #0</p>
+  <p class="thanks">이용해주셔서 감사합니다 😊</p>
+
+  <div class="progress-bar"><div class="progress-fill"></div></div>
+  <p class="redirect-msg">3초 후 메인 화면으로 이동합니다...</p>
+</div>
+
+<script th:inline="javascript">
+  const redirectUrl = /*[[${redirectUrl}]]*/ '/kiosk/session/start';
+</script>
+<script th:src="@{/js/kiosk/toss_success.js}"></script>
+</body>
+</html>
+

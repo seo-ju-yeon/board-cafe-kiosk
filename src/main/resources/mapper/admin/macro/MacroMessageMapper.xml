@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.example.board_cafe_kiosk_2603.mapper.admin.macro.MacroMessageMapper">
+
+    <select id="findAllActive" resultType="org.example.board_cafe_kiosk_2603.domain.admin.macro.MacroMessage">
+        SELECT
+            id,
+            direction,
+            message_text AS messageText,
+            is_active AS isActive
+        FROM macro_message
+        WHERE is_active = TRUE
+        ORDER BY direction DESC, id ASC
+    </select>
+
+    <select id="findById" resultType="org.example.board_cafe_kiosk_2603.domain.admin.macro.MacroMessage">
+        SELECT
+            id,
+            message_text AS messageText,
+            direction,
+            is_active AS isActive
+        FROM macro_message
+        WHERE id = #{id}
+    </select>
+
+    <insert id="insertMacro">
+        INSERT INTO macro_message (direction, message_text, is_active)
+        VALUES (#{direction}, #{messageText}, TRUE)
+    </insert>
+
+    <update id="deactivateMacro">
+        UPDATE macro_message
+        SET is_active = FALSE
+        WHERE id = #{id}
+    </update>
+
+    <!-- direction별 페이징 목록 조회 -->
+    <select id="selectList" resultType="org.example.board_cafe_kiosk_2603.domain.admin.macro.MacroMessage">
+        SELECT id, direction, message_text AS messageText, is_active AS isActive
+        FROM macro_message
+        WHERE is_active = TRUE
+        <if test="direction != null and direction != ''">
+            AND direction = #{direction}
+        </if>
+        ORDER BY id ASC
+        LIMIT #{skip}, #{size}
+    </select>
+    <!-- direction별 전체 개수 조회 -->
+    <select id="selectCount" resultType="int">
+        SELECT COUNT(*)
+        FROM macro_message
+        WHERE is_active = TRUE
+        <if test="direction != null and direction != ''">
+            AND direction = #{direction}
+        </if>
+    </select>
+</mapper>

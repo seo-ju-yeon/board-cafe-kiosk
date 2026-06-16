@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="ko"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/admin_layout}">
+
+<head>
+  <title>Sales Statistics</title>
+  <th:block layout:fragment="head-extra">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" th:href="@{/css/admin/status.css}">
+  </th:block>
+</head>
+
+<body>
+<th:block layout:fragment="content">
+  <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px;">
+    <h1 class="page-title" style="margin-bottom: 0;">매출 통계</h1>
+    <div style="display: flex; align-items: center; gap: 15px;">
+      <button onclick="loadStatData(document.getElementById('targetDate').value)" class="sync-btn">
+        🔄 실시간 동기화
+      </button>
+      <div class="date-picker-wrapper">
+        <label for="targetDate" style="font-weight: 600; margin-right: 10px;">기준 날짜:</label>
+        <input type="date" id="targetDate"
+               th:value="${#temporals.format(#temporals.createNow(), 'yyyy-MM-dd')}"
+               th:max="${#temporals.format(#temporals.createNow(), 'yyyy-MM-dd')}"
+               onchange="loadStatData(this.value)"
+               style="padding: 8px 12px; border-radius: 8px; border: 1px solid #ddd; font-family: inherit;">
+      </div>
+    </div>
+  </div>
+
+  <div class="summary-grid">
+    <div class="summary-card">
+      <div class="summary-label">💰 선택일 매출</div>
+      <div class="summary-value val-blue" id="stat-total-revenue">₩0</div>
+    </div>
+    <div class="summary-card">
+      <div class="summary-label">📈 주간 일평균(추정)</div>
+      <div class="summary-value val-green" id="stat-daily-avg">₩0</div>
+    </div>
+    <div class="summary-card">
+      <div class="summary-label">📋 총 주문</div>
+      <div class="summary-value val-orange" id="stat-total-orders">0</div>
+    </div>
+    <div class="summary-card">
+      <div class="summary-label">👥 총 방문자</div>
+      <div class="summary-value val-purple" id="stat-total-visitors">0</div>
+    </div>
+    <div class="summary-card">
+      <div class="summary-label">🕒 평균 이용시간</div>
+      <div class="summary-value val-blue" id="stat-avg-time">0m</div>
+    </div>
+  </div>
+
+  <div class="chart-row">
+    <div class="chart-card">
+      <div class="chart-title">최근 7일 매출 추이</div>
+      <canvas id="dailySalesChart" height="200"></canvas>
+    </div>
+    <div class="chart-card">
+      <div class="chart-title">카테고리별 매출</div>
+      <canvas id="categorySalesChart" height="200"></canvas>
+    </div>
+  </div>
+
+  <div class="chart-row" style="margin-top: 20px;">
+    <div class="best-seller-card" id="best-seller-container" style="margin-top: 0;">
+      <div class="chart-title">메뉴 베스트 셀러 (TOP 5)</div>
+      <div class="text-center py-4">데이터를 불러오는 중...</div>
+    </div>
+
+    <div class="best-seller-card" id="top-games-container" style="margin-top: 0;">
+      <div class="chart-title" id="top-games-title">월간 인기 보드게임 (TOP 5)</div>
+      <div class="text-center py-4">데이터를 불러오는 중...</div>
+    </div>
+  </div>
+</th:block>
+
+<th:block layout:fragment="scripts">
+  <script th:src="@{/js/admin/status.js}"></script>
+</th:block>
+</body>
+</html>

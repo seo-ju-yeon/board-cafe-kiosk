@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="ko"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/admin_layout}">
+
+<head>
+    <title>Point Management - BoardWave</title>
+    <th:block layout:fragment="head-extra">
+        <link rel="stylesheet" th:href="@{/css/admin/point.css}">
+    </th:block>
+</head>
+
+<body>
+<th:block layout:fragment="content">
+    <h1 class="page-title">포인트 관리</h1>
+
+    <!-- 통계 카드 -->
+    <div class="stats-container">
+        <div class="stat-mini-card">
+            <div class="stat-mini-label">전체 회원 수</div>
+            <div class="stat-mini-value" th:text="${totalCustomers + '명'}">5명</div>
+        </div>
+        <div class="stat-mini-card">
+            <div class="stat-mini-label">총 포인트 잔액</div>
+            <div class="stat-mini-value"
+                 th:text="${#numbers.formatInteger(totalPoints, 0, 'COMMA') + 'P'}">66,000P</div>
+        </div>
+        <div class="stat-mini-card">
+            <div class="stat-mini-label">인당 평균 포인트</div>
+            <div class="stat-mini-value"
+                 th:text="${#numbers.formatInteger(avgPoints, 0, 'COMMA') + 'P'}">13,200P</div>
+        </div>
+    </div>
+
+    <!-- 검색 바 -->
+    <div class="header-row">
+        <div class="search-box">
+            <span>🔍</span>
+            <input id="searchInput" type="text"
+                   th:value="${pageRequestDTO.keyword}"
+                   placeholder="전화번호를 입력하여 검색하세요 (예: 010-1234-5678)"
+                   onkeydown="if(event.key==='Enter') doSearch()">
+        </div>
+        <button class="search-clear-btn" onclick="doSearch()">검색</button>
+        <button class="search-clear-btn" onclick="clearSearch()">전체 보기</button>
+    </div>
+
+    <!-- 포인트 테이블 -->
+    <div class="table-container">
+        <table class="point-table">
+            <thead>
+            <tr>
+                <th>전화번호</th>
+                <th>현재 포인트</th>
+                <th>마지막 적립/변경 일시</th>
+                <th style="text-align:center;">기록</th>
+            </tr>
+            </thead>
+            <tbody id="pointTableBody">
+            <tr th:each="point : ${responseDTO.dtoList}"
+                th:data-phone="${point.phone}"
+                th:data-point-id="${point.id}">
+                <td class="phone-num" th:text="${point.phone}">010-1234-5678</td>
+                <td class="balance-text"
+                    th:text="${#numbers.formatInteger(point.balance, 0, 'COMMA') + ' P'}">12,500 P</td>
+                <td class="update-date"
+                    th:text="${#temporals.format(point.updatedAt, 'yyyy-MM-dd HH:mm:ss')}">
+                    2026-03-19 14:30:00</td>
+                <td style="text-align:center;">
+                    <button class="history-btn"
+                            th:data-id="${point.id}"
+                            th:data-phone="${point.phone}"
+                            onclick="openHistoryModal(this.getAttribute('data-id'), this.getAttribute('data-phone'))">
+                        History
+                    </button>
+                </td>
+            </tr>
+            <tr id="emptyRow" th:if="${#lists.isEmpty(responseDTO.dtoList)}">
+                <td colspan="4"
+                    style="text-align:center; color:#aaa; padding:40px;">
+                    등록된 포인트 내역이 없습니다.</td>
+            </tr>
+            </tbody>
+        </table>
+
+        <!-- 페이징 -->
+        <div class="pagination-container" style="display: flex; justify-content: center; margin-top: 20px; gap: 8px; padding-bottom: 15px;">
+
+            <a th:if="${responseDTO.prev}"
+               th:href="|@{/admin/points/list}?${pageRequestDTO.link}&page=${responseDTO.start - 1}|"
+               class="search-clear-btn" style="text-decoration: none;">이전</a>
+
+            <th:block th:each="num : ${#numbers.sequence(responseDTO.start, responseDTO.end)}">
+                <a th:href="|@{/admin/points/list}?${pageRequestDTO.link}&page=${num}|"
+                   th:text="${num}"
+                   th:class="${responseDTO.page == num} ? 'history-btn' : 'search-clear-btn'"
+                   th:style="${responseDTO.page == num} ? 'background: var(--primary-blue); color: white; text-decoration: none;' : 'text-decoration: none;'">
+                    1
+                </a>
+            </th:block>
+
+            <a th:if="${responseDTO.next}"
+               th:href="|@{/admin/points/list}?${pageRequestDTO.link}&page=${responseDTO.end + 1}|"
+               class="search-clear-btn" style="text-decoration: none;">다음</a>
+        </div>
+
+
+        <!-- 검색 결과 없음 (JS 제어) -->
+        <div id="noResultMsg"
+             style="display:none; text-align:center; color:#aaa; padding:40px; font-size:14px;">
+            검색 결과가 없습니다.
+        </div>
+    </div>
+
+    <!-- ===== History 모달 ===== -->
+    <div id="historyModal" class="modal-overlay" onclick="closeModalOnOverlay(event)">
+        <div class="modal">
+            <div class="modal-header">
+                <div>
+                    <div class="modal-title">📋 포인트 이력</div>
+                    <div class="modal-phone" id="modalPhone"></div>
+                </div>
+                <button class="modal-close" onclick="closeHistoryModal()">✕</button>
+            </div>
+            <div id="modalBody">
+                <div class="modal-loading">불러오는 중...</div>
+            </div>
+        </div>
+    </div>
+
+</th:block>
+
+<th:block layout:fragment="scripts">
+    <script th:src="@{/js/admin/point.js}"></script>
+</th:block>
+</body>
+</html>

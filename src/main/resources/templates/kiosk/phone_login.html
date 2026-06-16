@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <title>Member Login - Board Game Cafe</title>
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <link rel="stylesheet" th:href="@{/css/kiosk/phone_login.css}">
+</head>
+<body>
+
+<div class="container">
+  <div class="icon-header">
+    <i data-lucide="smartphone" style="width: 40px; height: 40px;"></i>
+  </div>
+  <h1>Membership</h1>
+  <p class="subtitle">휴대폰 번호를 입력하시면<br>포인트 적립 및 조회가 가능합니다.</p>
+
+  <!-- 폼 추가: 전화번호를 서버로 POST 전송 -->
+  <form id="phone-form" action="/kiosk/phone_login" method="post">
+    <input type="hidden" id="phone-input" name="phone" value="">
+  </form>
+
+  <div id="phone-display" class="phone-display"></div>
+
+  <div class="keypad">
+    <button class="key" onclick="appendNumber('1')">1</button>
+    <button class="key" onclick="appendNumber('2')">2</button>
+    <button class="key" onclick="appendNumber('3')">3</button>
+    <button class="key" onclick="appendNumber('4')">4</button>
+    <button class="key" onclick="appendNumber('5')">5</button>
+    <button class="key" onclick="appendNumber('6')">6</button>
+    <button class="key" onclick="appendNumber('7')">7</button>
+    <button class="key" onclick="appendNumber('8')">8</button>
+    <button class="key" onclick="appendNumber('9')">9</button>
+    <button class="key special" onclick="clearAll()">C</button>
+    <button class="key" onclick="appendNumber('0')">0</button>
+    <button class="key special" onclick="deleteLast()"><i data-lucide="delete"></i></button>
+  </div>
+
+  <div class="button-group">
+    <button class="action-btn skip-btn" onclick="skipStep()">
+      <i data-lucide="log-out" style="width: 20px;"></i>
+      적립 없이 계속
+    </button>
+    <button id="next-button" class="action-btn submit-btn" onclick="identifyMember()">
+      <i data-lucide="check-circle" style="width: 20px;"></i>
+      확인 및 조회
+    </button>
+  </div>
+</div>
+
+<script th:inline="javascript">
+  lucide.createIcons();
+
+  // 서버에서 주입된 값 (세션 기반이므로 URL 파라미터보다 신뢰도 높음)
+  const TABLE_NUMBER = /*[[${tableNumber}]]*/ 1;
+  const PARTY_SIZE   = /*[[${partySize}]]*/ 1;
+
+</script>
+<script th:src="@{/js/kiosk/phone_login.js}"></script>
+</body>
+</html>

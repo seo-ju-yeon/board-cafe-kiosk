@@ -1,0 +1,777 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    background-color: #f4f6f8;
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    overflow: hidden;
+}
+
+/* 상단 배너 */
+.timer-banner {
+    background-color: #ff8a00;
+    color: white;
+    text-align: center;
+    padding: 15px;
+    font-size: 1.1rem;
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    z-index: 100;
+}
+
+.timer-banner i {
+    width: 24px;
+    height: 24px;
+}
+
+/* 헤더 */
+.header {
+    background: white;
+    padding: 20px 30px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid #eaeaea;
+}
+
+.back-btn {
+    color: #007bff;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-weight: bold;
+    border: none;
+    background: none;
+    cursor: pointer;
+    font-size: 1rem;
+    transition: 0.2s;
+}
+
+.back-btn:hover {
+    color: #0056b3;
+}
+
+.back-btn i {
+    width: 24px;
+    height: 24px;
+}
+
+.table-info {
+    font-size: 1.2rem;
+    font-weight: bold;
+    color: #333;
+}
+
+/* 장바구니 아이템 영역 */
+.content {
+    flex: 1;
+    padding: 30px 40px;
+    overflow-y: auto;
+}
+
+.content::-webkit-scrollbar {
+    width: 8px;
+}
+
+.content::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 10px;
+}
+
+.content::-webkit-scrollbar-thumb {
+    background: #c1c1c1;
+    border-radius: 10px;
+}
+
+.content::-webkit-scrollbar-thumb:hover {
+    background: #888;
+}
+
+.empty-cart {
+    text-align: center;
+    padding: 80px 20px;
+    color: #888;
+}
+
+.empty-cart i {
+    width: 80px;
+    height: 80px;
+    margin-bottom: 20px;
+    opacity: 0.3;
+}
+
+.empty-cart h2 {
+    font-size: 1.5rem;
+    margin-bottom: 10px;
+    color: #333;
+}
+
+.cart-item {
+    background: white;
+    border-radius: 20px;
+    padding: 25px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 15px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.02);
+    transition: all 0.3s ease;
+}
+
+.cart-item:hover {
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
+}
+
+.item-info {
+    flex: 1;
+}
+
+.item-info h3 {
+    margin: 0 0 8px 0;
+    font-size: 1.2rem;
+    color: #333;
+}
+
+.item-price {
+    color: #007bff;
+    font-weight: bold;
+    font-size: 1.1rem;
+}
+
+.item-subtotal {
+    color: #888;
+    font-size: 0.9rem;
+    margin-top: 5px;
+}
+
+/* 수량 조절 UI */
+.quantity-control {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    background: #f8f9fa;
+    padding: 10px 15px;
+    border-radius: 30px;
+    margin-right: 20px;
+}
+
+.qty-btn {
+    width: 35px;
+    height: 35px;
+    border-radius: 50%;
+    border: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: 0.2s;
+}
+
+.qty-btn i {
+    width: 20px;
+    height: 20px;
+}
+
+.qty-btn.minus {
+    background-color: #e2e4e7;
+    color: #555;
+}
+
+.qty-btn.minus:hover {
+    background-color: #d0d2d7;
+}
+
+.qty-btn.plus {
+    background-color: #007bff;
+    color: white;
+}
+
+.qty-btn.plus:hover {
+    background-color: #0056b3;
+}
+
+.qty-number {
+    font-size: 1.3rem;
+    font-weight: bold;
+    min-width: 25px;
+    text-align: center;
+}
+
+.delete-btn {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: #f8f9fa;
+    border: none;
+    color: #f44336;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: 0.2s;
+}
+
+.delete-btn:hover {
+    background: #f44336;
+    color: white;
+}
+
+.delete-btn i {
+    width: 20px;
+    height: 20px;
+}
+
+/* 하단 결제 바 */
+.footer {
+    background: white;
+    padding: 30px 40px;
+    border-top: 1px solid #eaeaea;
+}
+
+.total-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.total-label {
+    font-size: 1.2rem;
+    font-weight: bold;
+    color: #333;
+}
+
+#total-amount {
+    font-size: 2.2rem;
+    font-weight: bold;
+    color: #007bff;
+}
+
+.button-group {
+    display: flex;
+    gap: 10px;
+}
+
+.order-btn, .clear-btn {
+    flex: 1;
+    padding: 20px;
+    border: none;
+    border-radius: 15px;
+    font-size: 1.2rem;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.order-btn {
+    background: #007bff;
+    color: white;
+}
+
+.order-btn:hover:not(:disabled) {
+    background: #0056b3;
+    box-shadow: 0 4px 12px rgba(0, 123, 255, 0.3);
+}
+
+.order-btn:active {
+    transform: scale(0.98);
+}
+
+.order-btn:disabled {
+    background: #ccc;
+    cursor: not-allowed;
+}
+
+.clear-btn {
+    background: #f0f2f5;
+    color: #888;
+}
+
+.clear-btn:hover {
+    background: #e0e2e7;
+    color: #555;
+}
+
+/* ========== 주문 확인 모달 ========== */
+#order-confirm-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.6);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 10000;
+}
+
+.modal-content {
+    background: white;
+    padding: 50px;
+    border-radius: 30px;
+    width: 90%;
+    max-width: 550px;
+    max-height: 80vh;
+    overflow-y: auto;
+    box-shadow: 0 10px 50px rgba(0, 0, 0, 0.3);
+}
+
+.modal-content h2 {
+    font-size: 1.8rem;
+    margin-bottom: 10px;
+    color: #333;
+    text-align: center;
+}
+
+.modal-content .subtitle {
+    text-align: center;
+    color: #888;
+    font-size: 0.95rem;
+    margin-bottom: 30px;
+}
+
+.modal-items-list {
+    background: #f8f9fa;
+    border-radius: 15px;
+    padding: 20px;
+    margin-bottom: 25px;
+    max-height: 300px;
+    overflow-y: auto;
+}
+
+.modal-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px 0;
+    border-bottom: 1px solid #e0e0e0;
+}
+
+.modal-item:last-child {
+    border-bottom: none;
+}
+
+.modal-item-info {
+    flex: 1;
+}
+
+.modal-item-name {
+    font-weight: bold;
+    color: #333;
+    font-size: 1rem;
+}
+
+.modal-item-qty {
+    color: #888;
+    font-size: 0.85rem;
+    margin-top: 3px;
+}
+
+.modal-item-price {
+    font-weight: bold;
+    color: #007bff;
+    text-align: right;
+    min-width: 100px;
+}
+
+.price-section {
+    border-top: 2px solid #eaeaea;
+    padding-top: 20px;
+    margin-bottom: 30px;
+}
+
+.price-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 1.3rem;
+    font-weight: bold;
+    color: #333;
+    margin-bottom: 10px;
+}
+
+.price-row span:last-child {
+    color: #007bff;
+    font-size: 1.8rem;
+}
+
+.modal-buttons {
+    display: flex;
+    gap: 15px;
+}
+
+.btn-confirm {
+    flex: 1;
+    padding: 20px;
+    background: #007bff;
+    color: white;
+    border: none;
+    border-radius: 15px;
+    font-weight: bold;
+    font-size: 1.1rem;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.btn-confirm:hover:not(:disabled) {
+    background: #0056b3;
+    box-shadow: 0 4px 12px rgba(0, 123, 255, 0.3);
+}
+
+.btn-confirm:disabled {
+    background: #ccc;
+    cursor: not-allowed;
+}
+
+.btn-cancel {
+    flex: 1;
+    padding: 20px;
+    background: #f0f2f5;
+    color: #888;
+    border: none;
+    border-radius: 15px;
+    font-weight: bold;
+    font-size: 1.1rem;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.btn-cancel:hover {
+    background: #e0e2e7;
+    color: #555;
+}
+
+/* 경고 모달 */
+#warning-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.6);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 9000;
+}
+
+.modal-box {
+    background: white;
+    padding: 40px;
+    border-radius: 30px;
+    text-align: center;
+    width: 400px;
+}
+
+.modal-box h2 {
+    margin-bottom: 10px;
+    color: #333;
+}
+
+.modal-box p {
+    color: #888;
+    margin-bottom: 30px;
+}
+
+.keep-btn {
+    width: 100%;
+    padding: 18px;
+    background: #007bff;
+    color: white;
+    border: none;
+    border-radius: 15px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: 0.2s;
+}
+
+.keep-btn:hover {
+    background: #0056b3;
+}
+
+/* 진행 중인 주문 섹션 */
+.active-orders-section {
+    background: #f0f7ff;
+    border-bottom: 2px solid #0066cc;
+    padding: 20px 30px;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.active-orders-label {
+    font-size: 1rem;
+    font-weight: bold;
+    color: #0066cc;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    white-space: nowrap;
+}
+
+.active-orders-label i {
+    width: 20px;
+    height: 20px;
+}
+
+.orders-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 12px;
+}
+
+.order-status-card {
+    background: white;
+    border-radius: 12px;
+    padding: 12px;
+    border: 1.5px solid #e0e0e0;
+    transition: all 0.3s ease;
+    cursor: pointer;
+}
+
+.order-status-card:hover {
+    border-color: #0066cc;
+    box-shadow: 0 2px 8px rgba(0, 102, 204, 0.15);
+}
+
+.card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+}
+
+.order-number {
+    font-size: 0.85rem;
+    font-weight: bold;
+    color: #333;
+}
+
+.status-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 3px 8px;
+    border-radius: 10px;
+    font-size: 0.75rem;
+    font-weight: bold;
+    white-space: nowrap;
+}
+
+.status-ordered {
+    background-color: #fff3cd;
+    color: #856404;
+}
+
+.status-confirmed {
+    background-color: #d1ecf1;
+    color: #0c5460;
+}
+
+.status-cooking {
+    background-color: #fde8e8;
+    color: #721c24;
+}
+
+.status-delivering {
+    background-color: #d4edda;
+    color: #155724;
+}
+
+.status-completed {
+    background-color: #d4edda;
+    color: #155724;
+}
+
+.status-cancelled {
+    background-color: #f8d7da;
+    color: #721c24;
+}
+
+/* 진행 상황 바 */
+.progress-container {
+    margin-top: 8px;
+}
+
+.progress-steps {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 6px;
+    position: relative;
+}
+
+.progress-step {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    flex: 1;
+    position: relative;
+    z-index: 2;
+}
+
+.step-dot {
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background: #e0e0e0;
+    border: 1.5px solid white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.6rem;
+    color: white;
+    font-weight: bold;
+    transition: all 0.3s ease;
+    margin-bottom: 2px;
+}
+
+.step-dot.active {
+    background: #0066cc;
+    border-color: #0052a3;
+}
+
+.step-dot.completed {
+    background: #28a745;
+    border-color: #1e7e34;
+}
+
+.step-label {
+    font-size: 0.65rem;
+    color: #666;
+    text-align: center;
+    line-height: 1.1;
+    max-width: 40px;
+}
+
+.step-label.active {
+    color: #0066cc;
+    font-weight: bold;
+}
+
+.step-label.completed {
+    color: #28a745;
+    font-weight: bold;
+}
+
+/* 진행 바 배경 */
+.progress-bar-background {
+    position: absolute;
+    top: 9px;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: #e0e0e0;
+    z-index: 1;
+}
+
+.progress-bar-fill {
+    position: absolute;
+    top: 9px;
+    left: 0;
+    height: 1px;
+    background: #0066cc;
+    transition: width 0.4s ease;
+    z-index: 1;
+}
+
+.card-items {
+    font-size: 0.75rem;
+    color: #666;
+    margin-top: 8px;
+    padding-top: 8px;
+    border-top: 1px solid #eee;
+}
+
+.card-items-list {
+    list-style: none;
+    margin: 4px 0 0 0;
+    padding: 0;
+}
+
+.card-items-list li {
+    padding: 1px 0;
+    font-size: 0.7rem;
+    color: #555;
+}
+
+.order-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: white;
+    border: 1.5px solid #0066cc;
+    border-radius: 20px;
+    padding: 8px 14px;
+    font-size: 0.85rem;
+    cursor: pointer;
+    font-weight: bold;
+    color: #0066cc;
+    text-decoration: none;
+    transition: all 0.2s;
+}
+
+.order-badge:hover {
+    background: #0066cc;
+    color: white;
+}
+
+.order-badge i {
+    width: 14px;
+    height: 14px;
+}
+
+/* 토스트 알림 */
+.toast {
+    position: fixed;
+    bottom: 30px;
+    right: 30px;
+    background: #333;
+    color: white;
+    padding: 15px 25px;
+    border-radius: 12px;
+    z-index: 2000;
+    animation: slideInUp 0.3s ease;
+}
+
+@keyframes slideInUp {
+    from {
+        transform: translateY(100px);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+/* 로딩 스피너 */
+.spinner {
+    display: inline-block;
+    width: 20px;
+    height: 20px;
+    border: 3px solid #f3f3f3;
+    border-top: 3px solid #007bff;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin-right: 10px;
+}
+
+@keyframes spin {
+    0% {
+        transform: rotate(0deg);
+    }
+    100% {
+        transform: rotate(360deg);
+    }
+}

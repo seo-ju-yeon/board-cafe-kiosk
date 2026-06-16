@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <title>Package Selection - Board Game Cafe</title>
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <link rel="stylesheet" th:href="@{/css/kiosk/package_selection.css}">
+</head>
+<body>
+
+<div class="container">
+  <div class="icon-header">
+    <i data-lucide="layout-grid" style="width:30px;height:30px;"></i>
+  </div>
+  <h1>Package Selection</h1>
+  <p class="subtitle">이용하실 요금제를 선택해 주세요.</p>
+
+  <div class="policy-wrapper">
+    <div class="policy-card warning">
+      <strong><i data-lucide="alert-triangle" style="width:14px;vertical-align:middle;"></i> 이용 시간 및 환불 정책</strong>
+      <ul>
+        <li>초과 요금은 분당 추가 금액이 적용됩니다.</li>
+        <li>모든 요금제는 <b>1인당 금액</b>이며, 입장 시 1회 선택 가능합니다.</li>
+        <li>퇴실 시 남은 시간에 대한 부분 환불은 제공되지 않습니다.</li>
+      </ul>
+    </div>
+    <div class="policy-card payment-info">
+      <strong><i data-lucide="credit-card" style="width:14px;vertical-align:middle;"></i> 결제 안내 (후불제)</strong>
+      <ul>
+        <li>선택하신 패키지 및 추가 메뉴 비용은 <b>퇴실 시 일괄 결제</b>합니다.</li>
+        <li>보드카페 규정상 1인 1음료 혹은 1음식 주문이 필수입니다.</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- 패키지 카드 + 화살표 -->
+  <div class="paging-wrapper">
+    <!-- 이전 버튼 -->
+    <button class="arrow-btn" id="prev-btn" onclick="prevPage()" disabled>
+      <i data-lucide="chevron-left"></i>
+    </button>
+
+    <!-- 패키지 그리드 -->
+    <div class="grid" id="package-grid">
+      <!-- JS로 렌더링 -->
+    </div>
+
+    <!-- 다음 버튼 -->
+    <button class="arrow-btn" id="next-btn" onclick="nextPage()">
+      <i data-lucide="chevron-right"></i>
+    </button>
+  </div>
+
+  <button id="next-button" class="submit-btn" onclick="completeSelection()">
+    패키지를 선택해 주세요
+  </button>
+</div>
+
+<script th:inline="javascript">
+  lucide.createIcons();
+
+  const TABLE_NUMBER  = /*[[${tableNumber}]]*/ 1;
+  const ALL_PACKAGES  = /*[[${packageList}]]*/ [];
+</script>
+<script th:src="@{/js/kiosk/package_selection.js}"></script>
+</body>
+</html>

@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="ko"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+      layout:decorate="~{layout/admin_layout}">
+
+<head>
+    <title>게임 관리 - BOARD WAVE</title>
+    <th:block layout:fragment="head-extra">
+        <link rel="stylesheet" th:href="@{/css/admin/product_game.css}">
+    </th:block>
+</head>
+
+<body>
+<th:block layout:fragment="content">
+
+    <div class="header-flex">
+        <h1 class="page-title">상품 관리 시스템</h1>
+
+        <!-- 숨김 탭이 아닐 때만 버튼 표시 -->
+        <!-- 새 게임 추가: ADMIN, SUPER 정상 버튼 -->
+        <a sec:authorize="hasAnyRole('ADMIN', 'SUPER')"
+           th:if="${activeTab != 'hidden'}"
+           th:href="@{/admin/product/game/add}" class="btn-add-product">+ 새 게임 추가</a>
+
+        <!-- 새 게임 추가: STAFF 비활성 버튼 -->
+        <a sec:authorize="hasRole('STAFF')"
+           th:if="${activeTab != 'hidden'}"
+           href="#" class="btn-add-product"
+           style="opacity: 0.4; cursor: not-allowed;"
+           onclick="alert('관리자 권한이 필요합니다.'); return false;">+ 새 게임 추가</a>
+    </div>
+
+    <!-- 상단 탭 네비게이션 -->
+    <div class="tab-container">
+        <!-- 게임 관리: 숨김 탭이 아닐 때 active -->
+        <a href="/admin/product/game" class="tab-btn"
+           th:classappend="${currentPage == 'game' and activeTab != 'hidden'} ? ' active'">게임 관리</a>
+
+        <a href="/admin/product/menu?tab=food" class="tab-btn">음식 관리</a>
+        <a href="/admin/product/menu?tab=drink" class="tab-btn">음료 관리</a>
+        <a href="/admin/product/menu?tab=guest" class="tab-btn">인원 추가</a>
+        <!-- 게임 숨김: hidden 탭일 때 active -->
+        <a href="/admin/product/game?tab=hidden" class="tab-btn"
+           th:classappend="${currentPage == 'game' and activeTab == 'hidden'} ? ' active'">게임 숨김 목록</a>
+        <a href="/admin/product/menu?tab=hidden" class="tab-btn">메뉴 숨김 목록</a>
+        <!-- 카테고리 관리: category 페이지일 때 active -->
+        <a href="/admin/category" class="tab-btn"
+           th:classappend="${activePage == 'category'} ? ' active'">카테고리 관리</a>
+    </div>
+
+    <!-- 카테고리 필터 바 -->
+    <div class="category-filter"
+         th:if="${categoryList != null and not #lists.isEmpty(categoryList)}">
+        <!--         th:if="${activeTab != 'hidden' and categoryList != null and not #lists.isEmpty(categoryList)}">-->
+        <span class="category-filter-label">카테고리</span>
+
+        <!-- 전체 버튼 -->
+        <!--        <a th:href="@{/admin/product/game(size=${pageRequestDTO.size})}"-->
+        <a th:href="@{/admin/product/game(tab=${activeTab}, size=${pageRequestDTO.size})}"
+           th:classappend="${selectedCategoryId == null} ? ' active'"
+           class="cat-btn">전체</a>
+
+        <!-- 카테고리 버튼 목록 -->
+        <!--th:href="@{/admin/product/game(categoryId=${cat.id}, size=${pageRequestDTO.size})}"-->
+        <a th:each="cat : ${categoryList}"
+           th:href="@{/admin/product/game(tab=${activeTab}, categoryId=${cat.id}, size=${pageRequestDTO.size})}"           th:text="${cat.name}"
+           th:classappend="${selectedCategoryId != null and selectedCategoryId == cat.id} ? ' active'"
+           class="cat-btn"></a>
+    </div>
+
+    <!-- 검색 -->
+    <div class="search-container">
+        <span>🔍</span>
+        <input type="text" class="search-input"
+               placeholder="게임명을 입력하여 검색하세요..."
+               onkeyup="filterProducts()">
+    </div>
+
+    <!-- 게임 목록 테이블 -->
+    <div class="list-card" th:if="${activeTab != 'hidden'}">
+        <table class="product-table">
+            <thead>
+            <tr>
+                <th>게임 정보</th>
+                <th>인원 / 시간</th>
+                <th>재고 수</th>
+                <th>상태</th>
+                <th style="text-align:right;">관리 액션</th>
+            </tr>
+            </thead>
+            <tbody id="productList">
+
+            <tr th:if="${pageResponse.dtoList == null or #lists.isEmpty(pageResponse.dtoList)}" class="empty-row">
+                <td colspan="5">등록된 게임이 없습니다.</td>
+            </tr>
+
+            <tr th:each="game : ${pageResponse.dtoList}">
+                <td>
+                    <div class="prod-info">
+                        <div class="prod-thumb">🎲</div>
+                        <div>
+                            <div class="prod-name" th:text="${game.name}"></div>
+                            <div style="font-size:12px; color:#64748b;"
+                                 th:text="${game.categoryName}"></div>
+                        </div>
+                    </div>
+                </td>
+                <td>
+                    <span th:text="${game.minPlayers} + '~' + ${game.maxPlayers} + '인 / ' + ${game.playTime} + '분'"></span>
+                </td>
+                <td>
+                    <span th:text="${game.gameItemCount} + '개'"></span>
+                </td>
+                <td>
+                    <span th:class="${game.gameItemCount == 0} ? 'status-badge badge-soldout'
+                                   : (${game.active} ? 'status-badge badge-active' : 'status-badge badge-soldout')"
+                          th:text="${game.gameItemCount == 0} ? '재고 없음'
+                                  : (${game.active} ? '대여 가능' : '대여 불가')">
+                    </span>
+                </td>
+                <td>
+                    <div class="action-group">
+
+                        <!-- 수정: ADMIN, SUPER -->
+                        <a sec:authorize="hasAnyRole('ADMIN', 'SUPER')"
+                           class="btn-table btn-edit"
+                           th:href="@{/admin/product/game/edit/{id}(id=${game.id})}">수정</a>
+
+                        <!-- 수정: STAFF -->
+                        <a sec:authorize="hasRole('STAFF')"
+                           href="#" class="btn-table btn-edit"
+                           style="opacity: 0.4; cursor: not-allowed;"
+                           onclick="alert('관리자 권한이 필요합니다.'); return false;">수정</a>
+
+                        <!-- 숨기기/표시: ADMIN, SUPER -->
+                        <form sec:authorize="hasAnyRole('ADMIN', 'SUPER')"
+                              th:action="@{/admin/product/game/{id}/toggle-active(id=${game.id})}"
+                              method="post" style="display:inline;">
+                            <input type="hidden" name="categoryId" th:value="${selectedCategoryId}">
+                            <input type="hidden" name="page" th:value="${pageResponse.page}">
+                            <input type="hidden" name="size" th:value="${pageResponse.size}">
+                            <button type="submit" class="btn-table"
+                                    th:classappend="${game.active} ? 'btn-hide' : 'btn-instock'"
+                                    th:text="${game.active} ? '숨기기' : '표시'">
+                            </button>
+                        </form>
+
+                        <!-- 숨기기/표시: STAFF -->
+                        <button sec:authorize="hasRole('STAFF')"
+                                class="btn-table btn-hide"
+                                style="opacity: 0.4; cursor: not-allowed;"
+                                onclick="alert('관리자 권한이 필요합니다.'); return false;"
+                                th:text="${game.active} ? '숨기기' : '표시'">
+                        </button>
+                    </div>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+
+        <!-- 페이징 -->
+        <div class="pagination">
+            <!-- 이전 버튼 -->
+            <a th:if="${pageResponse.prev}"
+               th:href="@{/admin/product/game(page=${pageResponse.start - 1}, size=${pageResponse.size}, categoryId=${selectedCategoryId})}"
+               class="page-link">◀</a>
+
+            <!-- 페이지 번호 버튼 -->
+            <a th:each="i : ${#numbers.sequence(pageResponse.start, pageResponse.end)}"
+               th:href="@{/admin/product/game(page=${i}, size=${pageResponse.size}, categoryId=${selectedCategoryId})}"
+               th:text="${i}"
+               th:classappend="${pageResponse.page == i} ? ' active'"
+               class="page-link"></a>
+
+            <!-- 다음 버튼 -->
+            <a th:if="${pageResponse.next}"
+               th:href="@{/admin/product/game(page=${pageResponse.end + 1}, size=${pageResponse.size}, categoryId=${selectedCategoryId})}"
+               class="page-link">▶</a>
+        </div>
+    </div>
+
+    <!-- ===== 게임 숨김 목록 테이블 (게임 숨김 탭) ===== -->
+    <div class="list-card" th:if="${activeTab == 'hidden'}">
+        <table class="product-table">
+            <thead>
+            <tr>
+                <th>게임 정보</th>
+                <th>인원 / 시간</th>
+                <th>재고 수</th>
+                <th>상태</th>
+                <th style="text-align:right;">관리 액션</th>
+            </tr>
+            </thead>
+            <tbody id="hiddenGameList">
+
+            <tr th:if="${hiddenPageResponse.dtoList == null or #lists.isEmpty(hiddenPageResponse.dtoList)}" class="empty-row">
+                <td colspan="5">숨김 처리된 게임이 없습니다.</td>
+            </tr>
+
+            <!-- gameList → hiddenPageResponse.dtoList -->
+            <tr th:each="game : ${hiddenPageResponse.dtoList}">
+                <td>
+                    <div class="prod-info">
+                        <div class="prod-thumb">🔒</div>
+                        <div>
+                            <div class="prod-name" th:text="${game.name}"></div>
+                            <div style="font-size:12px; color:#64748b;" th:text="${game.categoryName}"></div>
+                        </div>
+                    </div>
+                </td>
+                <td>
+                    <span th:text="${game.minPlayers} + '~' + ${game.maxPlayers} + '인 / ' + ${game.playTime} + '분'"></span>
+                </td>
+                <td>
+                    <span th:text="${game.gameItemCount} + '개'"></span>
+                </td>
+                <!-- 숨김 탭은 항상 숨김됨 배지 표시 -->
+                <td><span class="status-badge badge-hidden">숨김됨</span></td>
+                <td>
+                    <div class="action-group">
+
+                        <!-- 다시 표시 버튼: ADMIN, SUPER 정상 / STAFF 비활성 -->
+                        <form sec:authorize="hasAnyRole('ADMIN', 'SUPER')"
+                              th:action="@{/admin/product/game/{id}/toggle-active(id=${game.id})}"
+                              method="post" style="display:inline;">
+                            <button type="submit" class="btn-table btn-instock">다시 표시</button>
+                        </form>
+                        <button sec:authorize="hasRole('STAFF')"
+                                class="btn-table btn-instock"
+                                style="opacity: 0.4; cursor: not-allowed;"
+                                onclick="alert('관리자 권한이 필요합니다.'); return false;">다시 표시</button>
+
+                    </div>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+
+        <!-- 숨김 탭 페이징 -->
+        <div class="pagination">
+            <a th:if="${hiddenPageResponse.prev}"
+               th:href="@{/admin/product/game(tab='hidden', page=${hiddenPageResponse.start - 1}, size=${hiddenPageResponse.size}, categoryId=${selectedCategoryId})}"
+               class="page-link">◀</a>
+
+            <a th:each="i : ${#numbers.sequence(hiddenPageResponse.start, hiddenPageResponse.end)}"
+               th:href="@{/admin/product/game(tab='hidden', page=${i}, size=${hiddenPageResponse.size}, categoryId=${selectedCategoryId})}"
+               th:text="${i}"
+               th:classappend="${hiddenPageResponse.page == i} ? ' active'"
+               class="page-link"></a>
+
+            <a th:if="${hiddenPageResponse.next}"
+               th:href="@{/admin/product/game(tab='hidden', page=${hiddenPageResponse.end + 1}, size=${hiddenPageResponse.size}, categoryId=${selectedCategoryId})}"
+               class="page-link">▶</a>
+        </div>
+
+    </div>
+
+</th:block>
+
+<th:block layout:fragment="scripts">
+    <script th:src="@{/js/admin/product_game.js}"></script>
+</th:block>
+</body>
+</html>

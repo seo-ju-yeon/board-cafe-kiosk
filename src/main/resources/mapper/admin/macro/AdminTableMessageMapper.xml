@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.example.board_cafe_kiosk_2603.mapper.admin.macro.AdminTableMessageMapper">
+    <insert id="insertMessage">
+        INSERT INTO table_message (table_id, macro_id, direction, content)
+        VALUES (#{tableId}, #{macroId}, #{direction}, #{content})
+    </insert>
+</mapper>

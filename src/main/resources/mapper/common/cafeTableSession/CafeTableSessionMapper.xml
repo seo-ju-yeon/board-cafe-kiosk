@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="org.example.board_cafe_kiosk_2603.mapper.common.cafeTableSession.CafeTableSessionMapper">
+    <!--
+       테이블 ID로 활성 세션 단건 조회.
+       구 selectActiveByTableId(AdminMapper) + findActiveByTableId(KioskMapper) 통합.
+       check_in_time DESC + LIMIT 1 로 가장 최신 활성 세션을 반환합니다.
+   -->
+    <select id="findActiveByTableId" resultType="org.example.board_cafe_kiosk_2603.domain.common.cafeTableSession.CafeTableSession">
+        SELECT id, table_id, package_id, initial_guest_cnt,
+               check_in_time, check_out_time, is_active, total_amount
+        FROM table_session
+        WHERE table_id = #{tableId}
+          AND is_active = TRUE
+        ORDER BY check_in_time DESC
+        LIMIT 1
+    </select>
+
+    <!--
+        세션 PK 로 단건 조회.
+    -->
+    <select id="findById" resultType="org.example.board_cafe_kiosk_2603.domain.common.cafeTableSession.CafeTableSession">
+        SELECT id, table_id, package_id, initial_guest_cnt,
+               check_in_time, check_out_time, is_active, total_amount
+        FROM table_session
+        WHERE id = #{id}
+    </select>
+
+    <!-- =========================================================
+         [키오스크] 체크인 — 세션 생성
+         ========================================================= -->
+
+    <!--
+        새 세션 INSERT (체크인 / 패키지 선택 완료 시).
+        구 insertSession(CafeTableSessionMapper) + insert(table_session_mapper) 통합.
+        - is_active=TRUE, total_amount=0 을 명시하여 DB 기본값 의존 제거.
+        - useGeneratedKeys + keyProperty 로 생성된 PK 를 session.id 에 반환.
+    -->
+    <insert id="insert" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO table_session
+            (table_id, package_id, initial_guest_cnt, is_active, total_amount)
+        VALUES
+            (#{tableId}, #{packageId}, #{initialGuestCnt}, TRUE, 0)
+    </insert>
+
+    <!-- =========================================================
+         [어드민 / 키오스크 공통] 체크아웃 & 금액 업데이트
+         ========================================================= -->
+
+    <!--
+        체크아웃 처리.
+        is_active=FALSE, check_out_time=현재 시각, total_amount 확정을 한 번에 수행.
+        구 closeSession(AdminMapper) 와 checkOut(table_session_mapper) 를 통합.
+        → closeSession 은 tableId 기준이었으나, 동일 테이블에 여러 세션이 있을 경우
+          오작동 가능성이 있어 세션 PK(id) 기준으로 통일하였습니다.
+    -->
+    <update id="checkOut">
+        UPDATE table_session
+        SET is_active      = FALSE,
+            check_out_time = CURRENT_TIMESTAMP,
+            total_amount   = #{totalAmount}
+        WHERE id = #{id}
+    </update>
+
+    <!--
+        total_amount 단독 업데이트 (주문 추가 시 중간 금액 반영).
+        구 updateTotalAmount 는 세 XML 모두에 존재했으며 로직이 동일하므로 하나로 통합.
+    -->
+    <update id="updateTotalAmount">
+        UPDATE table_session
+        SET total_amount = #{totalAmount}
+        WHERE id = #{id}
+    </update>
+
+</mapper>

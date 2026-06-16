@@ -1,0 +1,159 @@
+body {
+    margin: 0;
+    padding: 0;
+    font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
+    background-color: #f0f2f5;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100vh;
+}
+
+.header {
+    text-align: center;
+    margin-bottom: 50px;
+}
+
+.header h1 {
+    font-size: 2.5rem;
+    margin-bottom: 10px;
+    color: #111;
+}
+
+.header p {
+    color: #666;
+    font-size: 1.1rem;
+}
+
+.container {
+    display: flex;
+    gap: 25px;
+    max-width: 900px;
+    width: 90%;
+}
+
+.card {
+    flex: 1;
+    background: white;
+    border-radius: 20px;
+    padding: 40px 20px;
+    text-align: center;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.05);
+    cursor: pointer;
+    transition: transform 0.2s, box-shadow 0.2s;
+    text-decoration: none;
+    color: inherit;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.card:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 15px 35px rgba(0,0,0,0.1);
+}
+
+.icon-wrapper {
+    width: 80px;
+    height: 80px;
+    background-color: #007bff;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 20px;
+    color: white;
+}
+
+.card h2 {
+    font-size: 1.5rem;
+    margin: 15px 0 10px 0;
+    color: #333;
+}
+
+.card p {
+    color: #888;
+    font-size: 0.95rem;
+    line-height: 1.5;
+}
+
+/* 하단 물음표 버튼 */
+.help-btn {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    background: #333;
+    color: white;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+}
+
+/* 기존 CSS 유지 및 하단에 추가 */
+
+/* 상단 포트폴리오 라벨 */
+.portfolio-label {
+    display: inline-block;
+    background-color: #007bff;
+    color: white;
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    margin-bottom: 12px;
+    letter-spacing: 0.5px;
+}
+
+/* 카드 내 기능 태그 스타일 */
+.feature-tags {
+    margin-top: 25px;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 6px;
+    padding-top: 20px;
+    border-top: 1px solid #f0f0f0;
+    width: 100%;
+}
+
+.feature-tags span {
+    background-color: #f8f9fa;
+    color: #666;
+    font-size: 0.75rem;
+    padding: 4px 10px;
+    border-radius: 6px;
+    border: 1px solid #eee;
+    transition: all 0.2s;
+}
+
+/* 호버 시 태그 포인트 컬러 변경 */
+.card:hover .feature-tags span {
+    border-color: #007bff;
+    color: #007bff;
+    background-color: #f0f7ff;
+}
+
+/* 하단 푸터 안내 */
+.portfolio-footer {
+    margin-top: 40px;
+    text-align: center;
+    color: #999;
+    font-size: 0.85rem;
+}
+
+/* 모바일 대응을 위한 미디어 쿼리 (선택사항) */
+@media (max-width: 768px) {
+    .container {
+        flex-direction: column;
+        align-items: center;
+    }
+    .card {
+        width: 100%;
+        max-width: 400px;
+    }
+}

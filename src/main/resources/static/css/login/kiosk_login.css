@@ -1,0 +1,220 @@
+/* 공통 폰트 및 배경 설정 */
+body {
+    margin: 0;
+    padding: 0;
+    font-family: 'Pretendard', sans-serif;
+    background-color: #f0f2f5;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100vh;
+}
+
+.login-card {
+    background: white;
+    width: 400px;
+    padding: 40px;
+    border-radius: 24px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+    text-align: center;
+}
+
+/* 아이콘 박스 (키오스크용은 기존 블루 유지) */
+.icon-box {
+    width: 60px;
+    height: 60px;
+    background-color: #007bff;
+    border-radius: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 20px;
+    color: white;
+}
+
+h2 {
+    margin: 0;
+    font-size: 1.8rem;
+    color: #111;
+}
+
+.subtitle {
+    color: #888;
+    margin: 10px 0 30px;
+    font-size: 0.95rem;
+}
+
+/* 시연 계정 섹션 (동일하게 유지) */
+.demo-container {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 12px;
+    margin-bottom: 20px;
+}
+
+.demo-label {
+    font-size: 12px;
+    font-weight: 600;
+    color: #64748b;
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.demo-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 6px;
+}
+
+.demo-btn {
+    all: unset;
+    cursor: pointer;
+    padding: 8px;
+    background: white;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    transition: all 0.2s ease;
+    text-align: left;
+}
+
+.demo-btn:hover {
+    border-color: #3b82f6;
+    background: #eff6ff;
+    transform: translateY(-1px);
+}
+
+.role-box {
+    display: block;
+    font-size: 10px;
+    font-weight: 700;
+    margin-bottom: 2px;
+}
+
+.acc-info {
+    display: block;
+    font-size: 11px;
+    color: #334155;
+    font-family: monospace;
+}
+
+.status-active {
+    color: #10b981;
+}
+
+/* 입력창 및 레이블 스타일 */
+.input-group {
+    text-align: left;
+    margin-bottom: 20px;
+}
+
+.label {
+    display: block;
+    font-size: 0.85rem;
+    color: #666;
+    margin-bottom: 8px;
+    font-weight: 600;
+}
+
+input {
+    width: 100%;
+    padding: 15px;
+    border: 1px solid #e1e4e8;
+    border-radius: 12px;
+    background-color: #f8f9fa;
+    font-size: 1rem;
+    box-sizing: border-box;
+    outline: none;
+    transition: all 0.2s;
+}
+
+input:focus {
+    border-color: #007bff;
+    background-color: #fff;
+}
+
+/* 버튼 및 하단 텍스트 */
+.btn-primary {
+    width: 100%;
+    padding: 16px;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 12px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    margin-top: 10px;
+    transition: background 0.2s;
+}
+
+.btn-primary:hover {
+    background-color: #0056b3;
+}
+
+.admin-options {
+    margin-top: 15px;
+    display: flex;
+    justify-content: center;
+}
+
+.footer-text {
+    font-size: 0.8rem;
+    color: #aaa;
+    margin: 0;
+}
+
+/* 에러 메시지 스타일 (관리자 화면과 동일) */
+.error-msg {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: #A32D2D;
+    font-size: 0.85rem;
+    margin-bottom: 18px;
+    background: #FCEBEB;
+    border: 0.5px solid #F09595;
+    padding: 12px 14px;
+    border-radius: 10px;
+    text-align: left;
+    animation: slideDown 0.3s ease;
+}
+
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-6px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* 셀렉트 박스 디자인 추가 */
+.demo-selector {
+    margin-top: 4px;
+}
+
+#quickSelect {
+    width: 100%;
+    padding: 8px 12px;
+    border-radius: 8px;
+    border: 1px solid #e2e8f0;
+    background: white;
+    font-size: 11px;
+    color: #475569;
+    cursor: pointer;
+    outline: none;
+}
+
+#quickSelect:hover {
+    border-color: #3b82f6;
+}
+
+/* 기존 demo-btn 스타일 유지 및 full-width 대응 */
+.demo-btn.full-width, .demo-selector.full-width {
+    grid-column: span 2;
+}

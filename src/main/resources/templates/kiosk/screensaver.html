@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <title>BoardWave - Tap to Start</title>
+  <link rel="stylesheet" th:href="@{/css/kiosk/screensaver.css}">
+</head>
+<body>
+
+<div class="screensaver-container" id="tap-to-start">
+  <div class="brand-box">
+    <h1 class="brand-name">BoardWave</h1>
+    <p class="sub-title">PREMIUM BOARD GAME CAFE</p>
+  </div>
+
+  <p class="touch-info">TOUCH TO START</p>
+
+  <svg class="waves" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"
+       viewBox="0 24 150 28" preserveAspectRatio="none" shape-rendering="auto">
+    <defs>
+      <path id="gentle-wave" d="M-160 44c30 0 58-18 88-18s 58 18 88 18 58-18 88-18 58 18 88 18 v44h-352z" />
+    </defs>
+    <g class="parallax">
+      <use xlink:href="#gentle-wave" x="48" y="0" />
+      <use xlink:href="#gentle-wave" x="48" y="3" />
+      <use xlink:href="#gentle-wave" x="48" y="5" />
+      <use xlink:href="#gentle-wave" x="48" y="7" />
+    </g>
+  </svg>
+</div>
+
+<script>
+  // 서버에서 주입된 tableNumber
+  const TABLE_NUMBER = /*[[${tableNumber}]]*/ 1;
+</script>
+<script th:src="@{/js/kiosk/screensaver.js}"></script>
+</body>
+</html>

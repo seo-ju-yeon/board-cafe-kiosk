@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.example.board_cafe_kiosk_2603.mapper.admin.policy.PolicyMapper">
+    <!-- ID로 단건 조회 -->
+    <select id="findById" resultType="org.example.board_cafe_kiosk_2603.domain.admin.policy.Policy">
+        SELECT id, name, type, duration_minutes, base_price, extra_price_per_min,
+               is_active AS active, updated_at
+        FROM board_cafe_kiosk_2603.cafe_package
+        WHERE id = #{id}
+    </select>
+
+    <!-- 패키지 등록 -->
+    <insert id="insert" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO board_cafe_kiosk_2603.cafe_package
+        (name, type, duration_minutes, base_price, extra_price_per_min, is_active)
+        VALUES
+            (#{name}, #{type}, #{durationMinutes}, #{basePrice}, #{extraPricePerMin}, true)
+    </insert>
+
+    <!-- 패키지 수정 -->
+    <update id="update">
+        UPDATE board_cafe_kiosk_2603.cafe_package
+        SET name               = #{name},
+            type               = #{type},
+            duration_minutes   = #{durationMinutes},
+            base_price         = #{basePrice},
+            extra_price_per_min = #{extraPricePerMin},
+            updated_at         = CURRENT_TIMESTAMP
+        WHERE id = #{id}
+    </update>
+
+    <!-- 활성/비활성 토글 -->
+    <update id="updateStatus">
+        UPDATE board_cafe_kiosk_2603.cafe_package
+        SET is_active  = #{active},
+            updated_at = CURRENT_TIMESTAMP
+        WHERE id = #{id}
+    </update>
+
+    <!--============페이징============= -->
+    <select id="selectList" resultType="org.example.board_cafe_kiosk_2603.domain.admin.policy.Policy">
+        SELECT id, name, type, duration_minutes, base_price, extra_price_per_min,
+        is_active AS active, updated_at
+        FROM board_cafe_kiosk_2603.cafe_package
+        WHERE 1=1
+        <if test='filter != null and filter == "active"'>
+            AND is_active = true
+        </if>
+        <if test='filter != null and filter == "inactive"'>
+            AND is_active = false
+        </if>
+        ORDER BY is_active DESC, id ASC
+        LIMIT #{skip}, #{size}
+    </select>
+
+    <select id="selectCount" resultType="int">
+        SELECT COUNT(*)
+        FROM board_cafe_kiosk_2603.cafe_package
+        WHERE 1=1
+        <if test='filter != null and filter == "active"'>
+            AND is_active = true
+        </if>
+        <if test='filter != null and filter == "inactive"'>
+            AND is_active = false
+        </if>
+    </select>
+</mapper>

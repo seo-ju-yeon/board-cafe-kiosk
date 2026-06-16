@@ -1,0 +1,92 @@
+body {
+    margin: 0; padding: 0;
+    font-family: 'Pretendard', sans-serif;
+    background-color: #f0f2f5;
+    display: flex; align-items: center; justify-content: center;
+    min-height: 100vh; overflow-y: auto;
+}
+.container {
+    text-align: center; width: 100%;
+    max-width: 1000px; padding: 30px 20px;
+}
+.icon-header {
+    width: 60px; height: 60px;
+    background-color: #007bff; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    margin: 0 auto 15px; color: white;
+}
+h1 { font-size: 2rem; margin: 10px 0; color: #111; }
+.subtitle { color: #666; margin-bottom: 20px; font-size: 1rem; }
+
+.policy-wrapper {
+    display: grid; grid-template-columns: 1.2fr 1fr;
+    gap: 15px; margin-bottom: 25px;
+}
+.policy-card {
+    background-color: #fff; border: 1px solid #e1e4e8;
+    border-radius: 12px; padding: 15px; text-align: left; font-size: 0.85rem;
+}
+.policy-card.warning { background-color: #fff4f4; border-color: #ffcfcf; color: #d63031; }
+.policy-card.payment-info { background-color: #f8f9fa; border-left: 5px solid #333; }
+.policy-card strong { display: block; margin-bottom: 5px; font-size: 0.95rem; }
+.policy-card ul { margin: 0; padding-left: 18px; line-height: 1.6; }
+
+/* 페이징 래퍼 */
+.paging-wrapper {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 16px;
+    margin-bottom: 30px;
+}
+
+.arrow-btn {
+    width: 52px; height: 52px;
+    border-radius: 50%;
+    border: 2px solid #007bff;
+    background: white;
+    color: #007bff;
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    flex-shrink: 0;
+}
+.arrow-btn:hover { background: #007bff; color: white; }
+.arrow-btn:disabled { border-color: #ddd; color: #ddd; cursor: not-allowed; background: white; }
+.arrow-btn i { width: 24px; height: 24px; }
+
+.grid {
+    display: grid; grid-template-columns: repeat(3, 1fr);
+    gap: 15px; flex: 1;
+}
+
+.package-card {
+    background: white; border-radius: 20px; padding: 20px 15px;
+    cursor: pointer; box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+    transition: all 0.2s ease; border: 3px solid transparent;
+    display: flex; flex-direction: column;
+}
+.package-card:hover { transform: translateY(-5px); box-shadow: 0 10px 25px rgba(0,0,0,0.1); }
+.package-card.selected { border-color: #007bff; background-color: #f0f7ff; }
+.pkg-name { font-size: 1.1rem; font-weight: bold; color: #333; margin-bottom: 8px; }
+.pkg-time { font-size: 1.6rem; font-weight: 800; color: #007bff; margin-bottom: 5px; }
+.pkg-type { font-size: 0.75rem; color: #999; margin-bottom: 5px; letter-spacing: 0.5px; }
+.pkg-desc { font-size: 0.85rem; color: #888; min-height: 34px; line-height: 1.4; }
+.pkg-price {
+    font-size: 1.2rem; font-weight: bold; color: #111;
+    margin-top: 15px; padding-top: 15px; border-top: 1px solid #eee;
+}
+.pkg-unit { font-size: 0.8rem; font-weight: normal; color: #888; margin-left: 4px; }
+
+.submit-btn {
+    width: 100%; padding: 22px;
+    background-color: #e2e4e7; color: #a0a3a7;
+    border: none; border-radius: 15px;
+    font-size: 1.2rem; font-weight: bold; cursor: not-allowed;
+    transition: all 0.3s ease;
+}
+.submit-btn.active {
+    background-color: #007bff; color: white; cursor: pointer;
+    box-shadow: 0 10px 20px rgba(0,123,255,0.2);
+}
+.empty-msg { color: #aaa; padding: 40px; font-size: 1rem; }

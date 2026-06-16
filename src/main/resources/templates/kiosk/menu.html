@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <title>키오스크 메인메뉴</title>
+</head>
+<body>
+
+<div th:fragment="menuContent">
+  <div class="menu-grid" id="menu-grid">
+    <th:block th:each="item : ${menuItems}" th:if="${item.stock != 0}">
+
+      <div class="menu-item"
+           th:data-name="${item.name != null ? item.name : '상품명'}"
+           th:data-price="${item.price != null ? item.price : 0}">
+
+        <div class="menu-img-area">
+          <img th:if="${item.imageUrl != null and item.imageUrl != ''}"
+               th:src="${item.imageUrl}" alt="상품 이미지">
+          <div th:unless="${item.imageUrl != null and item.imageUrl != ''}">
+            <i data-lucide="image" class="placeholder-icon"></i>
+          </div>
+        </div>
+
+        <div class="menu-info-area">
+          <div class="menu-info-left">
+            <div class="menu-name" th:text="${item.name != null ? item.name : '상품명'}">상품명</div>
+            <div class="menu-price"
+                 th:classappend="${currentMenu == 'games' or (item.price != null ? item.price : 0) == 0 ? 'free' : ''}"
+                 th:text="${currentMenu == 'games'
+                            ? '대여가능'
+                            : ((item.price != null ? item.price : 0) == 0
+                            ? 'FREE'
+                            : '₩' + #numbers.formatInteger(item.price, 1, 'COMMA'))}">
+              ₩5,000
+            </div>
+          </div>
+
+          <div class="menu-info-right">
+            <button class="add-direct-btn" onclick="addItemToCartDirect(this)">
+              <i data-lucide="plus"></i>
+            </button>
+          </div>
+        </div>
+
+      </div>
+    </th:block>
+  </div>
+</div>
+
+</body>
+</html>

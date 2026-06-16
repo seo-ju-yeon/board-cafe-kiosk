@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="ko"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BoardWave Admin</title>
+  <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css" />
+  <link rel="stylesheet" th:href="@{/css/layout/admin_layout.css}">
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <th:block layout:fragment="head-extra"></th:block>
+</head>
+<body>
+
+<aside class="sidebar">
+  <div class="brand-area">
+    <div class="brand-title">Board Game Cafe</div>
+    <div class="brand-name">BOARD WAVE</div>
+  </div>
+
+  <div class="sidebar-user-info">
+    <i data-lucide="circle-user"></i>
+    <div class="user-meta">
+      <!-- 이름만 띄울때 -->
+      <!--      <span class="user-name" sec:authentication="principal.name">실제 이름</span>-->
+      <!-- 이름 + 아이디 띄울때 -->
+      <span class="user-name">
+    <span sec:authentication="principal.name">실명</span>
+    (<span sec:authentication="principal.username">아이디</span>)
+</span>
+
+      <span class="user-role-badge">
+            <th:block sec:authorize="hasRole('ADMIN')">ADMIN</th:block>
+            <th:block sec:authorize="hasRole('STAFF')">STAFF</th:block>
+            <th:block sec:authorize="hasRole('SUPER')">PORTFOLIO</th:block>
+            <th:block sec:authorize="!hasRole('ADMIN') and !hasRole('STAFF') and !hasRole('SUPER')">USER</th:block>
+        </span>
+    </div>
+  </div>
+
+  <div class="clock-area">
+    <div id="current-date" class="date-display">0000. 00. 00 (요일)</div>
+    <div class="time-display">
+      <i data-lucide="clock"></i>
+      <div id="current-time">00:00:00</div>
+    </div>
+  </div>
+
+  <nav class="nav-menu">
+    <div class="nav-section">
+      <div class="nav-label">운영</div>
+      <a th:href="@{/admin/dashboard}" class="nav-item">
+        <span class="nav-icon"><i data-lucide="layout-dashboard"></i></span> 테이블 현황
+      </a>
+      <a th:href="@{/admin/points}" class="nav-item" th:classappend="${activePage == 'pointManagement'} ? 'active'">
+        <span class="nav-icon"><i data-lucide="wallet"></i></span> 포인트 관리
+      </a>
+    </div>
+
+    <div class="nav-section">
+      <div class="nav-label">매출</div>
+
+      <!-- 매출 통계: ADMIN, SUPER 정상 링크 -->
+      <a sec:authorize="hasAnyRole('ADMIN','SUPER')"
+         th:href="@{/admin/status}" class="nav-item" th:classappend="${activePage == 'salesStats'} ? 'active'">
+        <span class="nav-icon"><i data-lucide="trending-up"></i></span> 매출 통계
+      </a>
+
+      <!-- 매출 통계: STAFF 클릭 시 접근 불가 표시(alter) -->
+      <a sec:authorize="hasRole('STAFF')"
+         href="#"
+         class="nav-item"
+         style="color: #bdc1c6; cursor: not-allowed;"
+         onclick="alert('관리자 권한이 필요한 메뉴입니다.'); return false;">
+        <span class="nav-icon"><i data-lucide="trending-up"></i></span> 매출 통계
+        <span style="font-size: 11px; margin-left: auto; background: #f1f3f4; color: #9aa0a6; padding: 2px 6px; border-radius: 4px;">관리자 전용</span>
+      </a>
+    </div>
+
+    <div class="nav-section">
+      <div class="nav-label">상품 관리</div>
+      <a th:href="@{/admin/product/game}" class="nav-item" th:classappend="${activePage == 'productReg' && activeTab == 'game'} ? 'active'">
+        <span class="nav-icon"><i data-lucide="package"></i></span> 상품 관리
+      </a>
+    </div>
+
+    <div class="nav-section">
+      <div class="nav-label">운영 설정</div>
+      <a th:href="@{/admin/macro}" class="nav-item" th:classappend="${activePage == 'macroMassage'} ? 'active'">
+        <span class="nav-icon"><i data-lucide="message-square-more"></i></span> 매크로 메시지 관리
+      </a>
+
+      <!-- 요금 정책: ADMIN, SUPER 정상 링크 -->
+      <a sec:authorize="hasAnyRole('ADMIN', 'SUPER')"
+         th:href="@{/admin/policy}" class="nav-item" th:classappend="${activePage == 'packageManagement'} ? 'active'">
+        <span class="nav-icon"><i data-lucide="receipt-text"></i></span> 요금 정책
+      </a>
+
+      <!-- 요금 정책: STAFF 접근 불가 표시 -->
+      <a sec:authorize="hasRole('STAFF')"
+         href="#" class="nav-item"
+         style="color: #bdc1c6; cursor: not-allowed;"
+         onclick="alert('관리자 권한이 필요한 메뉴입니다.'); return false;">
+        <span class="nav-icon"><i data-lucide="receipt-text"></i></span> 요금 정책
+        <span style="font-size: 11px; margin-left: auto; background: #f1f3f4; color: #9aa0a6; padding: 2px 6px; border-radius: 4px;">관리자 전용</span>
+      </a>
+    </div>
+
+    <div class="nav-section">
+      <div class="nav-label">계정</div>
+
+      <!-- 직원 관리: ADMIN, SUPER 정상 링크 -->
+      <a sec:authorize="hasAnyRole('ADMIN', 'SUPER')"
+         th:href="@{/admin/staff}" class="nav-item" th:classappend="${activePage == 'staffManagement'} ? 'active'">
+        <span class="nav-icon"><i data-lucide="users"></i></span> 직원 관리
+      </a>
+
+      <!-- 직원 관리: STAFF 접근 불가 표시 -->
+      <a sec:authorize="hasRole('STAFF')"
+         href="#" class="nav-item"
+         style="color: #bdc1c6; cursor: not-allowed;"
+         onclick="alert('관리자 권한이 필요한 메뉴입니다.'); return false;">
+        <span class="nav-icon"><i data-lucide="users"></i></span> 직원 관리
+        <span style="font-size: 11px; margin-left: auto; background: #f1f3f4; color: #9aa0a6; padding: 2px 6px; border-radius: 4px;">관리자 전용</span>
+      </a>
+
+      <a th:href="@{/admin/staff/profile}" class="nav-item" th:classappend="${activePage == 'profileManagement'} ? 'active'">
+        <span class="nav-icon"><i data-lucide="user-cog"></i></span> 내 정보 관리
+      </a>
+    </div>
+  </nav>
+
+  <form th:action="@{/admin/logout}" method="post" id="logoutForm" style="display:none;"></form>
+  <a href="javascript:document.getElementById('logoutForm').submit();" class="logout-btn">로그아웃</a>
+</aside>
+
+<main class="main-content">
+  <div layout:fragment="content"></div>
+</main>
+
+<script th:src="@{/js/layout/admin_layout.js}"></script>
+<th:block layout:fragment="scripts"></th:block>
+<script>
+  // 아이콘 로딩
+  document.addEventListener('DOMContentLoaded', function() {
+    lucide.createIcons();
+  });
+</script>>
+
+</body>
+</html>

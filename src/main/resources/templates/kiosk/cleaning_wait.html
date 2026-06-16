@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cleaning - Board Game Cafe</title>
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <link rel="stylesheet" th:href="@{/css/kiosk/cleaning_wait.css}">
+</head>
+<body>
+<div class="container" id="cleaning-screen">
+  <div class="icon-wrap">
+    <i data-lucide="sparkles"></i>
+  </div>
+  <h1>테이블 청소 중입니다</h1>
+  <p class="subtitle">
+    현재 테이블을 정리하고 있습니다.<br>
+    테이블 정리가 완료되면 이용 하실 수 있습니다.
+  </p>
+  <p class="table" th:if="${tableNumber != null}" th:text="'Table #' + ${tableNumber}">Table #1</p>
+  <div class="touch">
+    <i data-lucide="loader-circle"></i>
+    청소 대기 중...
+  </div>
+</div>
+<script th:src="@{/js/kiosk/cleaning_wait.js}"></script>
+</body>
+</html>

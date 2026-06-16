@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="ko"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/admin_layout}">
+
+<head>
+  <title>Macro Management</title>
+  <th:block layout:fragment="head-extra">
+    <!-- CSRF 토큰 메타 태그 추가 (fetch POST 요청에 사용) -->
+    <meta name="_csrf"        th:content="${_csrf.token}"/>
+    <meta name="_csrf_header" th:content="${_csrf.headerName}"/>
+    <link rel="stylesheet" th:href="@{/css/admin/package.css}">
+  </th:block>
+</head>
+
+<body>
+<th:block layout:fragment="content">
+  <div class="header-container">
+    <h1 class="page-title">요금 정책</h1>
+    <button class="btn-primary" onclick="openPolicyModal()">+ 새 정책 추가</button>
+  </div>
+
+  <div class="tab-container">
+    <button class="tab-button" th:classappend="${filter == 'all'} ? 'active'"
+            onclick="filterTable('all')">
+      전체 <span th:text="${countAll}"></span>
+    </button>
+    <button class="tab-button" th:classappend="${filter == 'active'} ? 'active'"
+            onclick="filterTable('active')">
+      적용 중 <span th:text="${countActive}"></span>
+    </button>
+    <button class="tab-button" th:classappend="${filter == 'inactive'} ? 'active'"
+            onclick="filterTable('inactive')">
+      비활성 <span th:text="${countInactive}"></span>
+    </button>
+  </div>
+
+  <div class="table-container">
+    <table class="macro-massage-table">
+      <thead>
+      <tr>
+        <th>정책 명칭</th>
+        <th>이용 시간</th>
+        <th>금액 (1인)</th>
+        <th>초과 요금</th>
+        <th>상태</th>
+        <th style="text-align: right;">관리</th>
+      </tr>
+      </thead>
+
+      <tbody id="policyTableBody">
+      <tr th:each="policy : ${responseDTO.dtoList}"
+          th:data-id="${policy.id}"
+          th:classappend="${!policy.active} ? 'is-disabled' : ''">
+        <td th:text="${policy.name}">패키지명</td>
+        <td th:text="${policy.displayTime}">1시간</td>
+        <td th:text="${#numbers.formatInteger(policy.basePrice, 0, 'COMMA') + '원'}">5,000원</td>
+        <td th:text="${policy.extraPricePerMin != null and policy.extraPricePerMin > 0}
+                 ? '10분당 ' + ${policy.extraPricePerMin} + '원'
+                 : '없음'">없음</td>
+        <td>
+      <span class="status-badge"
+            th:classappend="${policy.active} ? 'status-active' : 'status-inactive'"
+            th:text="${policy.active} ? '적용 중' : '비활성'">적용 중</span>
+        </td>
+        <td style="text-align: right;">
+          <button th:if="${policy.active}"
+                  class="btn-text text-danger"
+                  th:data-id="${policy.id}"
+                  onclick="toggleStatus(this, false)">비활성화</button>
+          <button th:if="${!policy.active}"
+                  class="btn-text text-active"
+                  th:data-id="${policy.id}"
+                  onclick="toggleStatus(this, true)">활성화</button>
+        </td>
+      </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- 등록 모달 -->
+  <div id="policyModal" class="modal-overlay" onclick="closePolicyModal(event)">
+    <div class="modal-content" onclick="event.stopPropagation()">
+      <div class="modal-header"><h3 style="margin-bottom: 24px; text-align: center;">새 정책 추가</h3></div>
+      <form id="policyForm">
+        <div class="form-group">
+          <label>정책 명칭</label>
+          <input type="text" id="policyName" placeholder="예: 평일 2시간 패키지">
+        </div>
+      </form>
+        <div class="form-group">
+          <label>타입</label>
+          <div class="toggle-group">
+            <label class="radio-label">
+              <input type="radio" name="policyType" value="HOURLY" checked onchange="onTypeChange(this.value)">
+              <span>시간제</span>
+            </label>
+            <label class="radio-label">
+              <input type="radio" name="policyType" value="FREE" onchange="onTypeChange(this.value)">
+              <span>자유</span>
+            </label>
+          </div>
+        </div>
+
+        <div class="form-row" id="time-row">
+            <div class="form-group">
+              <label>이용 시간 (분)</label>
+              <div class="stepper-control">
+                <button type="button" class="stepper-btn" onclick="stepValue('baseTime', -10)">-</button>
+                <input type="number" id="baseTime" class="stepper-input" value="60">
+                <button type="button" class="stepper-btn" onclick="stepValue('baseTime', 10)">+</button>
+              </div>
+            </div>
+        </div>
+          <div class="form-group">
+            <label>금액 (원 / 1인)</label>
+            <div class="stepper-control">
+              <button type="button" class="stepper-btn" onclick="stepValue('basePrice', -500)">-</button>
+              <input type="number" id="basePrice" class="stepper-input" value="5000">
+              <button type="button" class="stepper-btn" onclick="stepValue('basePrice', 500)">+</button>
+            </div>
+          </div>
+
+        <div class="form-group" id="extra-row">
+          <label>초과 요금 (10분당 / 원)</label>
+          <div class="stepper-control">
+            <button type="button" class="stepper-btn" onclick="stepValue('extraPrice', -10)">-</button>
+            <input type="number" id="extraPrice" class="stepper-input" value="0">
+            <button type="button" class="stepper-btn" onclick="stepValue('extraPrice', 10)">+</button>
+          </div>
+        </div>
+
+      <div style="display: flex; gap: 12px; margin-top: 28px;">
+        <button class="btn-text" style="flex:1" onclick="closePolicyModal()">취소</button>
+        <button class="btn-primary" style="flex:1.5" onclick="savePolicy()">정책 저장</button>
+      </div>
+    </div>
+  </div>
+  <!-- 페이징 -->
+  <div class="pagination">
+    <a th:if="${responseDTO.prev}"
+       th:href="@{/admin/policy(page=${responseDTO.start - 1}, filter=${filter})}"
+       class="page-btn">‹</a>
+
+    <th:block th:each="num : ${#numbers.sequence(responseDTO.start, responseDTO.end)}">
+      <a th:href="@{/admin/policy(page=${num}, filter=${filter})}"
+         th:text="${num}"
+         th:class="${responseDTO.page == num} ? 'page-btn active' : 'page-btn'">
+      </a>
+    </th:block>
+
+    <a th:if="${responseDTO.next}"
+       th:href="@{/admin/policy(page=${responseDTO.end + 1}, filter=${filter})}"
+       class="page-btn">›</a>
+  </div>
+  <!-- /페이징 -->
+</th:block>
+
+<th:block layout:fragment="scripts">
+  <script>
+    const currentFilter = '[[${filter}]]';
+    const currentPage = [[${responseDTO.page}]];
+  </script>
+  <script th:src="@{/js/admin/package.js}"></script>
+</th:block>
+</body>
+</html>

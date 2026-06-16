@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="ko"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+      layout:decorate="~{layout/admin_layout}">
+
+<head>
+    <title>메뉴 관리 - BOARD WAVE</title>
+    <th:block layout:fragment="head-extra">
+        <link rel="stylesheet" th:href="@{/css/admin/product_menu.css}">
+    </th:block>
+</head>
+
+<body>
+<th:block layout:fragment="content">
+
+    <div class="header-flex">
+        <h1 class="page-title">상품 관리 시스템</h1>
+
+        <!-- 새 메뉴 추가: ADMIN, SUPER 정상 버튼 -->
+        <a sec:authorize="hasAnyRole('ADMIN', 'SUPER')"
+           th:if="${activeTab != 'hidden'}"
+           th:href="@{/admin/product/menu/add(tab=${activeTab})}"
+           class="btn-add-product">+ 새 메뉴 추가</a>
+
+        <!-- 새 메뉴 추가: STAFF 비활성 버튼 -->
+        <a sec:authorize="hasRole('STAFF')"
+           th:if="${activeTab != 'hidden'}"
+           href="#" class="btn-add-product"
+           style="opacity: 0.4; cursor: not-allowed;"
+           onclick="alert('관리자 권한이 필요합니다.'); return false;">+ 새 메뉴 추가</a>
+    </div>
+
+    <!-- 상단 탭 네비게이션 (5개) -->
+    <div class="tab-container">
+        <a href="/admin/product/game"            class="tab-btn">게임 관리</a>
+        <!-- 메뉴 탭들: menu 페이지이고 각 tab과 일치할 때 -->
+        <a href="/admin/product/menu?tab=food"  class="tab-btn"
+           th:classappend="${currentPage == 'menu' and activeTab == 'food'}   ? ' active'">음식 관리</a>
+        <a href="/admin/product/menu?tab=drink" class="tab-btn"
+           th:classappend="${currentPage == 'menu' and activeTab == 'drink'}  ? ' active'">음료 관리</a>
+        <a href="/admin/product/menu?tab=guest" class="tab-btn"
+           th:classappend="${currentPage == 'menu' and activeTab == 'guest'}  ? ' active'">인원 추가</a>
+
+        <!-- 게임 숨김: game 페이지이고 hidden일 때 -->
+        <a href="/admin/product/game?tab=hidden" class="tab-btn">
+            게임 숨김 목록</a>
+
+        <!-- 메뉴 숨김: menu 페이지이고 hidden일 때 -->
+        <a href="/admin/product/menu?tab=hidden" class="tab-btn"
+           th:classappend="${currentPage == 'menu' and activeTab == 'hidden'} ? ' active'">메뉴 숨김 목록</a>
+
+        <!-- 카테고리 관리: category 페이지일 때 active -->
+        <a href="/admin/category" class="tab-btn"
+           th:classappend="${activePage == 'category'} ? ' active'">카테고리 관리</a>
+
+    </div>
+
+    <!--
+        ── 카테고리 필터 바 ──
+        숨김 탭은 카테고리 필터 표시 안 함.
+        컨트롤러에서 categoryList(List<CategoryDto>)와
+        selectedCategoryId(Long, 없으면 null)를 모델에 담아주세요.
+
+        URL 예시: /admin/product/menu?tab=food&categoryId=2
+    -->
+    <!--    <div class="category-filter"-->
+    <!--         th:if="${activeTab != 'hidden' and categoryList != null and not #lists.isEmpty(categoryList)}">-->
+    <!-- hidden 탭도 포함 -->
+    <div class="category-filter"
+         th:if="${categoryList != null and not #lists.isEmpty(categoryList)}">
+        <span class="category-filter-label">카테고리</span>
+
+        <!-- 전체 버튼 -->
+        <a th:href="@{/admin/product/menu(tab=${activeTab}, size=${pageRequestDTO.size})}"
+           th:classappend="${selectedCategoryId == null} ? ' active'"
+           class="cat-btn">전체</a>
+
+        <!-- 카테고리 버튼 목록 -->
+        <a th:each="cat : ${categoryList}"
+           th:href="@{/admin/product/menu(tab=${activeTab}, categoryId=${cat.id}, size=${pageRequestDTO.size})}"
+           th:text="${cat.name}"
+           th:classappend="${selectedCategoryId != null and selectedCategoryId == cat.id} ? ' active'"
+           class="cat-btn"></a>
+    </div>
+
+    <!-- 검색 -->
+    <div class="search-container">
+        <span>🔍</span>
+        <input type="text" class="search-input"
+               th:placeholder="${activeTab == 'guest'} ? '인원추가 상품명을 검색하세요...' : '메뉴명을 입력하여 검색하세요...'"
+               onkeyup="filterProducts()">
+    </div>
+
+    <!-- ===== 음식 / 음료 / 인원추가 탭 ===== -->
+    <div class="list-card" th:if="${activeTab == 'food' or activeTab == 'drink' or activeTab == 'guest'}">
+        <table class="product-table">
+            <thead>
+            <tr>
+                <th>메뉴 정보</th>
+                <th>카테고리</th>
+                <th>가격</th>
+                <th>상태</th>
+                <th style="text-align:right;">관리 액션</th>
+            </tr>
+            </thead>
+            <tbody id="productList">
+            <!--            <tr th:if="${menuList == null or #lists.isEmpty(menuList)}" class="empty-row">-->
+            <tr th:if="${pageResponse.dtoList == null or #lists.isEmpty(pageResponse.dtoList)}" class="empty-row">
+                <td colspan="5">등록된 메뉴가 없습니다.</td>
+            </tr>
+            <!--            <tr th:each="menu : ${menuList}">-->
+            <tr th:each="menu : ${pageResponse.dtoList}">
+                <td>
+                    <div class="prod-info">
+                        <div class="prod-thumb"
+                             th:text="${activeTab == 'food'} ? '🍔' : (${activeTab == 'drink'} ? '☕' : '👥')"></div>
+                        <div class="prod-name" th:text="${menu.name}"></div>
+                    </div>
+                </td>
+                <td th:text="${menu.categoryName}"></td>
+                <td>
+                    <span class="prod-price"
+                          th:text="'₩' + ${#numbers.formatInteger(menu.price, 0, 'COMMA')}"></span>
+                </td>
+                <td>
+                    <span th:class="${menu.isAvailable} ? 'status-badge badge-active' : 'status-badge badge-soldout'"
+                          th:text="${menu.isAvailable} ? '판매중' : '품절'"></span>
+                </td>
+                <td>
+                    <div class="action-group">
+
+                        <!-- 수정: ADMIN, SUPER -->
+                        <a sec:authorize="hasAnyRole('ADMIN', 'SUPER')"
+                           class="btn-table btn-edit"
+                           th:href="@{/admin/product/menu/edit/{id}(id=${menu.id}, tab=${activeTab})}">수정</a>
+
+                        <!-- 수정: STAFF -->
+                        <a sec:authorize="hasRole('STAFF')"
+                           href="#" class="btn-table btn-edit"
+                           style="opacity: 0.4; cursor: not-allowed;"
+                           onclick="alert('관리자 권한이 필요합니다.'); return false;">수정</a>
+
+                        <!-- 품절/입고: ADMIN, SUPER -->
+                        <form sec:authorize="hasAnyRole('ADMIN', 'SUPER')"
+                              th:action="@{/admin/product/menu/{id}/toggle-soldout(id=${menu.id})}"
+                              method="post" style="display:inline;">
+                            <input type="hidden" name="tab"        th:value="${activeTab}"/>
+                            <!-- 카테고리 필터 유지 -->
+                            <input type="hidden" name="categoryId" th:value="${selectedCategoryId}"/>
+                            <input type="hidden" name="page"       th:value="${pageResponse.page}"/>
+                            <input type="hidden" name="size"       th:value="${pageResponse.size}"/>
+                            <button type="submit" class="btn-table"
+                                    th:classappend="${menu.isAvailable} ? 'btn-soldout' : 'btn-instock'"
+                                    th:text="${menu.isAvailable} ? '품절' : '입고'"></button>
+                        </form>
+
+                        <!-- 품절/입고: STAFF -->
+                        <button sec:authorize="hasRole('STAFF')"
+                                class="btn-table btn-soldout"
+                                style="opacity: 0.4; cursor: not-allowed;"
+                                onclick="alert('관리자 권한이 필요합니다.'); return false;"
+                                th:text="${menu.isAvailable} ? '품절' : '입고'"></button>
+
+                        <!-- 숨기기: ADMIN, SUPER -->
+                        <form sec:authorize="hasAnyRole('ADMIN', 'SUPER')"
+                              th:action="@{/admin/product/menu/{id}/toggle-hide(id=${menu.id})}"
+                              method="post" style="display:inline;">
+                            <input type="hidden" name="tab"        th:value="${activeTab}"/>
+                            <input type="hidden" name="categoryId" th:value="${selectedCategoryId}"/>
+                            <input type="hidden" name="page"       th:value="${pageResponse.page}"/>
+                            <input type="hidden" name="size"       th:value="${pageResponse.size}"/>
+                            <button type="submit" class="btn-table btn-hide">숨기기</button>
+                        </form>
+
+                        <!-- 숨기기: STAFF -->
+                        <button sec:authorize="hasRole('STAFF')"
+                                class="btn-table btn-hide"
+                                style="opacity: 0.4; cursor: not-allowed;"
+                                onclick="alert('관리자 권한이 필요합니다.'); return false;">숨기기</button>
+
+                    </div>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+
+        <!-- 페이징 -->
+        <div class="pagination">
+            <a th:if="${pageResponse.prev}"
+               th:href="@{/admin/product/menu(tab=${activeTab}, page=${pageResponse.start - 1}, size=${pageResponse.size}, categoryId=${selectedCategoryId})}"
+               class="page-link">◀</a>
+
+            <a th:each="i : ${#numbers.sequence(pageResponse.start, pageResponse.end)}"
+               th:href="@{/admin/product/menu(tab=${activeTab}, page=${i}, size=${pageResponse.size}, categoryId=${selectedCategoryId})}"
+               th:text="${i}"
+               th:classappend="${pageResponse.page == i} ? ' active'"
+               class="page-link"></a>
+
+            <a th:if="${pageResponse.next}"
+               th:href="@{/admin/product/menu(tab=${activeTab}, page=${pageResponse.end + 1}, size=${pageResponse.size}, categoryId=${selectedCategoryId})}"
+               class="page-link">▶</a>
+        </div>
+    </div>
+
+    <!-- ===== 숨김 탭 (카테고리 필터 없음) ===== -->
+    <div class="list-card" th:if="${activeTab == 'hidden'}">
+        <table class="product-table">
+            <thead>
+            <tr>
+                <th>메뉴 정보</th>
+                <th>카테고리</th>
+                <th>가격</th>
+                <th>상태</th>
+                <th style="text-align:right;">관리 액션</th>
+            </tr>
+            </thead>
+            <tbody id="productList_hidden">
+            <!--            <tr th:if="${menuList == null or #lists.isEmpty(menuList)}" class="empty-row">-->
+            <tr th:if="${pageResponse.dtoList == null or #lists.isEmpty(pageResponse.dtoList)}" class="empty-row">
+                <td colspan="5">숨김 처리된 상품이 없습니다.</td>
+            </tr>
+            <!--            <tr th:each="menu : ${menuList}">-->
+            <tr th:each="menu : ${pageResponse.dtoList}">
+                <td>
+                    <div class="prod-info">
+                        <div class="prod-thumb">🔒</div>
+                        <div class="prod-name" th:text="${menu.name}"></div>
+                    </div>
+                </td>
+                <td th:text="${menu.categoryName}"></td>
+                <td>
+                    <span class="prod-price"
+                          th:text="'₩' + ${#numbers.formatInteger(menu.price, 0, 'COMMA')}"></span>
+                </td>
+                <td><span class="status-badge badge-hidden">숨김됨</span></td>
+                <td>
+                    <div class="action-group">
+
+                        <!-- 다시 표시: ADMIN, SUPER -->
+                        <form sec:authorize="hasAnyRole('ADMIN', 'SUPER')"
+                              th:action="@{/admin/product/menu/{id}/restore(id=${menu.id})}"
+                              method="post" style="display:inline;">
+                            <input type="hidden" name="page" th:value="${pageResponse.page}"/>
+                            <input type="hidden" name="size" th:value="${pageResponse.size}"/>
+                            <button type="submit" class="btn-table btn-instock">다시 표시</button>
+                        </form>
+
+                        <!-- 다시 표시: STAFF -->
+                        <button sec:authorize="hasRole('STAFF')"
+                                class="btn-table btn-instock"
+                                style="opacity: 0.4; cursor: not-allowed;"
+                                onclick="alert('관리자 권한이 필요합니다.'); return false;">🔓 다시 표시</button>
+
+                    </div>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+
+        <!-- 페이징 -->
+        <div class="pagination">
+            <a th:if="${pageResponse.prev}"
+               th:href="@{/admin/product/menu(tab='hidden', page=${pageResponse.start - 1}, size=${pageResponse.size})}"
+               class="page-link">◀</a>
+
+            <a th:each="i : ${#numbers.sequence(pageResponse.start, pageResponse.end)}"
+               th:href="@{/admin/product/menu(tab='hidden', page=${i}, size=${pageResponse.size})}"
+               th:text="${i}"
+               th:classappend="${pageResponse.page == i} ? ' active'"
+               class="page-link"></a>
+
+            <a th:if="${pageResponse.next}"
+               th:href="@{/admin/product/menu(tab='hidden', page=${pageResponse.end + 1}, size=${pageResponse.size})}"
+               class="page-link">▶</a>
+        </div>
+    </div>
+
+</th:block>
+
+<th:block layout:fragment="scripts">
+    <script th:src="@{/js/admin/product_menu.js}"></script>
+</th:block>
+</body>
+</html>

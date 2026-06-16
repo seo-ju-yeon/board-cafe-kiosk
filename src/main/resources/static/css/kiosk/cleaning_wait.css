@@ -1,0 +1,73 @@
+* { box-sizing: border-box; }
+body {
+    margin: 0;
+    font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    background: linear-gradient(135deg, #fff8e1 0%, #ffe0b2 100%);
+    height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #4e342e;
+    overflow: hidden;
+}
+.container {
+    width: min(92vw, 760px);
+    background: rgba(255, 255, 255, 0.86);
+    border: 2px solid #ffcc80;
+    border-radius: 28px;
+    padding: 42px 28px;
+    text-align: center;
+    box-shadow: 0 16px 40px rgba(0, 0, 0, 0.08);
+}
+.icon-wrap {
+    width: 96px;
+    height: 96px;
+    margin: 0 auto 20px;
+    border-radius: 999px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #ff9800;
+    color: white;
+    animation: pulse 1.8s infinite;
+}
+.icon-wrap i { width: 48px; height: 48px; }
+h1 {
+    margin: 0;
+    font-size: 2.1rem;
+    font-weight: 800;
+    color: #e65100;
+}
+.subtitle {
+    margin-top: 14px;
+    font-size: 1.05rem;
+    color: #6d4c41;
+    line-height: 1.55;
+}
+.touch {
+    margin-top: 28px;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 16px;
+    border-radius: 999px;
+    background: #fff3e0;
+    border: 1px solid #ffcc80;
+    color: #ef6c00;
+    font-weight: 700;
+    animation: blink 1.6s infinite;
+}
+.table {
+    margin-top: 10px;
+    font-size: 0.95rem;
+    color: #8d6e63;
+    font-weight: 600;
+}
+@keyframes pulse {
+    0%, 100% { transform: scale(1); opacity: 1; }
+    50% { transform: scale(1.06); opacity: 0.88; }
+}
+@keyframes blink {
+    0%, 100% { opacity: 0.5; }
+    50% { opacity: 1; }
+}

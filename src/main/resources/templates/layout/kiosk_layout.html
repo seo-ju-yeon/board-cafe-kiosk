@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="'Kiosk - ' + ${pageTitle != null ? pageTitle : 'Main'}">Kiosk Main Menu</title>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link rel="stylesheet" href="/css/layout/kiosk_layout.css">
+</head>
+<body>
+
+<div class="sidebar-left">
+    <div class="nav-group">
+        <button class="nav-btn" th:classappend="${currentMenu == 'drinks' ? 'active' : ''}" onclick="navigateMenu('drinks')">
+            <i data-lucide="coffee"></i><span class="nav-label">음료</span>
+        </button>
+        <button class="nav-btn" th:classappend="${currentMenu == 'food' ? 'active' : ''}" onclick="navigateMenu('food')">
+            <i data-lucide="utensils"></i><span class="nav-label">음식</span>
+        </button>
+        <button class="nav-btn" th:classappend="${currentMenu == 'games' ? 'active' : ''}" onclick="navigateMenu('games')">
+            <i data-lucide="gamepad-2"></i><span class="nav-label">게임</span>
+        </button>
+        <button class="nav-btn" th:classappend="${currentMenu == 'members' ? 'active' : ''}" onclick="navigateMenu('members')">
+            <i data-lucide="user-plus"></i><span class="nav-label">인원추가</span>
+        </button>
+    </div>
+    <div class="nav-group">
+        <button class="nav-btn ai-service" onclick="location.href='/kiosk/ai'">
+            <i data-lucide="sparkles"></i> <span class="nav-label">AI Service</span>
+        </button>
+        <button class="nav-btn orange" onclick="openServiceModal()"><i data-lucide="bell"></i><span class="nav-label">직원호출</span></button>
+        <button class="nav-btn red" onclick="navigateCheckout()"><i data-lucide="credit-card"></i><span class="nav-label">정산</span></button>
+    </div>
+</div>
+
+<div class="main-area">
+    <div class="header">
+        <div class="header-left">
+            <span class="table-info" th:text="'Table ' + ${tableNumber != null ? tableNumber : '0'} + '번'">Table 0번</span>
+            <span class="party-badge">
+                <i data-lucide="users"></i>
+                <span th:text="(${partySize ?: 0}) + '명'">1명</span>
+            </span>
+        </div>
+        <div class="header-right">
+            <div class="timer-badge" id="timer-badge">
+                <i data-lucide="clock"></i><span id="timer-text">--:--</span>
+            </div>
+            <div class="order-status-box hidden" id="order-status-box" role="button" tabindex="0" aria-label="주문 상세 보기">
+                <span class="order-status-dot"></span>
+                <span id="order-status-text">새 주문</span>
+            </div>
+            <div class="game-status-box hidden" id="game-status-box" role="button" tabindex="0" aria-label="게임 요청 상세 보기">
+                <span class="game-status-dot"></span>
+                <span id="game-status-text">게임 요청</span>
+            </div>
+            <button class="icon-btn cart" onclick="navigateCart()">
+                <i data-lucide="shopping-cart"></i>
+                <span class="btn-label">장바구니</span>
+                <span class="cart-badge" id="cart-badge" th:text="${cartCount ?: 0}" th:style="${(cartCount ?: 0) > 0 ? 'display:flex' : 'display:none'}">0</span>
+            </button>
+        </div>
+    </div>
+    <div class="content">
+        <div th:replace="~{kiosk/menu :: menuContent}"></div>
+    </div>
+</div>
+
+<div class="modal-overlay" id="serviceModal">
+    <div class="modal-content">
+        <h2 class="modal-title">서비스 요청</h2>
+        <div class="modal-grid">
+            <button class="service-btn" onclick="callService('직원 호출')"><strong>직원 호출</strong></button>
+            <button class="service-btn" onclick="callService('물티슈 요청')"><strong>물티슈</strong></button>
+            <button class="service-btn" onclick="callService('게임 규칙 설명')"><strong>게임 규칙</strong></button>
+            <button class="service-btn" onclick="callService('테이블 청소')"><strong>테이블 청소</strong></button>
+        </div>
+        <button onclick="closeServiceModal()" style="margin-top:20px; border:none; background:none; cursor:pointer;">닫기</button>
+    </div>
+</div>
+
+<script th:inline="javascript">
+    lucide.createIcons({attrs: {'stroke-width': 2.5}});
+
+    /* Thymeleaf 인라인 변수 안전하게 가져오기 */
+    const TABLE_NUMBER = [[${tableNumber}]];
+    const SESSION_START_TIME = [[${sessionStartTime}]];
+    const DURATION_MINUTES = [[${durationMinutes}]];
+</script>
+<script src="/js/layout/kiosk_layout.js"></script>
+</body>
+</html>

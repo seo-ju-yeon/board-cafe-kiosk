@@ -1,0 +1,136 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.example.board_cafe_kiosk_2603.mapper.admin.statistics.StatMapper">
+
+    <delete id="deleteDailySummary">
+        DELETE FROM daily_sales_summary WHERE stat_date = #{targetDate}
+    </delete>
+
+    <insert id="insertDailySummaryFromSessions">
+        INSERT INTO daily_sales_summary (stat_date, total_revenue, order_count, visit_count, avg_usage_time)
+        SELECT
+            #{targetDate},
+            /* 1. payment 테이블의 실제 결제 완료 금액(DONE) 합계 */
+            IFNULL(SUM(p.final_amount), 0),
+
+            /* 2. 해당 날짜에 결제 완료된 세션에 포함된 모든 주문 건수 */
+            (SELECT COUNT(*) FROM orders o
+                                      JOIN payment p2 ON o.session_id = p2.session_id
+             WHERE p2.status = 'DONE'
+               AND p2.paid_at >= #{targetDate}
+               AND p2.paid_at <![CDATA[ < ]]> DATE_ADD(#{targetDate}, INTERVAL 1 DAY)),
+
+            /* 3. 방문자 수: 세션 초기 인원 + 추가 인원(GUEST 카테고리) 수량 */
+            IFNULL(SUM(ts.initial_guest_cnt + IFNULL(extra.extra_qty, 0)), 0),
+
+            /* 4. 평균 이용 시간 */
+            IFNULL(AVG(TIMESTAMPDIFF(MINUTE, ts.check_in_time, ts.check_out_time)), 0)
+        FROM payment p
+                 INNER JOIN table_session ts ON p.session_id = ts.id
+                 LEFT JOIN (
+            /* GUEST 카테고리(인원 추가) 수량 미리 합산 */
+            SELECT o.session_id, SUM(oi.quantity) as extra_qty
+            FROM order_item oi
+                     INNER JOIN orders o ON oi.order_id = o.id
+                     INNER JOIN menu m ON oi.menu_id = m.id
+                     INNER JOIN category c ON m.category_id = c.id
+            WHERE c.type = 'GUEST'
+              AND o.status = 'COMPLETED'
+            GROUP BY o.session_id
+        ) extra ON p.session_id = extra.session_id
+        WHERE p.status = 'DONE'
+          AND p.paid_at >= #{targetDate}
+          AND p.paid_at <![CDATA[ < ]]> DATE_ADD(#{targetDate}, INTERVAL 1 DAY)
+        ON DUPLICATE KEY UPDATE
+                             total_revenue = VALUES(total_revenue),
+                             order_count = VALUES(order_count),
+                             visit_count = VALUES(visit_count),
+                             avg_usage_time = VALUES(avg_usage_time)
+    </insert>
+
+    <delete id="deleteItemSalesHistory">
+        DELETE FROM item_sales_history WHERE stat_date = #{targetDate}
+    </delete>
+
+    <insert id="insertItemSalesHistory">
+        INSERT INTO item_sales_history (stat_date, product_id, category, sales_qty, sales_amount)
+        SELECT
+            #{targetDate},
+            oi.menu_id,
+            c.type,
+            SUM(oi.quantity),
+            SUM(oi.price * oi.quantity)
+        FROM order_item oi
+                 INNER JOIN orders o ON oi.order_id = o.id
+                 INNER JOIN payment p ON o.session_id = p.session_id
+                 INNER JOIN menu m ON oi.menu_id = m.id
+                 INNER JOIN category c ON m.category_id = c.id
+        WHERE p.status = 'DONE'
+          AND p.paid_at >= #{targetDate}
+          AND p.paid_at <![CDATA[ < ]]> DATE_ADD(#{targetDate}, INTERVAL 1 DAY)
+            /* 🚫 '인원 추가(GUEST)'와 '게임 대여(GAME)'는 매출 통계에서 제외 */
+          AND c.type NOT IN ('GUEST', 'GAME')
+        GROUP BY oi.menu_id, c.type
+        ON DUPLICATE KEY UPDATE
+                             sales_qty = VALUES(sales_qty),
+                             sales_amount = VALUES(sales_amount)
+    </insert>
+
+    <select id="getWeeklyStats" resultType="org.example.board_cafe_kiosk_2603.dto.admin.statistics.DailySalesDTO">
+        SELECT
+            DATE_FORMAT(stat_date, '%Y-%m-%d') as statDate,
+            total_revenue as totalRevenue,
+            order_count as orderCount,
+            visit_count as visitCount,
+            avg_usage_time as avgUsageTime
+        FROM daily_sales_summary
+        WHERE stat_date BETWEEN DATE_SUB(#{endDate}, INTERVAL 6 DAY) AND #{endDate}
+        ORDER BY stat_date
+    </select>
+
+    <select id="getTopSellingMenuByDate" resultType="org.example.board_cafe_kiosk_2603.dto.admin.statistics.ItemSalesDTO">
+        SELECT
+            m.name as menuName,
+            ish.sales_qty as salesQty,
+            ish.sales_amount as salesAmount
+        FROM item_sales_history ish
+                 INNER JOIN menu m ON ish.product_id = m.id
+        WHERE ish.stat_date = #{targetDate}
+        ORDER BY ish.sales_qty DESC
+        LIMIT #{limit}
+    </select>
+
+    <select id="getTopSellingItems" resultType="org.example.board_cafe_kiosk_2603.dto.admin.statistics.ItemSalesDTO">
+        SELECT m.name as menuName, SUM(ish.sales_qty) as salesQty
+        FROM item_sales_history ish
+                 INNER JOIN menu m ON ish.product_id = m.id
+        WHERE ish.stat_date >= DATE_SUB(CURDATE(), INTERVAL 7 DAY)
+        GROUP BY ish.product_id, m.name
+        ORDER BY salesQty DESC LIMIT 5
+    </select>
+
+    <select id="getCategoryStatsByDate" resultType="map">
+        SELECT
+            category as categoryName,
+            SUM(sales_amount) as totalAmount
+        FROM item_sales_history
+        WHERE stat_date = #{targetDate}
+        GROUP BY category
+    </select>
+
+    <select id="getTopGamesByMonth" resultType="org.example.board_cafe_kiosk_2603.dto.admin.statistics.GameStatsDTO">
+        SELECT
+            g.name AS gameName,
+            COUNT(gh.id) AS rentCount
+        FROM game_history gh
+                 INNER JOIN game_item gi ON gh.game_item_id = gi.id
+                 INNER JOIN game g ON gi.game_id = g.id
+        WHERE YEAR(gh.rented_at) = YEAR(#{targetDate})
+          AND MONTH(gh.rented_at) = MONTH(#{targetDate})
+        GROUP BY g.id, g.name
+        ORDER BY rentCount DESC
+        LIMIT #{limit}
+    </select>
+</mapper>

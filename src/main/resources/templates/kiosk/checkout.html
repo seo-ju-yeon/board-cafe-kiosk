@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>정산 - Board Game Cafe</title>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://js.tosspayments.com/v2/standard"></script>
+    <link rel="stylesheet" th:href="@{/css/kiosk/checkout.css}">
+</head>
+<body>
+
+<div class="container">
+    <h1 class="page-title">🧾 정산하기</h1>
+
+    <!-- 주문 내역 -->
+    <div class="card" id="order-summary">
+        <div class="card-header"><i data-lucide="shopping-bag"></i> 주문 내역</div>
+    </div>
+
+    <!-- 세션 정보 -->
+    <div class="card">
+        <div class="card-header"><i data-lucide="clock"></i> 이용 정보</div>
+        <div class="info-row">
+            <span class="info-label"><i data-lucide="timer"></i> 초과 시간</span>
+            <span id="elapsed-time">계산 중...</span>
+        </div>
+        <div class="info-row">
+            <span class="info-label"><i data-lucide="users"></i> 인원</span>
+            <span th:text="${partySize} + '명'">2명</span>
+        </div>
+        <div class="info-row" th:if="${packageName != null and packageName != ''}">
+            <span class="info-label"><i data-lucide="package"></i> 패키지</span>
+            <span th:text="${packageName}">패키지명</span>
+        </div>
+        <div class="info-row" th:if="${packageTotal > 0}">
+            <span class="info-label"><i data-lucide="tag"></i> 패키지 금액</span>
+            <span th:text="'₩' + ${#numbers.formatInteger(packageTotal, 0, 'COMMA')}">₩0</span>
+        </div>
+    </div>
+
+    <!-- 포인트 사용 (전화번호 등록된 경우만 표시) -->
+    <div class="point-card" id="point-section"
+         th:if="${customerPhone != null and customerPhone != ''}">
+        <div class="point-card-header">
+            <div class="point-card-title">
+                <i data-lucide="star"></i> 포인트 사용
+            </div>
+            <span class="point-balance-badge"
+                  th:text="'보유 ' + ${pointBalance} + 'P'">보유 0P</span>
+        </div>
+        <div class="point-input-row">
+            <input type="number" class="point-input" id="point-input"
+                   th:placeholder="'최대 ' + ${pointBalance} + 'P 사용 가능'"
+                   min="0" th:max="${pointBalance}"/>
+            <button class="point-apply-btn" onclick="applyPoint()">적용</button>
+            <button class="point-reset-btn" onclick="resetPoint()">취소</button>
+        </div>
+        <div class="point-applied-msg" id="point-applied-msg">
+            ✅ <span id="point-applied-amount">0</span>P 사용 적용됨
+        </div>
+    </div>
+
+    <!-- 포인트 미등록 안내 -->
+    <div class="point-card" th:if="${customerPhone == null or customerPhone == ''}">
+        <div class="point-card-title" style="margin-bottom: 8px;">
+            <i data-lucide="star"></i> 포인트
+        </div>
+        <p class="no-point-msg">전화번호를 등록하면 포인트를 적립하고 사용할 수 있어요.</p>
+    </div>
+
+    <!-- 금액 상세 -->
+    <div class="card" id="amount-card">
+        <div class="card-header"><i data-lucide="receipt"></i> 결제 금액</div>
+        <div class="amount-breakdown">
+            <div class="amount-row">
+                <span>상품 합계</span>
+                <span id="subtotal-amount">₩0</span>
+            </div>
+            <div class="amount-row" id="over-charge-row" style="display:none;">
+                <span>초과 요금</span>
+                <span id="over-charge-amount" style="color:#f44336;font-weight:700;">₩0</span>
+            </div>
+            <div class="amount-row discount" id="point-discount-row" style="display:none;">
+                <span>포인트 할인</span>
+                <span id="point-discount-amount">-₩0</span>
+            </div>
+        </div>
+        <div class="final-box">
+            <span class="final-box-label">최종 결제 금액</span>
+            <span class="final-box-amount" id="final-total">₩0</span>
+        </div>
+    </div>
+
+    <!-- 토스페이먼츠 위젯 컨테이너 -->
+    <div class="card" id="toss-widget-card">
+        <div class="card-header"><i data-lucide="credit-card"></i> 결제 수단</div>
+        <div id="payment-widget" class="payment-widget" style="margin-bottom: 20px;"></div>
+        <div id="agreement" style="margin-top: 20px;"></div>
+    </div>
+
+    <!-- 버튼 -->
+    <div class="button-group">
+        <button class="pay-btn" id="pay-btn" onclick="processPayment()">
+            <i data-lucide="credit-card"></i>
+            <span id="pay-btn-label">결제하기</span>
+        </button>
+        <button class="back-btn" onclick="history.back()">
+            <i data-lucide="arrow-left"></i> 돌아가기
+        </button>
+    </div>
+</div>
+
+<script th:inline="javascript">
+    // ===== Thymeleaf 서버 변수 =====
+    const packageName     = /*[[${packageName}]]*/ '';
+    const partySize       = /*[[${partySize}]]*/ 1;
+    const packageTotal    = /*[[${packageTotal}]]*/ 0;
+    const sessionStartTime = /*[[${sessionStartTime}]]*/ 0;
+    const durationMinutes = /*[[${durationMinutes}]]*/ 0;
+    const extraPricePerMin = /*[[${extraPricePerMin}]]*/ 0;
+    const tableNumber     = /*[[${tableNumber}]]*/ 1;
+    const customerPhone   = /*[[${customerPhone}]]*/ '';
+    const checkoutSource  = /*[[${checkoutSource}]]*/ 'kiosk';
+
+    // Thymeleaf에서 전달받은 포인트 잔액 (서버 렌더링 값)
+    const initialPointBalance = /*[[${pointBalance}]]*/ 0;
+
+</script>
+<script th:src="@{/js/kiosk/checkout.js}"></script>
+</body>
+</html>

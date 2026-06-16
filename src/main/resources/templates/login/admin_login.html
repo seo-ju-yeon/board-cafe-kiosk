@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Admin Login - Board Game Cafe</title>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link rel="stylesheet" th:href="@{/css/login/admin_login.css}">
+    <style>
+        /* 시연 계정 섹션 스타일링 */
+        .demo-container {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            padding: 12px;
+            margin-bottom: 20px;
+        }
+        .demo-label {
+            font-size: 12px;
+            font-weight: 600;
+            color: #64748b;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center; gap: 4px;
+        }
+        .demo-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 6px;
+        }
+        .demo-btn {
+            all: unset;
+            cursor: pointer;
+            padding: 8px;
+            background: white;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            transition: all 0.2s ease;
+            text-align: left;
+        }
+        .demo-btn:hover {
+            border-color: #3b82f6;
+            background: #eff6ff;
+            transform: translateY(-1px);
+        }
+        .role-box {
+            display: block;
+            font-size: 10px;
+            font-weight: 700;
+            margin-bottom: 2px;
+        }
+        .acc-info {
+            display: block;
+            font-size: 11px;
+            color: #334155;
+            font-family: monospace;
+        }
+        .status-active { color: #10b981; }   /* 활성 */
+        .status-inactive { color: #f43f5e; } /* 비활성 */
+        .status-super { color: #8b5cf6; }    /* 슈퍼 */
+
+        .demo-btn.full-width { grid-column: span 2; }
+    </style>
+</head>
+<body>
+
+<div class="login-card">
+    <div class="icon-box"><i data-lucide="users"></i></div>
+    <h2>Admin Login</h2>
+    <p class="subtitle">매장 관리 시스템 접속</p>
+
+    <!-- [수정됨] DB SQL 데이터와 100% 일치시킨 시연 계정 가이드 -->
+    <div class="demo-container">
+        <div class="demo-label">
+            <i data-lucide="shield-check" size="14"></i> 포트폴리오 시연용 계정 (클릭 시 입력)
+        </div>
+        <div class="demo-grid">
+            <!-- 관리자 계정 (SQL: admin / admin02) -->
+            <button type="button" class="demo-btn" onclick="quickLogin('admin', '1111')">
+                <span class="role-box status-active">관리자 활성화</span>
+                <span class="acc-info">admin / 1111</span>
+            </button>
+            <button type="button" class="demo-btn" onclick="quickLogin('admin02', '2222')">
+                <span class="role-box status-inactive">관리자 비활성화</span>
+                <span class="acc-info">admin02 / 2222</span>
+            </button>
+
+            <!-- 스태프 계정 (SQL: staff01 / staff04) -->
+            <button type="button" class="demo-btn" onclick="quickLogin('staff01', '1111')">
+                <span class="role-box status-active">스태프 활성화</span>
+                <span class="acc-info">staff01 / 1111</span>
+            </button>
+            <button type="button" class="demo-btn" onclick="quickLogin('staff04', '2222')">
+                <span class="role-box status-inactive">스태프 비활성화</span>
+                <span class="acc-info">staff04 / 2222</span>
+            </button>
+
+            <!-- 슈퍼 계정 (SQL: pass) -->
+            <button type="button" class="demo-btn full-width" onclick="quickLogin('pass', '1234')">
+                <span class="role-box status-super">시스템 총괄 (SUPER)</span>
+                <span class="acc-info">pass / 1234</span>
+            </button>
+        </div>
+    </div>
+
+    <div th:if="${param.error}" class="error-msg">
+        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="#A32D2D" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0; margin-top:1px;">
+            <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
+        </svg>
+        <span>아이디 혹은 비밀번호가 일치하지 않습니다.</span>
+    </div>
+
+    <form th:action="@{/admin/login-process}" method="POST">
+        <div class="input-group">
+            <span class="label">Admin ID</span>
+            <div class="input-wrapper">
+                <input type="text" name="username" id="username" placeholder="아이디를 입력하세요" required>
+            </div>
+        </div>
+
+        <div class="input-group">
+            <span class="label">Password</span>
+            <div class="input-wrapper">
+                <input type="password" name="password" id="password" placeholder="비밀번호를 입력하세요" required>
+            </div>
+        </div>
+
+        <button type="submit" class="btn-primary">로그인</button>
+    </form>
+
+    <div class="admin-options">
+        <a th:href="@{/admin/find_pw}" class="find-pw">비밀번호를 잊으셨나요?</a>
+    </div>
+</div>
+
+<script>
+    lucide.createIcons();
+
+    function quickLogin(id, pw) {
+        document.getElementById('username').value = id;
+        document.getElementById('password').value = pw;
+        document.getElementById('username').focus();
+    }
+</script>
+</body>
+</html>

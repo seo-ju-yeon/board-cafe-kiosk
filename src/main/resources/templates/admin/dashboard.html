@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="ko"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/admin_layout}">
+
+<head>
+    <title>BoardWave Dashboard</title>
+    <th:block layout:fragment="head-extra">
+        <!-- CSRF 토큰 (fetch PATCH/DELETE/POST 요청에 사용) -->
+        <meta name="_csrf" th:content="${_csrf.token}"/>
+        <meta name="_csrf_header" th:content="${_csrf.headerName}"/>
+        <link rel="stylesheet" th:href="@{/css/admin/dashboard.css}">
+    </th:block>
+</head>
+
+<body>
+<th:block layout:fragment="content">
+    <div class="header-container">
+        <h1 class="page-title"> 테이블 현황</h1>
+        <div style="display: flex; align-items: center; gap: 20px;">
+            <!-- 메세지 전송 버튼 -->
+            <button class="btn btn-msg" style="padding: 10px 18px; border: none; border-radius: 10px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 8px;" onclick="openMessageModal()">
+                <i data-lucide="send" style="width: 18px; height: 18px;"></i> 메세지 전송
+            </button>
+
+            <!-- 전체 리셋 (마감) 버튼 -->
+            <button class="btn btn-reset" style="display: flex; align-items: center; gap: 8px;" onclick="handleTotalReset()">
+                <i data-lucide="rotate-ccw" style="width: 18px; height: 18px;"></i> 전체 리셋 (마감)
+            </button>
+
+            <div class="status-legend">
+                <div class="legend-item"><div class="dot empty"></div>빈 테이블</div>
+                <div class="legend-item"><div class="dot in-use"></div>사용중</div>
+                <div class="legend-item"><div class="dot cleaning"></div>청소 중</div>
+                <div class="legend-item"><div class="dot request"></div>요청 있음</div>
+            </div>
+        </div>
+    </div>
+
+    <div id="pending-orders-section">
+        <div class="pending-section-header">
+            🔔 신규 주문 대기
+            <span class="pending-badge" id="pending-count">0</span>
+            <div class="pending-actions">
+                <button class="btn-pending-bulk" id="pending-confirm-all-btn" onclick="confirmAllPendingOrders()">전체 확인</button>
+            </div>
+        </div>
+        <div id="pending-orders-list"></div>
+    </div>
+
+    <div class="table-grid">
+        <div th:each="table : ${tables}"
+             class="table-card"
+             th:classappend="${(table.hasUnreadMessage ? 'has-msg ' : '') + 'status-' + #strings.toLowerCase(table.status)}"
+             th:data-id="${table.id}"
+             th:data-num="${table.tableNumber}"
+             th:data-status="${table.status}"
+             th:data-token="${table.accessToken}"
+             th:data-latestorder="pending"
+             onclick="openTableModal(this)">
+
+            <div class="alert-dot"></div>
+
+            <div class="table-number" th:text="'Table ' + ${table.tableNumber}">Table 1</div>
+
+            <div class="status-text">
+                <span th:if="${table.status == 'EMPTY'}" style="color: #bdc1c6;">비어있음</span>
+                <span th:if="${table.status == 'OCCUPIED'}" style="color: #4285f4;">이용 중</span>
+                <span th:if="${table.status == 'CLEANING'}" style="color: #fbbc04;">청소 중</span>
+            </div>
+
+            <th:block th:if="${table.status == 'OCCUPIED'}">
+                <div class="order-status-container" style="margin-top: 8px;">
+                    <div class="order-mini-badge" data-role="order-mini-badge">
+                        <span class="mini-dot"></span>
+                        <span class="mini-text">주문 진행중</span>
+                    </div>
+                </div>
+                <div class="live-amount-box">
+                    <div class="live-amount-row">
+                        <span class="live-amount-label">실시간 합계</span>
+                        <span class="live-amount-value" data-role="live-amount">₩0</span>
+                    </div>
+                </div>
+            </th:block>
+
+            <div class="time-info" style="font-size: 12px; color: #5f6368; display: flex; justify-content: space-between; align-items: center; margin-top: 15px; padding-top: 10px; border-top: 1px dashed #eee;">
+                <span th:if="${table.status == 'OCCUPIED' and table.guestCount != null}" style="display: flex; align-items: center; gap: 4px; font-weight: 500;">
+                    👥 <span th:text="${table.guestCount} + '명'">2명</span>
+                </span>
+                <span th:unless="${table.status == 'OCCUPIED'}"></span>
+                <span th:if="${table.status == 'OCCUPIED' and table.checkInTime != null}" style="display: flex; align-items: center; gap: 4px;">
+                    🕒 <span th:text="${#temporals.format(table.checkInTime, 'HH:mm')}">14:30</span>
+                </span>
+            </div>
+        </div>
+    </div>
+
+    <div id="tableModal" class="modal-overlay" onclick="closeTableModal()">
+        <div class="modal-content" onclick="event.stopPropagation()">
+            <div class="modal-header">
+                <span id="modalTitle">Table 0</span>
+                <button class="close-btn" onclick="closeTableModal()">×</button>
+            </div>
+            <div class="modal-body">
+                <div id="unreadMsgBox" class="unread-msg-box">
+                    <strong>⚠️ 확인이 필요한 손님 요청</strong>
+                    <ul id="unreadMsgList"></ul>
+                </div>
+
+                <div style="font-weight: 600; color: #3c4043;">📋 실시간 주문 내역</div>
+                <div id="orderList" class="order-list"></div>
+                <div class="rented-game-box">
+                    <div class="rented-game-title">🎲 테이블 게임 현황</div>
+                    <div id="rentedGameList" style="font-size:12px; color:#64748b;">없음</div>
+                </div>
+
+                <div class="total-price-container" style="margin-top: 20px; padding-top: 15px; border-top: 2px dashed #eee;">
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <span style="font-size: 14px; color: #5f6368;">현재 이용 합계</span>
+                        <span id="totalPrice" style="font-size: 24px; font-weight: 800; color: #ea4335;">0원</span>
+                    </div>
+                </div>
+
+                <div class="action-group">
+                    <button class="btn btn-pay" onclick="handlePayment()">💰 테이블 결제</button>
+                    <button class="btn btn-status" onclick="handleStatusUpdate()">🔄 상태변경</button>
+                    <button class="btn btn-order-status" id="orderStatusBtn" onclick="changeAllOrdersStatus()" style="display:none;">📋 주문상태변경</button>
+                    <button class="btn btn-msg" id="readBtn" onclick="handleReadMessage()" style="display:none;">✉️ 요청확인</button>
+                    <button class="btn btn-close" onclick="closeTableModal()">닫기</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="messageModal" class="modal-overlay" onclick="closeMessageModal()">
+        <div class="modal-content" onclick="event.stopPropagation()">
+            <div class="modal-header">
+                <span>📨 테이블 메세지 전송</span>
+                <button class="close-btn" onclick="closeMessageModal()">×</button>
+            </div>
+            <div class="modal-body">
+                <div style="margin-bottom: 15px;">
+                    <label style="font-weight: 600; display: block; margin-bottom: 8px; color: #3c4043;">대상 테이블</label>
+                    <select id="targetTableSelect" style="width: 100%; padding: 12px; border-radius: 8px; border: 1px solid #ddd; outline: none;">
+                        <option value="">테이블을 선택하세요</option>
+                    </select>
+                </div>
+
+                <div style="margin-bottom: 25px;">
+                    <label style="font-weight: 600; display: block; margin-bottom: 8px; color: #3c4043;">전송할 메세지 (매크로)</label>
+                    <select id="macroMessageSelect" style="width: 100%; padding: 12px; border-radius: 8px; border: 1px solid #ddd; outline: none;">
+                        <option value="">메세지를 선택하세요</option>
+                    </select>
+                </div>
+
+                <div class="action-group" style="margin-top: 0;">
+                    <button class="btn btn-msg" style="flex: 1;" onclick="submitMessage()">전송하기</button>
+                    <button class="btn btn-close" style="flex: 1;" onclick="closeMessageModal()">취소</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="serialAssignModal" class="modal-overlay" onclick="closeGameSerialModal()">
+        <div class="modal-content" onclick="event.stopPropagation()">
+            <div class="modal-header">
+                <span>🎲 게임 일련번호 선택</span>
+                <button class="close-btn" onclick="closeGameSerialModal()">×</button>
+            </div>
+            <div class="modal-body">
+                <div id="serialAssignTitle" style="font-size:14px; color:#475569; margin-bottom:10px;"></div>
+                <div id="serialAssignList"></div>
+                <div class="action-group">
+                    <button class="btn btn-serial" onclick="submitGameSerialAssignment()">선택 적용</button>
+                    <button class="btn btn-close" onclick="closeGameSerialModal()">닫기</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="paymentGameCheckModal" class="modal-overlay" onclick="closePaymentGameCheckModal()">
+        <div class="modal-content" onclick="event.stopPropagation()">
+            <div class="modal-header">
+                <span id="paymentGameCheckTitle">💰 결제 전 게임 일련번호 확인</span>
+                <button class="close-btn" onclick="closePaymentGameCheckModal()">×</button>
+            </div>
+            <div class="modal-body">
+                <div id="paymentGameCheckDesc" style="font-size:13px; color:#475569; margin-bottom:10px;">
+                    대여 중인 일련번호 상태를 확인한 뒤 빈테이블로 전환합니다.
+                </div>
+                <div id="paymentGameCheckList"></div>
+                <div class="action-group">
+                    <button id="paymentGameCheckConfirmBtn" class="btn btn-pay" onclick="confirmPaymentWithGameItemCheck()">상태 반영 후 빈테이블 전환</button>
+                    <button class="btn btn-close" onclick="closePaymentGameCheckModal()">취소</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="rentalReturnModal" class="modal-overlay" onclick="closeRentalReturnModal()">
+        <div class="modal-content" onclick="event.stopPropagation()">
+            <div class="modal-header">
+                <span id="rentalReturnTitle">↩️ 대여 반납 처리</span>
+                <button class="close-btn" onclick="closeRentalReturnModal()">×</button>
+            </div>
+            <div class="modal-body">
+                <div id="rentalReturnDesc" style="font-size:13px; color:#475569; margin-bottom:10px;">
+                    반납 처리할 일련번호를 체크하세요.
+                </div>
+                <div id="rentalReturnList"></div>
+                <div class="action-group">
+                    <button class="btn btn-return" onclick="submitRentalReturn()">선택 반납</button>
+                    <button class="btn btn-close" onclick="closeRentalReturnModal()">취소</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <th:block layout:fragment="scripts">
+        <script src="https://cdn.jsdelivr.net/npm/sockjs-client@1/dist/sockjs.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/stompjs@2.3.3/lib/stomp.min.js"></script>
+        <script th:src="@{/js/websoket/websocket.js}"></script>
+        <script th:src="@{/js/admin/dashboard.js}"></script>
+    </th:block>
+</th:block>
+</body>
+</html>

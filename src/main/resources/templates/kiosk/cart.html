@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>장바구니 - Board Game Cafe</title>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link rel="stylesheet" th:href="@{/css/kiosk/cart.css}">
+
+</head>
+<body onclick="resetActivityTimer()">
+
+<div class="timer-banner">
+    <i data-lucide="clock"></i>
+    장바구니가 <span id="timer-display">05:00</span> 후 초기화됩니다
+</div>
+
+<div class="header">
+    <button class="back-btn" onclick="history.back()">
+        <i data-lucide="arrow-left"></i> 메뉴로 돌아가기
+    </button>
+    <div class="table-info" th:text="'Table #' + ${tableNumber}">Table #5</div>
+</div>
+
+<!-- 진행 중인 주문 배지 -->
+<div id="active-orders-section" class="active-orders-section" style="display:none;"></div>
+
+<div class="content" id="cart-content">
+    <!-- 동적 콘텐츠 -->
+</div>
+
+<div class="footer">
+    <div class="total-row">
+        <span class="total-label">총 결제액</span>
+        <span id="total-amount">₩0</span>
+    </div>
+    <div class="button-group">
+        <button class="order-btn" id="checkout-btn" onclick="openOrderConfirmModal()">주문하기</button>
+        <button class="clear-btn" onclick="clearCart()">장바구니 비우기</button>
+    </div>
+</div>
+
+<!-- ========== 주문 확인 모달 ========== -->
+<div id="order-confirm-modal">
+    <div class="modal-content">
+        <h2>주문 확인</h2>
+        <p class="subtitle">주문 내용을 확인하신 후 진행해주세요</p>
+
+        <!-- 주문 상품 리스트 -->
+        <div class="modal-items-list" id="modal-items-list">
+            <!-- 동적으로 채워짐 -->
+        </div>
+
+        <!-- 가격 정보 -->
+        <div class="price-section">
+            <div class="price-row">
+                <span>총 결제액</span>
+                <span id="modal-total">₩0</span>
+            </div>
+        </div>
+
+        <!-- 버튼 -->
+        <div class="modal-buttons">
+            <button class="btn-confirm" id="confirm-btn" onclick="confirmOrder()">
+                <span id="confirm-btn-text">주문하기</span>
+            </button>
+            <button class="btn-cancel" onclick="closeOrderConfirmModal()">취소</button>
+        </div>
+    </div>
+</div>
+
+<!-- 경고 모달 -->
+<div id="warning-modal">
+    <div class="modal-box">
+        <h2>계속 이용하시겠습니까?</h2>
+        <p>응답이 없어 곧 장바구니가 비워집니다.</p>
+        <button class="keep-btn" onclick="hideWarningModal()">쇼핑 계속하기</button>
+    </div>
+</div>
+
+<script th:src="@{/js/kiosk/cart.js}"></script>
+</body>
+</html>

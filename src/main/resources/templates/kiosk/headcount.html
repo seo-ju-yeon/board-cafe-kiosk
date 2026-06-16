@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <title>Party Size - Board Game Cafe</title>
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <link rel="stylesheet" th:href="@{/css/kiosk/headcount.css}">
+
+</head>
+<body>
+
+<div class="container">
+  <div class="icon-header">
+    <i data-lucide="users-round" style="width: 40px; height: 40px;"></i>
+  </div>
+  <h1>How many people in your party?</h1>
+  <p class="subtitle">일행이 몇 명이신가요?</p>
+  <!-- form 추가 -->
+  <form id="headcount-form" action="/kiosk/headcount" method="POST" style="display:none;">
+    <input type="hidden" name="partySize" id="partySize-input">
+  </form>
+
+  <div class="grid">
+    <div class="number-card" onclick="selectPeople(1, this)">
+      <i data-lucide="users"></i>
+      <span>1</span>
+    </div>
+    <div class="number-card" onclick="selectPeople(2, this)">
+      <i data-lucide="users"></i>
+      <span>2</span>
+    </div>
+    <div class="number-card" onclick="selectPeople(3, this)">
+      <i data-lucide="users"></i>
+      <span>3</span>
+    </div>
+    <div class="number-card" onclick="selectPeople(4, this)">
+      <i data-lucide="users"></i>
+      <span>4</span>
+    </div>
+    <div class="number-card" onclick="selectPeople(5, this)">
+      <i data-lucide="users"></i>
+      <span>5</span>
+    </div>
+    <div class="number-card" onclick="selectPeople(6, this)">
+      <i data-lucide="users"></i>
+      <span>6</span>
+    </div>
+    <div class="number-card" onclick="selectPeople(7, this)">
+      <i data-lucide="users"></i>
+      <span>7</span>
+    </div>
+    <div class="number-card" onclick="selectPeople(8, this)">
+      <i data-lucide="users"></i>
+      <span>8</span>
+    </div>
+  </div>
+
+  <button id="next-button" class="submit-btn" onclick="goToNext()">인원수를 선택해주세요</button>
+</div>
+
+<div class="help-btn">?</div>
+
+<script th:src="@{/js/kiosk/headcount.js}"></script>
+</body>
+</html>

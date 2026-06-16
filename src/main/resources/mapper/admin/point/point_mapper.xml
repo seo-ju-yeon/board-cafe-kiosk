@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.example.board_cafe_kiosk_2603.mapper.admin.point.PointMapper">
+
+    <!-- ===== point 테이블 ===== -->
+    <select id="findAll" resultType="org.example.board_cafe_kiosk_2603.domain.admin.point.Point">
+        SELECT id, phone, balance, updated_at
+        FROM point
+        ORDER BY updated_at DESC
+    </select>
+
+    <select id="findByPhone" resultType="org.example.board_cafe_kiosk_2603.domain.admin.point.Point">
+        SELECT id, phone, balance, updated_at
+        FROM point
+        WHERE phone = #{phone}
+    </select>
+
+    <insert id="insert">
+        INSERT INTO point (phone, balance)
+        VALUES (#{phone}, #{balance})
+    </insert>
+
+    <update id="updateBalance">
+        UPDATE point
+        SET balance = #{balance}
+        WHERE id = #{id}
+    </update>
+
+    <select id="sumTotalBalance" resultType="java.lang.Integer">
+        SELECT COALESCE(SUM(balance), 0)
+        FROM point
+    </select>
+
+    <select id="countAll" resultType="java.lang.Integer">
+        SELECT COUNT(*)
+        FROM point
+    </select>
+
+    <!-- ===== point_history 테이블 ===== -->
+
+    <select id="findHistoryByPointId" resultType="org.example.board_cafe_kiosk_2603.domain.admin.point.PointHistory">
+        SELECT id, point_id, order_id, type, amount, balance_after, created_at
+        FROM point_history
+        WHERE point_id = #{pointId}
+        ORDER BY created_at DESC
+    </select>
+
+    <insert id="insertHistory">
+        INSERT INTO point_history (point_id, order_id, type, amount, balance_after)
+        VALUES (#{pointId}, #{orderId}, #{type}, #{amount}, #{balanceAfter})
+    </insert>
+
+    <select id="countUseHistoryByOrderId" resultType="int">
+        SELECT COUNT(*)
+        FROM point_history
+        WHERE order_id = #{orderId}
+          AND type = 'USE'
+    </select>
+
+    <!-- ============== 페이징 ================ -->
+    <select id="selectList" resultType="org.example.board_cafe_kiosk_2603.domain.admin.point.Point">
+        SELECT * FROM point
+        WHERE 1=1
+        <if test="keyword != null and keyword != ''">
+            AND phone LIKE CONCAT('%', #{keyword}, '%')
+        </if>
+        ORDER BY id DESC
+        LIMIT #{skip}, #{size}
+    </select>
+
+    <select id="selectCount" resultType="int">
+        SELECT COUNT(*) FROM point
+        WHERE 1=1
+        <if test="keyword != null and keyword != ''">
+            AND phone LIKE CONCAT('%', #{keyword}, '%')
+        </if>
+    </select>
+</mapper>

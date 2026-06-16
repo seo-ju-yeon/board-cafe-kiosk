@@ -1,0 +1,207 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.example.board_cafe_kiosk_2603.mapper.admin.table.CafeTableMapper">
+    <select id="selectAllTables" resultType="org.example.board_cafe_kiosk_2603.domain.admin.table.CafeTable">
+        /* DB의 스네이크 케이스 필드명을 Entity의 카멜케이스 속성에 매핑 */
+        SELECT
+        ct.id,
+        ct.table_number AS tableNumber,
+        CASE WHEN ts.id IS NOT NULL THEN 'OCCUPIED' ELSE ct.status END AS status,
+        ct.access_token AS accessToken,
+        ts.check_in_time AS checkInTime,
+        ts.initial_guest_cnt AS guestCount,
+        /* 수정: TABLE_TO_STAFF 방향의 읽지 않은 메시지가 있을 때만 true */
+        (SELECT COUNT(*) FROM table_message tm
+        WHERE tm.table_id = ct.id
+        AND tm.is_read = false
+        AND tm.direction = 'TABLE_TO_STAFF') > 0 AS hasUnreadMessage
+        FROM cafe_table ct
+        LEFT JOIN table_session ts
+            ON ts.id = COALESCE(
+                ct.current_session_id,
+                (
+                    SELECT s.id
+                    FROM table_session s
+                    WHERE s.table_id = ct.id
+                      AND s.is_active = TRUE
+                    ORDER BY s.check_in_time DESC
+                    LIMIT 1
+                )
+            )
+        ORDER BY ct.table_number
+        <!-- 메인 대시보드 배치를 위해 테이블 번호 순으로 정렬하여 리턴 -->
+    </select>
+
+    <select id="selectOccupiedTableIds" resultType="int">
+        SELECT ct.id
+        FROM cafe_table ct
+        WHERE ct.status = 'OCCUPIED'
+           OR EXISTS (
+               SELECT 1
+               FROM table_session ts
+               WHERE ts.table_id = ct.id
+                 AND ts.is_active = TRUE
+           )
+    </select>
+
+    <select id="selectAccessTokenById" resultType="string">
+        SELECT access_token
+        FROM cafe_table
+        WHERE id = #{id}
+    </select>
+
+    <insert id="insertNewSession" useGeneratedKeys="true" keyProperty="id">
+        /* 입장 인원, 패키지 정보를 기반으로 세션 생성. check_in_time은 DB DEFAULT 사용 */
+        INSERT INTO table_session (
+            table_id,
+            package_id,
+            initial_guest_cnt,
+            is_active
+        ) VALUES (
+                     #{tableId},
+                     #{packageId},
+                     #{initialGuestCnt},
+                     TRUE
+                 )
+    </insert>
+
+    <update id="updateTableStatusAndSession">
+        /* 상태 변경과 동시에 현재 이용 중인 세션 ID(포인터)를 동기화 */
+        UPDATE cafe_table
+        SET
+            status = #{status},
+            current_session_id = #{sessionId}
+        WHERE id = #{id}
+    </update>
+
+    <update id="closeSession">
+        /* 세션을 비활성화하고 퇴실 시각을 현재로 업데이트 */
+        UPDATE table_session
+        SET
+            is_active = FALSE,
+            check_out_time = NOW()
+        WHERE id = #{sessionId}
+    </update>
+
+<!--    <select id="selectCurrentSessionId" resultType="long">-->
+<!--        SELECT current_session_id-->
+<!--        FROM cafe_table-->
+<!--        WHERE id = #{id}-->
+<!--    </select>-->
+
+    <!-- access_token 업데이트: updateAccessToken
+     기존 쿼리문에서의 변경 내역 id 값을 tableId로 변경 -->
+
+    <!-- current_session_id 조회 -->
+    <!-- resultType="org.example.board_cafe_kiosk_2603.domain.admin.table.CafeTable" -->
+    <select id="selectCurrentSessionId" resultType="java.lang.Long">
+        SELECT current_session_id FROM cafe_table
+        WHERE id = #{tableId}
+    </select>
+
+    <select id="selectStatusById" resultType="string">
+        SELECT status
+        FROM cafe_table
+        WHERE id = #{tableId}
+    </select>
+
+    <!-- access_token 업데이트 -->
+    <update id="updateAccessToken">
+        UPDATE cafe_table
+        SET access_token = #{accessToken}
+        WHERE id = #{tableId}
+    </update>
+
+    <!-- table_session에서 직접 활성 세션 ID 조회 -->
+    <!-- resultType="java.lang.Long" -->
+    <select id="selectActiveSessionByTableId" resultType="java.lang.Long">
+        SELECT id FROM table_session
+        WHERE table_id = #{tableId}
+          AND is_active = TRUE
+        ORDER BY check_in_time DESC
+        LIMIT 1
+    </select>
+
+    <select id="selectLatestSessionByTableId" resultType="java.lang.Long">
+        SELECT id
+        FROM table_session
+        WHERE table_id = #{tableId}
+        ORDER BY check_in_time DESC
+        LIMIT 1
+    </select>
+
+    <update id="resetAllTablesAtMidnight">
+        /* 모든 테이블을 공석으로 만들고 세션 연결을 강제 해제 */
+        /* 자정/강제 리셋: 상태(EMPTY), 세션포인터(NULL), 인증토큰(NULL)을 한 번에 초기화 */
+        UPDATE cafe_table
+        SET
+            status = 'EMPTY',
+            current_session_id = NULL,
+            access_token = NULL
+    </update>
+
+    <update id="updateAllActiveSessions">
+        UPDATE table_session
+        SET is_active = FALSE,
+            check_out_time = NOW()
+        WHERE is_active = TRUE
+    </update>
+
+    <select id="selectActiveOrderItems" resultType="org.example.board_cafe_kiosk_2603.dto.kiosk.order.OrderItemDTO">
+        SELECT
+            oi.id,
+            oi.order_id AS orderId,
+            oi.menu_id AS menuId,
+            oi.menu_name AS menuName,
+            oi.price,
+            oi.quantity,
+            o.status AS status
+        FROM orders o
+                 JOIN order_item oi ON o.id = oi.order_id
+        WHERE o.session_id = #{sessionId}
+          AND o.status != 'CANCELLED'
+        ORDER BY o.ordered_at DESC
+    </select>
+
+    <update id="updateMessagesReadStatus">
+        UPDATE table_message
+        SET is_read = true
+        WHERE table_id = #{tableId}
+          AND is_read = false
+          AND direction = 'TABLE_TO_STAFF'
+    </update>
+
+    <select id="selectUnreadMessageContents" resultType="string">
+        SELECT content
+        FROM table_message
+        WHERE table_id = #{tableId}
+          AND is_read = false
+          AND direction = 'TABLE_TO_STAFF'  /* 손님이 보낸 요청만 조회 */
+        ORDER BY created_at                 /* 먼저 요청한 순서대로 정렬 */
+    </select>
+
+    <!-- 테이블 번호로 단건 조회 (로그인용) -->
+    <select id="findByTableNumber" resultType="org.example.board_cafe_kiosk_2603.domain.admin.table.CafeTable">
+        SELECT id, table_number, password, status, access_token, current_session_id
+        FROM cafe_table
+        WHERE table_number = #{tableNumber}
+    </select>
+
+    <!-- Session ID 비움 처리 시 메크로 메세지 is_read = true 로 변경 -->
+    <update id="updateMessagesReadStatusBySessionId">
+        UPDATE table_message
+        SET is_read = TRUE
+        WHERE table_id = (SELECT table_id FROM table_session WHERE id = #{sessionId})
+          AND is_read = FALSE
+    </update>
+
+    <!-- 현재 활성화된 모든 메시지"를 한꺼번에 읽음 처리 (마감용) -->
+    <update id="updateAllMessagesReadStatus">
+        UPDATE table_message
+        SET is_read = TRUE
+        WHERE is_read = FALSE
+    </update>
+
+</mapper>

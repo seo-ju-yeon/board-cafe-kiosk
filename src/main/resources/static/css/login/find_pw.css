@@ -1,0 +1,326 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Pretendard', sans-serif;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    background: #f0f2f5;
+}
+
+.container {
+    background: white;
+    padding: 40px;
+    border-radius: 24px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+    width: 100%;
+    max-width: 440px;
+}
+
+.icon-box {
+    width: 56px;
+    height: 56px;
+    background: #dc3545;
+    border-radius: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 18px;
+    color: white;
+}
+
+h2 {
+    text-align: center;
+    font-size: 1.5rem;
+    color: #111;
+    margin-bottom: 6px;
+}
+
+.subtitle {
+    text-align: center;
+    color: #888;
+    font-size: 0.88rem;
+    margin-bottom: 28px;
+}
+
+/* 단계 표시 */
+.steps {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-bottom: 28px;
+}
+
+.step {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+}
+
+.step-circle {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: #e0e0e0;
+    color: #999;
+    font-weight: 700;
+    font-size: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s;
+}
+
+/* 현재 활성화된 단계는 빨간색 */
+.step-circle.active {
+    background: #dc3545;
+    color: white;
+}
+
+/* 완료된 단계는 빨간색 */
+.step-circle.done {
+    background: #28a745;
+    color: white;
+}
+
+.step-label {
+    font-size: 11px;
+    color: #999;
+    white-space: nowrap;
+}
+
+.step-label.active {
+    color: #dc3545;
+    font-weight: 600;
+}
+
+.step-label.done {
+    color: #28a745;
+}
+
+.step-line {
+    width: 48px;
+    height: 2px;
+    background: #e0e0e0;
+    margin-bottom: 18px;
+    transition: background 0.3s;
+}
+
+.step-line.done {
+    background: #28a745;
+}
+
+/* 폼 요소 */
+.form-group {
+    margin-bottom: 18px;
+    text-align: left;
+}
+
+label {
+    display: block;
+    margin-bottom: 6px;
+    color: #555;
+    font-weight: 600;
+    font-size: 0.85rem;
+}
+
+input[type="text"],
+input[type="email"] {
+    width: 100%;
+    padding: 13px 14px;
+    border: 1px solid #e1e4e8;
+    border-radius: 12px;
+    background: #f8f9fa;
+    font-size: 0.95rem;
+    box-sizing: border-box;
+    outline: none;
+    transition: border-color 0.2s;
+}
+
+input:focus {
+    border-color: #dc3545;
+    background: #fff;
+}
+
+input[readonly] {
+    background: #f0f2f5;
+    color: #888;
+    cursor: not-allowed;
+}
+
+input.input-error {
+    border-color: #dc3545;
+}
+
+/* 에러 메시지 스타일 */
+.field-error {
+    font-size: 0.78rem;
+    color: #dc3545;
+    margin-top: 5px;
+    display: none;
+}
+
+.field-hint {
+    font-size: 0.78rem;
+    color: #aaa;
+    margin-top: 5px;
+}
+
+.input-row {
+    display: flex;
+    gap: 8px;
+}
+
+.input-row input {
+    flex: 1;
+}
+
+/* 타이머 */
+.timer {
+    font-size: 0.82rem;
+    color: #dc3545;
+    font-weight: 700;
+    margin-top: 6px;
+    display: none;
+}
+
+/* 타이머 깜빡임 애니메이션: 1분 미만일 때 작용 */
+.timer.expiring {
+    animation: blink 0.8s step-start infinite;
+}
+
+@keyframes blink {
+    50% {
+        opacity: 0.3;
+    }
+}
+
+/* 버튼 */
+.btn {
+    padding: 12px 16px;
+    border: none;
+    border-radius: 12px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.2s;
+    white-space: nowrap;
+}
+
+.btn:disabled {
+    background: #ccc !important;
+    cursor: not-allowed;
+}
+
+.btn-primary {
+    background: #dc3545;
+    color: white;
+}
+
+.btn-primary:hover:not(:disabled) {
+    background: #c82333;
+}
+
+.btn-secondary {
+    background: #6c757d;
+    color: white;
+}
+
+.btn-secondary:hover:not(:disabled) {
+    background: #5a6268;
+}
+
+.btn-success {
+    background: #28a745;
+    color: white;
+}
+
+.btn-success:hover:not(:disabled) {
+    background: #218838;
+}
+
+.btn-full {
+    width: 100%;
+    padding: 14px;
+    font-size: 1rem;
+    margin-top: 6px;
+}
+
+/* 메시지 */
+#globalMsg {
+    border-radius: 10px;
+    padding: 11px 14px;
+    font-size: 0.85rem;
+    margin-bottom: 16px;
+    display: none;
+    text-align: left;
+}
+
+#globalMsg.error {
+    background: #fdf2f2;
+    color: #721c24;
+    border: 1px solid #f5c6cb;
+}
+
+#globalMsg.success {
+    background: #d4edda;
+    color: #155724;
+    border: 1px solid #c3e6cb;
+}
+
+#globalMsg.info {
+    background: #d1ecf1;
+    color: #0c5460;
+    border: 1px solid #bee5eb;
+}
+
+/* 패널: 기본적으로 숨기고, active가 붙은 것만 보여줌 */
+.panel {
+    display: none;
+}
+
+.panel.active {
+    display: block;
+}
+
+.back-link {
+    display: block;
+    text-align: center;
+    margin-top: 14px;
+    color: #aaa;
+    font-size: 0.82rem;
+    cursor: pointer;
+    text-decoration: underline;
+}
+
+.back-link:hover {
+    color: #555;
+}
+
+/* 완료 화면 */
+.complete-box {
+    border-radius: 12px;
+    padding: 18px;
+    margin-bottom: 14px;
+    font-size: 0.9rem;
+    line-height: 1.8;
+}
+
+.complete-box.success {
+    background: #d4edda;
+    color: #155724;
+    border: 1px solid #c3e6cb;
+}
+
+.complete-box.info {
+    background: #d1ecf1;
+    color: #0c5460;
+    border: 1px solid #bee5eb;
+    font-size: 0.82rem;
+}

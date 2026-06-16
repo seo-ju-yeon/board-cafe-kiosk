@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.example.board_cafe_kiosk_2603.mapper.kiosk.cart.CartMapper">
+
+    <!-- tableNumber(표시 번호) → cafe_table.id(PK) 변환 -->
+    <select id="findCafeTableIdByTableNumber"
+            resultType="java.lang.Integer">
+        SELECT id
+        FROM cafe_table
+        WHERE table_number = #{tableNumber}
+        LIMIT 1
+    </select>
+
+    <!-- tableId(cafe_table.id)로 장바구니 조회 -->
+    <select id="findByTableId"
+            resultType="org.example.board_cafe_kiosk_2603.domain.kiosk.cart.Cart">
+        SELECT id, table_id, updated_at
+        FROM cart
+        WHERE table_id = #{tableId}
+    </select>
+
+    <!-- 장바구니 생성 (PK 반환) -->
+    <insert id="insert"
+            useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO cart (table_id)
+        VALUES (#{tableId})
+    </insert>
+
+    <!-- 장바구니 삭제 -->
+    <delete id="deleteByTableId">
+        DELETE FROM cart
+        WHERE table_id = #{tableId}
+    </delete>
+
+    <!-- updated_at 갱신 -->
+    <update id="updateTimestamp">
+        UPDATE cart
+        SET updated_at = CURRENT_TIMESTAMP
+        WHERE id = #{cartId}
+    </update>
+
+</mapper>

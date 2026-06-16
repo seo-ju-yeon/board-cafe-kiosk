@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <title>결제 실패 - Board Game Cafe</title>
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <link rel="stylesheet" th:href="@{/css/kiosk/toss_fail.css}">
+</head>
+<body>
+<div class="container">
+  <i data-lucide="circle-x" class="fail-icon"></i>
+  <h1>결제 실패</h1>
+
+  <div class="error-msg"
+       th:text="${errorMessage} ?: '결제가 취소되거나 실패했습니다.'">
+    결제가 취소되거나 실패했습니다.
+  </div>
+
+  <div class="button-group">
+    <button class="retry-btn" onclick="retryPayment()" th:text="${retryButtonText} ?: '다시 시도'">다시 시도</button>
+    <button class="back-btn"  onclick="goMenu()" th:text="${backButtonText} ?: '메뉴로 이동'">메뉴로 이동</button>
+  </div>
+</div>
+
+<script th:inline="javascript">
+  lucide.createIcons({ attrs: { 'stroke-width': 2.5 } });
+  const tableNumber = /*[[${tableNumber}]]*/ '1';
+  const checkoutSource = /*[[${checkoutSource}]]*/ 'kiosk';
+  const retryUrl = /*[[${retryUrl}]]*/ `/kiosk/checkout?tableNumber=${tableNumber}`;
+  const backUrl = /*[[${backUrl}]]*/ `/kiosk/drinks?tableNumber=${tableNumber}`;
+
+</script>
+<script th:src="@{/js/kiosk/toss_fail.js}"></script>
+</body>
+</html>
+

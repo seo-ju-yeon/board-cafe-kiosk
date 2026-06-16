@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Table Setup - Kiosk</title>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link rel="stylesheet" th:href="@{/css/login/kiosk_login.css}">
+</head>
+<body>
+
+<div class="login-card">
+    <div class="icon-box"><i data-lucide="monitor"></i></div>
+    <h2>Table Setup</h2>
+    <p class="subtitle">키오스크 초기화 및 테이블 연결</p>
+
+    <!-- 시연용 데이터 섹션 -->
+    <div class="demo-container">
+        <div class="demo-label">
+            시연용 빠른 설정
+        </div>
+        <div class="demo-grid">
+            <!-- 주요 테이블 바로 선택 -->
+            <button type="button" class="demo-btn" onclick="quickSetup('1', '1111')">
+                <span class="role-box status-active">추천 시연</span>
+                <span class="acc-info">No. 1 / 1111</span>
+            </button>
+            <button type="button" class="demo-btn" onclick="quickSetup('12', '1012')">
+                <span class="role-box status-active">추천 시연</span>
+                <span class="acc-info">No. 12 / 1012</span>
+            </button>
+
+            <!-- 나머지 테이블 선택기 -->
+            <div class="demo-selector full-width">
+                <select id="quickSelect" onchange="handleQuickSelect(this)">
+                    <option value="">기타 테이블 번호 선택 (1~12)</option>
+                    <option value="2|2222">테이블 2 (2222)</option>
+                    <option value="3|3333">테이블 3 (3333)</option>
+                    <option value="4|4444">테이블 4 (4444)</option>
+                    <option value="5|5555">테이블 5 (5555)</option>
+                    <option value="6|6666">테이블 6 (6666)</option>
+                    <option value="7|7777">테이블 7 (7777)</option>
+                    <option value="8|8888">테이블 8 (8888)</option>
+                    <option value="9|9999">테이블 9 (9999)</option>
+                    <option value="10|1010">테이블 10 (1010)</option>
+                    <option value="11|1011">테이블 11 (1011)</option>
+                </select>
+            </div>
+        </div>
+    </div>
+
+    <!-- 에러 메시지 -->
+    <div th:if="${param.error}" class="error-msg">
+        <i data-lucide="alert-circle" size="16"></i>
+        <span>테이블 번호 혹은 비밀번호가 일치하지 않습니다.</span>
+    </div>
+
+    <form th:action="@{/kiosk/login-process}" method="post">
+        <div class="input-group">
+            <span class="label">Table Number</span>
+            <div class="input-wrapper">
+                <input type="number" name="tableNumber" id="tableNumber" placeholder="테이블 번호 (1-12)" min="1" max="12" required>
+            </div>
+        </div>
+
+        <div class="input-group">
+            <span class="label">Admin Password</span>
+            <div class="input-wrapper">
+                <input type="password" name="password" id="password" placeholder="관리자 비밀번호 입력" required>
+            </div>
+        </div>
+
+        <input type="hidden" name="remember-me" value="true"/>
+
+        <button type="submit" class="btn-primary">Initialize Table</button>
+    </form>
+
+    <div class="admin-options">
+        <p class="footer-text">본 화면은 스태프 전용 설정 페이지입니다.</p>
+    </div>
+</div>
+
+<script>
+    lucide.createIcons();
+
+    // 버튼 클릭 시 입력
+    function quickSetup(num, pw) {
+        document.getElementById('tableNumber').value = num;
+        document.getElementById('password').value = pw;
+        document.getElementById('tableNumber').focus();
+    }
+
+    // 셀렉트 박스 변경 시 입력
+    function handleQuickSelect(select) {
+        if(select.value) {
+            const [num, pw] = select.value.split('|');
+            quickSetup(num, pw);
+        }
+    }
+</script>
+</body>
+</html>

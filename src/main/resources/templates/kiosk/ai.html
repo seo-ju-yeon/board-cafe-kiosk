@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BOARD WAVE - AI Guide Kiosk</title>
+    <link rel="icon" href="data:,">
+    <script src="https://unpkg.com/hangul-js"></script>
+    <link rel="stylesheet" href="/css/kiosk/ai.css">
+</head>
+<body>
+
+<div class="kiosk-frame">
+
+    <div class="ai-guide-zone" id="aiZone">
+        <div class="ai-character" id="char">
+            <div class="eyes">
+                <div class="eye"></div>
+                <div class="eye"></div>
+            </div>
+        </div>
+
+        <div class="stt-bubble" id="sttDisplay">
+            🎮 게임에 대해 궁금한 점을 물어보세요!<br>
+            <small style="color:#999; font-weight:400;">"스플렌더 설명해줘" 처럼 말씀해 주세요</small>
+        </div>
+
+        <div class="countdown-bar-wrap" id="countdownWrap">
+            <div class="countdown-bar" id="countdownBar"></div>
+        </div>
+
+        <button class="mic-btn" id="micBtn" onclick="toggleListening()" title="마이크 버튼">🎤</button>
+        <audio id="audioPlayer"></audio>
+    </div>
+
+    <div class="content-zone">
+
+        <div class="content-header">
+            🔍 AI 가이드의 설명
+            <div class="spinner" id="spinner"></div>
+        </div>
+
+        <details class="settings-panel" id="settingsPanel">
+            <summary>⚙️ AI 목소리 / 속도 설정</summary>
+            <div class="settings-body">
+                <div class="setting-row">
+                    <span class="setting-label">목소리</span>
+                    <div class="voice-btns" id="voiceBtns">
+                        <button class="voice-btn selected" data-voice="NOVA" onclick="selectVoice(this)">Nova (기본)
+                        </button>
+                        <button class="voice-btn" data-voice="ALLOY" onclick="selectVoice(this)">Alloy</button>
+                        <button class="voice-btn" data-voice="SHIMMER" onclick="selectVoice(this)">Shimmer</button>
+                        <button class="voice-btn" data-voice="ECHO" onclick="selectVoice(this)">Echo</button>
+                        <button class="voice-btn" data-voice="FABLE" onclick="selectVoice(this)">Fable</button>
+                        <button class="voice-btn" data-voice="ONYX" onclick="selectVoice(this)">Onyx</button>
+                    </div>
+                </div>
+                <div class="setting-row">
+                    <span class="setting-label">속도</span>
+                    <input type="range" class="speed-slider" id="speedSlider"
+                           min="0.5" max="2.0" step="0.1" value="1.0"
+                           oninput="updateSpeedLabel(this.value)">
+                    <span class="speed-value" id="speedValue">1.0x</span>
+                </div>
+            </div>
+        </details>
+
+        <div id="displayArea" style="flex:1;">
+            <div id="emptyMsg">
+                BOARD WAVE AI가 게임 사용법에 대한 <br>
+                궁금한 점을 해결해 드립니다! <br><br>
+                왼쪽 🎤 버튼을 눌러 질문해보세요.<br>
+                질문이 끝났을 경우 다시 한번 눌러주세요! <br><br>
+                메뉴로 돌아가고 싶으실 경우 '확인 완료' 버튼을 눌러주세요!
+            </div>
+        </div>
+
+        <div class="feedback-box" id="feedbackBox">
+            <div class="feedback-title">💡 제가 잘못 이해했나요?</div>
+            <p class="feedback-hint">아래 키보드로 질문을 입력하면 다시 답변해드릴게요.</p>
+
+            <div class="virtual-input" id="virtualInputDisplay" onclick="openVirtualKeyboard()">
+                <span id="inputText" style="color:#999;">여기를 눌러 입력하세요...</span>
+            </div>
+
+            <div class="vk-wrap" id="vkWrap">
+                <div id="vkRows"></div>
+                <div class="vk-row">
+                    <button class="vk-key wide" id="langBtn" onclick="toggleLang()">한/EN</button>
+                    <button class="vk-key space" onclick="vkType(' ')">스페이스</button>
+                    <button class="vk-key del" onclick="vkDel()">⌫ 삭제</button>
+                    <button class="vk-key confirm-key" onclick="applyFeedback()">✓ 전송</button>
+                </div>
+            </div>
+
+            <button class="btn btn-confirm"
+                    style="width:100%; margin-top:10px; padding:12px;"
+                    onclick="applyFeedback()">
+                ✏️ 다시 질문하기
+            </button>
+        </div>
+
+        <div class="action-btns">
+            <button class="btn btn-retry" onclick="toggleFeedback()">설명 수정 요청</button>
+            <button class="btn btn-confirm" onclick="resetAll()">확인 완료</button>
+        </div>
+    </div>
+</div>
+
+<script src="/js/kiosk/ai.js">
+
+</script>
+</body>
+</html>

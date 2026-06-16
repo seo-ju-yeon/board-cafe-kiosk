@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="ko"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/admin_layout}">
+
+<head>
+    <title>My Profile</title>
+    <th:block layout:fragment="head-extra">
+        <link rel="stylesheet" th:href="@{/css/admin/staff_profile.css}">
+    </th:block>
+</head>
+
+<body>
+<th:block layout:fragment="content">
+    <div class="profile-card">
+        <div class="profile-header">
+            <h2 th:text="${manager.name} + ' 님, 안녕하세요'">홍길동 님, 안녕하세요</h2>
+            <p style="color: var(--text-gray); font-size: 14px;">내 정보를 확인하고 수정할 수 있습니다.</p>
+        </div>
+
+        <form id="profileForm">
+            <div class="form-section">
+                <span class="section-title">기본 정보</span>
+                <div class="form-group">
+                    <label>아이디 (수정 불가)</label>
+                    <input type="text" th:value="${manager.loginId}" class="readonly-input" readonly>
+                </div>
+                <div class="form-group">
+                    <label>이름</label>
+                    <input type="text" id="userName" th:value="${manager.name}" placeholder="수정할 이름을 입력하세요">
+                </div>
+                <div class="form-group">
+                    <label>권한</label>
+                    <input type="text" th:value="${manager.role}" class="readonly-input" readonly>
+                </div>
+            </div>
+
+            <div class="form-section">
+                <span class="section-title">비밀번호 변경</span>
+                <p style="font-size: 12px; color: #FF3B30; margin-bottom: 10px;">* 변경을 원하실 때만 입력하세요.</p>
+                <div class="form-group">
+                    <label>새 비밀번호</label>
+                    <input type="password" id="newPassword" placeholder="최소 4자 이상">
+                </div>
+                <div class="form-group">
+                    <label>비밀번호 확인</label>
+                    <input type="password" id="confirmPassword" placeholder="한 번 더 입력하세요">
+                </div>
+            </div>
+
+            <div class="form-section" id="otpSection" style="display:none;">
+                <span class="section-title">본인 인증</span>
+                <p style="font-size: 12px; color: #86868b; margin-bottom: 10px;">
+                    등록된 이메일로 발송된 인증번호를 입력하세요.
+                </p>
+                <div class="form-group" style="display:flex; gap:10px;">
+                    <input type="text" id="otpInput" placeholder="인증번호 6자리" maxlength="6"
+                           style="flex:1; letter-spacing: 4px; text-align:center;">
+                    <button type="button" onclick="sendOtp()" class="btn-otp-send">
+                        인증번호 받기
+                    </button>
+                </div>
+                <button type="button" onclick="submitWithOtp()" class="btn-otp-submit">
+                    인증 후 저장
+                </button>
+            </div>
+
+            <button type="button" id="initialSaveBtn" class="btn-save" onclick="updateProfile()">저장하기</button>
+        </form>
+    </div>
+</th:block>
+
+<th:block layout:fragment="scripts">
+    <script th:src="@{/js/admin/staff_profile.js}"></script>
+</th:block>
+</body>
+</html>

@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.example.board_cafe_kiosk_2603.mapper.kiosk.cart.CartItemMapper">
+
+    <!-- 장바구니 항목 목록 조회 (menu JOIN) -->
+    <select id="findByCartId"
+            resultType="org.example.board_cafe_kiosk_2603.domain.kiosk.cart.CartItem">
+        SELECT ci.id,
+               ci.cart_id,
+               ci.menu_id,
+               ci.quantity,
+               m.name  AS menu_name,
+               m.price AS menu_price
+        FROM cart_item ci
+        JOIN menu m ON ci.menu_id = m.id
+        WHERE ci.cart_id = #{cartId}
+    </select>
+
+    <!-- cart_id + menu_id 로 단건 조회 -->
+    <select id="findByCartIdAndMenuId"
+            resultType="org.example.board_cafe_kiosk_2603.domain.kiosk.cart.CartItem">
+        SELECT id, cart_id, menu_id, quantity
+        FROM cart_item
+        WHERE cart_id = #{cartId}
+          AND menu_id = #{menuId}
+    </select>
+
+    <!-- 메뉴명 + 가격으로 menu.id 조회 -->
+    <select id="findMenuIdByNameAndPrice"
+            resultType="java.lang.Integer">
+        SELECT id
+        FROM menu
+        WHERE name       = #{name}
+          AND price      = #{price}
+          AND is_deleted = FALSE
+        LIMIT 1
+    </select>
+
+    <select id="countGameMenuByMenuId" resultType="int">
+        SELECT COUNT(*)
+        FROM menu m
+        JOIN game g ON g.name = m.name
+        WHERE m.id = #{menuId}
+          AND m.is_deleted = FALSE
+          AND m.is_available = TRUE
+          AND g.is_active = TRUE
+    </select>
+
+    <select id="countAvailableGameStockByMenuId" resultType="int">
+        SELECT COUNT(*)
+        FROM menu m
+        JOIN game g ON g.name = m.name
+        JOIN game_item gi ON gi.game_id = g.id
+        WHERE m.id = #{menuId}
+          AND m.is_deleted = FALSE
+          AND m.is_available = TRUE
+          AND g.is_active = TRUE
+          AND gi.status = 'NORMAL'
+    </select>
+
+    <!-- 항목 추가 (PK 반환) -->
+    <insert id="insert"
+            useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO cart_item (cart_id, menu_id, quantity)
+        VALUES (#{cartId}, #{menuId}, #{quantity})
+    </insert>
+
+    <!-- 수량 변경 -->
+    <update id="updateQuantity">
+        UPDATE cart_item
+        SET quantity = #{quantity}
+        WHERE cart_id = #{cartId}
+          AND menu_id = #{menuId}
+    </update>
+
+    <!-- 단건 삭제 -->
+    <delete id="deleteByCartIdAndMenuId">
+        DELETE FROM cart_item
+        WHERE cart_id = #{cartId}
+          AND menu_id = #{menuId}
+    </delete>
+
+    <!-- 전체 삭제 (장바구니 비우기) -->
+    <delete id="deleteAllByCartId">
+        DELETE FROM cart_item
+        WHERE cart_id = #{cartId}
+    </delete>
+
+</mapper>

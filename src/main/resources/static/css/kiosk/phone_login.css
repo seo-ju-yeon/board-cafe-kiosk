@@ -1,0 +1,125 @@
+body {
+    margin: 0; padding: 0;
+    font-family: 'Pretendard', sans-serif;
+    background-color: #f0f2f5;
+    display: flex; align-items: center; justify-content: center;
+    height: 100vh; overflow: hidden;
+}
+
+.container {
+    text-align: center;
+    width: 100%;
+    max-width: 500px;
+}
+
+.icon-header {
+    width: 80px; height: 80px;
+    background-color: #007bff;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    margin: 0 auto 20px;
+    color: white;
+}
+
+h1 { font-size: 2rem; margin: 10px 0; color: #111; }
+.subtitle { color: #888; margin-bottom: 30px; font-size: 1rem; line-height: 1.5; }
+
+.phone-display {
+    background: white;
+    border-radius: 20px;
+    padding: 25px;
+    font-size: 2.2rem;
+    font-weight: bold;
+    color: #007bff;
+    margin-bottom: 30px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+    min-height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    letter-spacing: 2px;
+}
+.phone-display:empty::before {
+    content: "010-0000-0000";
+    color: #e2e4e7;
+}
+
+.keypad {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 15px;
+    margin-bottom: 30px;
+}
+
+.key {
+    background: white;
+    border: none;
+    border-radius: 15px;
+    padding: 20px;
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: #333;
+    cursor: pointer;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.03);
+    transition: all 0.1s ease;
+}
+
+.key:active {
+    background: #eef6ff;
+    transform: scale(0.95);
+}
+
+.key.special {
+    background: #f8f9fa;
+    color: #888;
+    font-size: 1.1rem;
+}
+
+/* --- 하단 버튼 그룹 수정 --- */
+.button-group {
+    display: flex;
+    flex-direction: row; /* 가로 배치 */
+    gap: 15px;
+    padding: 0 5px;
+}
+
+.action-btn {
+    flex: 1; /* 동일한 너비 할당 */
+    padding: 22px;
+    border: none;
+    border-radius: 15px;
+    font-size: 1.1rem;
+    font-weight: bold;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    transition: all 0.3s ease;
+}
+
+/* 확인 버튼 스타일 */
+.submit-btn {
+    background-color: #e2e4e7;
+    color: #a0a3a7;
+    cursor: not-allowed;
+    flex: 1.5; /* 확인 버튼을 조금 더 크게 강조 */
+}
+
+.submit-btn.active {
+    background-color: #007bff;
+    color: white;
+    cursor: pointer;
+    box-shadow: 0 4px 15px rgba(0, 123, 255, 0.3);
+}
+
+/* 스킵 버튼 스타일 */
+.skip-btn {
+    background-color: #ffffff;
+    color: #666;
+    border: 1px solid #ddd;
+}
+
+.skip-btn:active {
+    background-color: #f8f9fa;
+}

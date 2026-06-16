@@ -1,0 +1,227 @@
+body {
+    margin: 0;
+    padding: 0;
+    font-family: 'Pretendard', sans-serif;
+    background-color: #f0f2f5;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100vh;
+}
+
+.auth-card {
+    background: white;
+    width: 460px;
+    padding: 40px;
+    border-radius: 24px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+    text-align: center;
+}
+
+.icon-box {
+    width: 60px;
+    height: 60px;
+    background-color: #2471a3;
+    border-radius: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 20px;
+    color: white;
+}
+
+h2 {
+    margin: 0;
+    font-size: 1.6rem;
+    color: #111;
+}
+
+.subtitle {
+    color: #888;
+    margin: 10px 0 24px;
+    font-size: 0.9rem;
+}
+
+.role-badge {
+    display: inline-block;
+    background: #eaf3fb;
+    color: #185fa5;
+    border: 1px solid #b5d4f4;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    padding: 3px 12px;
+    margin-bottom: 16px;
+}
+
+.info-box {
+    background: #eaf3fb;
+    border: 1px solid #b5d4f4;
+    color: #185fa5;
+    border-radius: 10px;
+    padding: 12px 16px;
+    font-size: 0.85rem;
+    margin-bottom: 24px;
+    text-align: left;
+}
+
+/* ── 상태 메시지 (JS로 제어) ── */
+#statusMsg {
+    border-radius: 8px;
+    padding: 10px 14px;
+    font-size: 0.85rem;
+    margin-bottom: 16px;
+    display: none;
+    text-align: left;
+}
+
+#statusMsg.success {
+    background: #d4edda;
+    color: #155724;
+    border: 1px solid #c3e6cb;
+}
+
+#statusMsg.error {
+    background: #fdf2f2;
+    color: #721c24;
+    border: 1px solid #f5c6cb;
+}
+
+.input-group {
+    text-align: left;
+    margin-bottom: 20px;
+}
+
+.label {
+    display: block;
+    font-size: 0.85rem;
+    color: #666;
+    margin-bottom: 8px;
+    font-weight: 600;
+}
+
+/* 이메일 + 인증 요청 버튼 한 줄 */
+.email-row {
+    display: flex;
+    gap: 8px;
+}
+
+.email-row input {
+    flex: 1;
+}
+
+input[type="email"],
+input[type="text"] {
+    width: 100%;
+    padding: 14px;
+    border: 1px solid #e1e4e8;
+    border-radius: 12px;
+    background-color: #f8f9fa;
+    font-size: 1rem;
+    box-sizing: border-box;
+    outline: none;
+    transition: border-color 0.2s;
+}
+
+input:focus {
+    border-color: #2471a3;
+    background-color: #fff;
+}
+
+input[readonly] {
+    background: #f0f2f5;
+    color: #888;
+    cursor: not-allowed;
+}
+
+input.input-error {
+    border-color: #e74c3c;
+}
+
+.field-hint {
+    font-size: 0.78rem;
+    color: #aaa;
+    margin-top: 5px;
+}
+
+.field-error {
+    font-size: 0.78rem;
+    color: #e74c3c;
+    margin-top: 5px;
+    display: none;
+}
+
+/* 타이머 */
+.timer {
+    font-size: 0.85rem;
+    color: #e74c3c;
+    font-weight: 600;
+    margin-top: 6px;
+    display: none;
+}
+
+/* OTP 입력 섹션 — 인증 요청 성공 후 노출 */
+#otpSection {
+    display: none;
+}
+
+.btn-send {
+    padding: 14px 16px;
+    background-color: #2471a3;
+    color: white;
+    border: none;
+    border-radius: 12px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: background-color 0.2s;
+}
+
+.btn-send:hover:not(:disabled) {
+    background-color: #1a5c85;
+}
+
+.btn-send:disabled {
+    background-color: #ccc;
+    cursor: not-allowed;
+}
+
+.btn-primary {
+    width: 100%;
+    padding: 16px;
+    background-color: #2471a3;
+    color: white;
+    border: none;
+    border-radius: 12px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    margin-bottom: 10px;
+    transition: background-color 0.2s;
+}
+
+.btn-primary:hover:not(:disabled) {
+    background-color: #1a5c85;
+}
+
+.btn-primary:disabled {
+    background-color: #ccc;
+    cursor: not-allowed;
+}
+
+.btn-secondary {
+    width: 100%;
+    padding: 14px;
+    background-color: #f0f2f5;
+    color: #555;
+    border: none;
+    border-radius: 12px;
+    font-size: 0.95rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.btn-secondary:hover {
+    background-color: #e2e6ea;
+}

@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.example.board_cafe_kiosk_2603.mapper.kiosk.payment.PaymentMapper">
+
+    <!-- 결제 레코드 생성 (PK 반환) -->
+    <insert id="insert"
+            useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO payment (session_id, table_number, status, final_amount, payment_key, order_id_toss, method, raw_response, approved_at, paid_at)
+        VALUES (#{sessionId}, #{tableNumber}, #{status}, #{finalAmount}, #{paymentKey}, #{orderIdToss}, #{method}, #{rawResponse}, #{approvedAt}, #{paidAt})
+        ON DUPLICATE KEY UPDATE
+            table_number  = VALUES(table_number),
+            status        = VALUES(status),
+            final_amount  = VALUES(final_amount),
+            payment_key   = VALUES(payment_key),
+            order_id_toss = VALUES(order_id_toss),
+            method        = VALUES(method),
+            raw_response  = VALUES(raw_response),
+            approved_at   = VALUES(approved_at),
+            paid_at       = VALUES(paid_at)
+    </insert>
+
+    <!-- 결제 키로 조회 (중복 결제 방지) -->
+    <select id="findByPaymentKey"
+            resultType="org.example.board_cafe_kiosk_2603.domain.kiosk.payment.Payment">
+        SELECT id, session_id, table_number, status, final_amount, payment_key, order_id_toss, method, raw_response, approved_at, paid_at
+        FROM payment
+        WHERE payment_key = #{paymentKey}
+        LIMIT 1
+    </select>
+
+    <!-- 토스용 주문번호로 조회 -->
+    <select id="findByOrderIdToss"
+            resultType="org.example.board_cafe_kiosk_2603.domain.kiosk.payment.Payment">
+        SELECT id, session_id, table_number, status, final_amount, payment_key, order_id_toss, method, raw_response, approved_at, paid_at
+        FROM payment
+        WHERE order_id_toss = #{orderIdToss}
+        LIMIT 1
+    </select>
+
+    <!-- 세션 ID로 조회 -->
+    <select id="findBySessionId"
+            resultType="org.example.board_cafe_kiosk_2603.domain.kiosk.payment.Payment">
+        SELECT id, session_id, table_number, status, final_amount, payment_key, order_id_toss, method, raw_response, approved_at, paid_at
+        FROM payment
+        WHERE session_id = #{sessionId}
+        LIMIT 1
+    </select>
+
+    <!-- 결제 상태 업데이트 -->
+    <update id="updateStatus">
+        UPDATE payment
+        SET status  = #{status},
+            paid_at = CURRENT_TIMESTAMP
+        WHERE id = #{id}
+    </update>
+
+    <!-- 결제 ID로 조회 -->
+    <select id="findById"
+            resultType="org.example.board_cafe_kiosk_2603.domain.kiosk.payment.Payment">
+        SELECT id, session_id, table_number, status, final_amount, payment_key, order_id_toss, method, raw_response, approved_at, paid_at
+        FROM payment
+        WHERE id = #{id}
+        LIMIT 1
+    </select>
+
+</mapper>

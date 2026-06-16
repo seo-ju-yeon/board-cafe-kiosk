@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Board Game Cafe - Role Selection</title>
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <link rel="stylesheet" th:href="@{/css/common/login.css}">
+</head>
+<body>
+
+<div class="header">
+  <div class="portfolio-label">Project Portfolio</div>
+  <h1>Board Game Cafe</h1>
+  <p>시작하려면 역할을 선택하세요</p>
+</div>
+
+<div class="container">
+  <!-- 고객 키오스크 -->
+  <a href="/kiosk/login" class="card">
+    <div class="icon-wrapper">
+      <i data-lucide="gamepad-2" style="width: 40px; height: 40px;"></i>
+    </div>
+    <h2>고객 키오스크</h2>
+    <p>테이블에서 주문하고<br>게임을 선택하세요</p>
+
+    <div class="feature-tags">
+      <span>장바구니/결제</span>
+      <span>실시간 주문 추적</span>
+      <span>주문/상세 조회</span>
+      <span>AI 게임 설명</span>
+      <span>인원추가</span>
+      <span>직원호출</span>
+      <span>요금제 선택</span>
+      <span>스크린 세이버</span>
+    </div>
+  </a>
+
+  <!-- 직원/관리자 -->
+  <a href="/admin/login" class="card">
+    <div class="icon-wrapper" style="background-color: #343a40;">
+      <i data-lucide="users" style="width: 40px; height: 40px;"></i>
+    </div>
+    <h2>직원/관리자</h2>
+    <p>테이블 상태 및<br>매장 관리</p>
+
+    <div class="feature-tags">
+      <span>테이블 현황 조회</span>
+        <span>실시간 주문제어</span>
+        <span>포인트 관리</span>
+        <span>매출 통계</span>
+        <span>상품 관리</span>
+      <span>매크로 메시지 관리</span>
+      <span>요금 정책 관리</span>
+      <span>직원관리</span>
+    </div>
+  </a>
+</div>
+
+<!-- 포트폴리오 하단 캡션 -->
+<div class="portfolio-footer">
+  <p>본 시스템은 보드게임 카페 운영 효율화를 위한 포트폴리오용 프로젝트입니다.</p>
+</div>
+
+<div class="help-btn">?</div>
+
+<script>
+  lucide.createIcons();
+</script>
+</body>
+</html>

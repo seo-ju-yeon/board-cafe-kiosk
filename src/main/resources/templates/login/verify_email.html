@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>2차 인증 - 이메일 확인</title>
+    <link rel="stylesheet" th:href="@{/css/login/verify_email.css}">
+</head>
+<body>
+<div class="auth-container">
+    <h2>🔐 2차 인증</h2>
+    <p class="subtitle">등록된 이메일 주소를 입력해주세요</p>
+
+    <div class="info-box">
+        📧 회원가입 시 등록한 이메일 주소를 정확히 입력해주세요.
+    </div>
+
+    <div id="globalError" class="error-message">
+        이메일 인증에 실패했습니다. 다시 시도해주세요.
+    </div>
+
+    <form id="emailForm" action="/login/verifyEmail" method="post">
+        <div class="form-group">
+            <label for="email">이메일 주소</label>
+            <input type="email" id="email" name="email" placeholder="example@email.com" required autofocus>
+            <div class="field-error" id="emailError"></div>
+        </div>
+
+        <button type="submit" class="btn btn-primary" id="submitBtn">확인</button>
+        <button type="button" class="btn btn-secondary" id="cancelBtn">취소</button>
+    </form>
+</div>
+<script th:src="@{/js/login/verify_email.js}"></script>
+</body>
+</html>
