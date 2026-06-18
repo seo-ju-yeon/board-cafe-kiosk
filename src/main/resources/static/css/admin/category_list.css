@@ -6,7 +6,7 @@
     --border-color: #e2e8f0;
 }
 
-/* ── 공통 레이아웃 ── */
+/* 공통 레이아웃 */
 .header-flex {
     display: flex;
     justify-content: space-between;
@@ -20,7 +20,7 @@
     color: var(--text-dark);
 }
 
-/* ── 상단 탭 네비게이션 (product_menu.html 동일 구조) ── */
+/* 상단 탭 */
 .tab-container {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
@@ -55,7 +55,7 @@
     background: #e2e8f0;
 }
 
-/* ── 리스트 카드 ── */
+/* 리스트 카드 */
 .list-card {
     background: white;
     border-radius: 15px;
@@ -126,33 +126,32 @@
 }
 
 /* 액션 버튼 */
-/* ── 액션 버튼 그룹 (가로 정렬 보장) ── */
 .action-group {
     display: flex;
-    gap: 10px;               /* 버튼 사이 간격 */
+    gap: 10px;
     justify-content: flex-end;
     align-items: center;
-    white-space: nowrap;     /* 줄바꿈 강제 방지 */
+    white-space: nowrap;
 }
 
 .btn-table {
-    padding: 8px 14px;       /* 여백 소폭 조정 */
+    padding: 8px 14px;
     border-radius: 8px;
     border: 1px solid var(--border-color);
     background: white;
     cursor: pointer;
     font-size: 13px;
     font-weight: 600;
-    display: inline-flex;    /* 내부 아이콘과 텍스트 가로 정렬 */
+    display: inline-flex;
     align-items: center;
     justify-content: center;
     gap: 6px;
     transition: all 0.2s;
     text-decoration: none;
-    min-width: 80px;         /* 버튼의 최소 너비를 맞춰서 균형감 부여 */
+    min-width: 80px;
 }
 
-/* 호버 효과 강화 */
+/* 버튼 호버 */
 .btn-table:hover {
     background: #f8fafc;
     transform: translateY(-2px);
@@ -179,7 +178,7 @@
     border-color: var(--danger-red);
 }
 
-/* + 새 카테고리 추가 버튼 */
+/* 카테고리 추가 버튼 */
 .btn-add-product {
     background: var(--primary-blue);
     color: white;
@@ -198,7 +197,7 @@
     padding: 40px;
 }
 
-/* ── 모달 공통 ── */
+/* 모달 */
 .modal-overlay {
     display: none;
     position: fixed;
@@ -300,7 +299,7 @@
     font-size: 14px;
 }
 
-/* ── 알림 모달 (삭제 불가, 성공) ── */
+/* 알림 모달 */
 .alert-modal-box {
     max-width: 380px;
     text-align: center;
@@ -336,7 +335,7 @@
     font-size: 14px;
 }
 
-/* ── 플래시 토스트 ── */
+/* 플래시 토스트 */
 .toast {
     position: fixed;
     bottom: 30px;
@@ -379,6 +378,7 @@
         opacity: 0;
     }
 }
+
 /* 페이징 */
 .pagination {
     display: flex;

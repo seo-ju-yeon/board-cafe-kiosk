@@ -61,7 +61,7 @@ h2 {
     align-items: center;
 }
 
-/* 아이콘을 다시 살릴 경우를 대비해 패딩 유지 */
+/* 입력 필드 */
 input {
     width: 100%;
     padding: 15px;
@@ -109,7 +109,7 @@ input:focus {
     text-decoration: underline;
 }
 
-/* 에러 메시지 스타일 추가 */
+/* 에러 메시지 */
 .error-msg {
     display: flex;
     align-items: flex-start;
@@ -124,7 +124,14 @@ input:focus {
     text-align: left;
     animation: slideDown 0.3s ease;
 }
+
 @keyframes slideDown {
-    from { opacity: 0; transform: translateY(-6px); }
-    to   { opacity: 1; transform: translateY(0); }
+    from {
+        opacity: 0;
+        transform: translateY(-6px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }

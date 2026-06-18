@@ -6,7 +6,7 @@ body {
     height: 100vh;
     overflow: hidden;
 }
-/* --- 좌측 사이드바 --- */
+/* 좌측 사이드바 */
 .sidebar-left {
     width: 168px;
     background-color: white;
@@ -49,7 +49,7 @@ body {
     bottom: auto;
 }
 
-/* --- 메인 영역 --- */
+/* 메인 영역 */
 .main-area { flex: 1; display: flex; flex-direction: column; }
 .header {
     height: 80px; background-color: white; border-bottom: 1px solid #eaeaea;
@@ -97,7 +97,7 @@ body {
     color: #f44336; border-color: #ffccbc; animation: pulse-red 1s infinite;
 }
 
-/* 새 주문 상태 박스 */
+/* 주문 상태 박스 */
 .order-status-box {
     display: flex;
     align-items: center;
@@ -172,7 +172,7 @@ body {
 @keyframes pulse-red { 0%, 100% { opacity: 1; } 50% { opacity: 0.7; } }
 .content { flex: 1; padding: 30px; overflow-y: auto; background-color: #f4f6f8; }
 
-/* 모달 및 기타 */
+/* 모달 */
 .modal-overlay {
     position: fixed; top: 0; left: 0; width: 100%; height: 100%;
     background: rgba(0, 0, 0, 0.5); display: none; align-items: center; justify-content: center; z-index: 1000;
@@ -188,7 +188,7 @@ body {
     position: fixed; bottom: 30px; right: 30px; background: #333; color: white;
     padding: 15px 25px; border-radius: 12px; z-index: 2000;
 }
-/* --- 메뉴 그리드 및 아이템 (추가된 부분) --- */
+/* 메뉴 목록 */
 .menu-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
@@ -212,7 +212,7 @@ body {
 .menu-item.sold-out {
     opacity: 0.5;
     filter: grayscale(100%);
-    pointer-events: none; /* 클릭 방지 */
+    pointer-events: none;
 }
 .menu-img-area {
     height: 180px;
@@ -255,7 +255,7 @@ body {
     color: #007bff;
 }
 .menu-price.free {
-    color: #f44336; /* FREE일 경우 빨간색 강조 */
+    color: #f44336;
 }
 .menu-info-right .add-direct-btn {
     width: 44px;
@@ -278,7 +278,7 @@ body {
     color: #9e9e9e;
 }
 
-/* --- 메뉴 그리드 --- */
+/* 메뉴 그리드 */
 .menu-grid {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
@@ -329,9 +329,8 @@ body {
 }
 .add-direct-btn:disabled { cursor: not-allowed; }
 .add-direct-btn i { width: 22px; height: 22px; }
-/* --- AI Service 버튼 전용 스타일 --- */
+/* AI 서비스 버튼 */
 .nav-btn.ai-service {
-    /* 미래지향적인 블루/시안 그라데이션 */
     background: linear-gradient(135deg, #00d2ff 0%, #3a7bd5 100%);
     color: white;
     border: none;
@@ -339,7 +338,7 @@ body {
     overflow: hidden;
 }
 
-/* AI 버튼만 살짝 더 강조하는 애니메이션 */
+/* AI 버튼 애니메이션 */
 .nav-btn.ai-service::after {
     content: '';
     position: absolute;
@@ -358,11 +357,10 @@ body {
 }
 
 .nav-btn.ai-service i {
-    /* 아이콘에 살짝 빛나는 효과 */
     filter: drop-shadow(0 0 5px rgba(255, 255, 255, 0.5));
 }
 
-/* 주황색 버튼(직원호출)과 구분되도록 간격 조정이 필요하다면 */
+/* 직원 호출 버튼 */
 .nav-group .nav-btn.orange {
     background: linear-gradient(135deg, #ff9800 0%, #f57c00 100%);
 }

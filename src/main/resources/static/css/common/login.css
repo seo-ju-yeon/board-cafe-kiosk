@@ -39,7 +39,7 @@ body {
     border-radius: 20px;
     padding: 40px 20px;
     text-align: center;
-    box-shadow: 0 10px 25px rgba(0,0,0,0.05);
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
     cursor: pointer;
     transition: transform 0.2s, box-shadow 0.2s;
     text-decoration: none;
@@ -51,7 +51,7 @@ body {
 
 .card:hover {
     transform: translateY(-8px);
-    box-shadow: 0 15px 35px rgba(0,0,0,0.1);
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
 }
 
 .icon-wrapper {
@@ -78,7 +78,7 @@ body {
     line-height: 1.5;
 }
 
-/* 하단 물음표 버튼 */
+/* 도움말 버튼 */
 .help-btn {
     position: fixed;
     bottom: 20px;
@@ -94,9 +94,7 @@ body {
     cursor: pointer;
 }
 
-/* 기존 CSS 유지 및 하단에 추가 */
-
-/* 상단 포트폴리오 라벨 */
+/* 포트폴리오 라벨 */
 .portfolio-label {
     display: inline-block;
     background-color: #007bff;
@@ -109,7 +107,7 @@ body {
     letter-spacing: 0.5px;
 }
 
-/* 카드 내 기능 태그 스타일 */
+/* 기능 태그 */
 .feature-tags {
     margin-top: 25px;
     display: flex;
@@ -131,14 +129,14 @@ body {
     transition: all 0.2s;
 }
 
-/* 호버 시 태그 포인트 컬러 변경 */
+/* 태그 호버 */
 .card:hover .feature-tags span {
     border-color: #007bff;
     color: #007bff;
     background-color: #f0f7ff;
 }
 
-/* 하단 푸터 안내 */
+/* 푸터 안내 */
 .portfolio-footer {
     margin-top: 40px;
     text-align: center;
@@ -146,12 +144,13 @@ body {
     font-size: 0.85rem;
 }
 
-/* 모바일 대응을 위한 미디어 쿼리 (선택사항) */
+/* 모바일 대응 */
 @media (max-width: 768px) {
     .container {
         flex-direction: column;
         align-items: center;
     }
+
     .card {
         width: 100%;
         max-width: 400px;

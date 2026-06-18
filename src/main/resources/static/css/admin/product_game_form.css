@@ -143,11 +143,26 @@
     transition: border-color 0.2s;
 }
 
-/* 상태별 행 색상 */
-.item-row.status-NORMAL   { background: #f0fdf4; border-color: #bbf7d0; }
-.item-row.status-RENTED   { background: #eff6ff; border-color: #bfdbfe; }
-.item-row.status-DAMAGED  { background: #fff7ed; border-color: #fed7aa; }
-.item-row.status-LOST     { background: #fef2f2; border-color: #fecaca; }
+/* 상태별 행 */
+.item-row.status-NORMAL {
+    background: #f0fdf4;
+    border-color: #bbf7d0;
+}
+
+.item-row.status-RENTED {
+    background: #eff6ff;
+    border-color: #bfdbfe;
+}
+
+.item-row.status-DAMAGED {
+    background: #fff7ed;
+    border-color: #fed7aa;
+}
+
+.item-row.status-LOST {
+    background: #fef2f2;
+    border-color: #fecaca;
+}
 
 .item-row .form-control {
     margin: 0;
@@ -162,7 +177,7 @@
     min-width: 70px;
 }
 
-/* 상태 select */
+/* 상태 선택 */
 .status-select {
     padding: 8px 10px;
     border-radius: 8px;
@@ -176,7 +191,7 @@
     background: white;
 }
 
-/* 상태 배지 (표시용) */
+/* 상태 배지 */
 .status-badge {
     padding: 4px 10px;
     border-radius: 20px;
@@ -185,10 +200,25 @@
     white-space: nowrap;
 }
 
-.badge-NORMAL  { background: #dcfce7; color: #16a34a; }
-.badge-RENTED  { background: #dbeafe; color: #2563eb; }
-.badge-DAMAGED { background: #ffedd5; color: #ea580c; }
-.badge-LOST    { background: #fee2e2; color: #dc2626; }
+.badge-NORMAL {
+    background: #dcfce7;
+    color: #16a34a;
+}
+
+.badge-RENTED {
+    background: #dbeafe;
+    color: #2563eb;
+}
+
+.badge-DAMAGED {
+    background: #ffedd5;
+    color: #ea580c;
+}
+
+.badge-LOST {
+    background: #fee2e2;
+    color: #dc2626;
+}
 
 .btn-remove-item {
     padding: 7px 12px;
@@ -208,7 +238,7 @@
     background: #fee2e2;
 }
 
-/* DAMAGED / LOST 는 삭제 버튼 비활성 */
+/* 삭제 비활성 상태 */
 .btn-remove-item:disabled {
     opacity: 0.35;
     cursor: not-allowed;

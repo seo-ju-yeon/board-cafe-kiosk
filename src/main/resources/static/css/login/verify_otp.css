@@ -64,7 +64,7 @@ h2 {
     text-align: left;
 }
 
-/* ── 상태 메시지 (JS로 제어) ── */
+/* 상태 메시지 */
 #statusMsg {
     border-radius: 8px;
     padding: 10px 14px;
@@ -99,7 +99,7 @@ h2 {
     font-weight: 600;
 }
 
-/* 이메일 + 인증 요청 버튼 한 줄 */
+/* 이메일 인증 요청 */
 .email-row {
     display: flex;
     gap: 8px;
@@ -159,7 +159,7 @@ input.input-error {
     display: none;
 }
 
-/* OTP 입력 섹션 — 인증 요청 성공 후 노출 */
+/* OTP 입력 섹션 */
 #otpSection {
     display: none;
 }

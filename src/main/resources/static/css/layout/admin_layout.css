@@ -1,4 +1,4 @@
-/* ===== [1. 공통 변수 및 기본 설정] ===== */
+/* 공통 설정 */
 :root {
     --primary-blue: #4285f4;
     --bg-light: #f8f9fa;
@@ -17,7 +17,7 @@ body {
     color: var(--text-dark);
 }
 
-/* ===== [2. 사이드바 레이아웃] ===== */
+/* 사이드바 */
 .sidebar {
     width: var(--sidebar-width);
     height: 100vh;
@@ -35,7 +35,7 @@ body {
 .brand-title { font-size: 11px; color: var(--text-gray); font-weight: 700; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 4px; }
 .brand-name { font-size: 24px; font-weight: 800; color: var(--primary-blue); letter-spacing: -0.5px; }
 
-/* --- [신규] 실시간 사용자 프로필 카드 --- */
+/* 사용자 프로필 카드 */
 .sidebar-user-info {
     display: flex;
     align-items: center;
@@ -74,7 +74,7 @@ body {
     letter-spacing: 0.5px;
 }
 
-/* 실시간 시계 영역 */
+/* 실시간 시계 */
 .clock-area {
     background: #f1f3f4;
     padding: 15px;
@@ -89,7 +89,7 @@ body {
 #current-time { font-size: 18px; font-weight: 700; color: var(--text-dark); }
 .clock-icon { font-size: 16px; }
 
-/* ===== [3. 네비게이션 메뉴] ===== */
+/* 네비게이션 메뉴 */
 .nav-menu { flex-grow: 1; }
 .nav-section { margin-bottom: 25px; }
 .nav-label { font-size: 12px; color: #9aa0a6; font-weight: 700; text-transform: uppercase; margin-bottom: 10px; padding-left: 10px; }
@@ -110,7 +110,7 @@ body {
 .nav-item.active { background-color: #e8f0fe; color: var(--primary-blue); font-weight: 700; }
 .nav-icon { margin-right: 12px; font-size: 18px; width: 20px; text-align: center; }
 
-/* ===== [4. 메인 콘텐츠 영역] ===== */
+/* 메인 콘텐츠 */
 .main-content {
     margin-left: var(--sidebar-width);
     padding: 40px;

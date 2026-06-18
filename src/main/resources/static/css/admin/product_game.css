@@ -54,7 +54,7 @@
     background: #e2e8f0;
 }
 
-/* 카테고리 필터 바 */
+/* 카테고리 필터 */
 .category-filter {
     display: flex;
     align-items: center;
@@ -274,13 +274,13 @@
     color: white;
 }
 
-/* 숨김됨 배지 스타일 추가  */
+/* 숨김 배지 */
 .badge-hidden {
     background: #f1f5f9;
     color: #64748b;
 }
 
-/* 수정 버튼 등 버튼 일관성 보존 */
+/* 수정 버튼 */
 .btn-edit {
     color: var(--primary-blue);
     border-color: #dbeafe;

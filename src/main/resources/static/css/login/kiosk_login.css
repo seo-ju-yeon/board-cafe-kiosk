@@ -1,4 +1,4 @@
-/* 공통 폰트 및 배경 설정 */
+/* 기본 레이아웃 */
 body {
     margin: 0;
     padding: 0;
@@ -19,7 +19,7 @@ body {
     text-align: center;
 }
 
-/* 아이콘 박스 (키오스크용은 기존 블루 유지) */
+/* 아이콘 박스 */
 .icon-box {
     width: 60px;
     height: 60px;
@@ -44,7 +44,7 @@ h2 {
     font-size: 0.95rem;
 }
 
-/* 시연 계정 섹션 (동일하게 유지) */
+/* 시연 계정 */
 .demo-container {
     background: #f8fafc;
     border: 1px solid #e2e8f0;
@@ -104,7 +104,7 @@ h2 {
     color: #10b981;
 }
 
-/* 입력창 및 레이블 스타일 */
+/* 입력 필드 */
 .input-group {
     text-align: left;
     margin-bottom: 20px;
@@ -135,7 +135,7 @@ input:focus {
     background-color: #fff;
 }
 
-/* 버튼 및 하단 텍스트 */
+/* 버튼 */
 .btn-primary {
     width: 100%;
     padding: 16px;
@@ -166,7 +166,7 @@ input:focus {
     margin: 0;
 }
 
-/* 에러 메시지 스타일 (관리자 화면과 동일) */
+/* 에러 메시지 */
 .error-msg {
     display: flex;
     align-items: center;
@@ -193,7 +193,7 @@ input:focus {
     }
 }
 
-/* 셀렉트 박스 디자인 추가 */
+/* 시연 계정 선택 */
 .demo-selector {
     margin-top: 4px;
 }
@@ -214,7 +214,7 @@ input:focus {
     border-color: #3b82f6;
 }
 
-/* 기존 demo-btn 스타일 유지 및 full-width 대응 */
+/* 전체 너비 옵션 */
 .demo-btn.full-width, .demo-selector.full-width {
     grid-column: span 2;
 }

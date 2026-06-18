@@ -10,7 +10,7 @@ body {
     justify-content: center;
     align-items: center;
     min-height: 100vh;
-    background: #f5f5f5; /* 배경색 추가 */
+    background: #f5f5f5;
 }
 
 .auth-container {
@@ -115,7 +115,7 @@ input.error {
     margin-bottom: 20px;
     border: 1px solid #f5c6cb;
     text-align: center;
-    display: none; /* 기본적으로 숨김 */
+    display: none;
 }
 
 .info-box {
