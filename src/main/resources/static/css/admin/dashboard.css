@@ -116,6 +116,7 @@
     color: #155724;
 }
 
+/* 선택 테이블 카드 강조 */
 @keyframes pulse {
     0%, 100% {
         opacity: 1;
@@ -199,6 +200,7 @@
     white-space: nowrap;
 }
 
+/* 주문 배지 미세 강조 */
 @keyframes pulse-mini {
     0%, 100% {
         opacity: 1;
@@ -210,6 +212,7 @@
     }
 }
 
+/* 신규 알림 점 강조 */
 @keyframes pulse-red {
     0% {
         transform: scale(1);
@@ -422,7 +425,7 @@
     display: none;
 }
 
-/* 신규 주문 알림 */
+/* 신규 주문 알림 상단 진입 */
 @keyframes slideInDown {
     from {
         opacity: 0;
@@ -434,6 +437,7 @@
     }
 }
 
+/* 신규 주문 알림 배경 강조 */
 @keyframes pulse-yellow {
     0%, 100% {
         box-shadow: 0 0 30px rgba(255, 204, 0, 0.5);

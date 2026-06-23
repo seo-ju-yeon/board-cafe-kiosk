@@ -1,17 +1,17 @@
-// URL 파라미터
+/* URL 파라미터 */
 const urlParams = new URLSearchParams(window.location.search);
-const orderId   = urlParams.get('orderId');
+const orderId = urlParams.get('orderId');
 
-// ===== 전역 상태 변수 =====
-let subtotalPrice   = 0;
-let menuSubtotal    = 0;
-let appliedPoint    = 0;
-let currentPointBalance = initialPointBalance;  // 중복 선언 제거, 이름 변경
-let widgets         = null;
-let orderId_toss    = null;
-let orderName       = '';
+/* 정산 화면 상태 */
+let subtotalPrice = 0;
+let menuSubtotal = 0;
+let appliedPoint = 0;
+let currentPointBalance = initialPointBalance;  // 현재 보유 포인트
+let widgets = null;
+let orderId_toss = null;
+let orderName = '';
 
-// ===== 토스트 알림 =====
+/* 토스트 메시지 표시 */
 function showToast(msg) {
     const toast = document.createElement('div');
     toast.className = 'toast';
@@ -20,15 +20,16 @@ function showToast(msg) {
     setTimeout(() => toast.remove(), 2500);
 }
 
-// ===== 이용 시간 계산 =====
+/* 시간 값 밀리초 단위 보정 */
 function normalizeEpochMillis(rawValue) {
     const n = Number(rawValue);
     if (!n || Number.isNaN(n)) return 0;
-    // 혹시 초 단위 값이 들어오면 ms 단위로 보정
+    // 초 단위 값 수신 시 밀리초 단위로 변환
     if (n > 0 && n < 100000000000) return n * 1000;
     return n;
 }
 
+/* 이용 초과 시간 및 초과 요금 갱신 */
 function updateElapsedTime() {
     const startMs = normalizeEpochMillis(sessionStartTime);
     if (!startMs || Number.isNaN(startMs)) {
@@ -38,24 +39,24 @@ function updateElapsedTime() {
     const elapsedRaw = Math.floor((Date.now() - startMs) / 60000);
     const elapsed = Math.max(elapsedRaw, 0);
 
-    // "추가 시간" 표시는 패키지 기본시간을 제외한 초과분만 보여준다.
+    // 패키지 기본시간을 제외한 초과분만 표시
     const extraMinutesForDisplay =
         (durationMinutes != null && durationMinutes > 0)
             ? Math.max(elapsed - durationMinutes, 0)
             : 0;
-    const hours   = Math.floor(extraMinutesForDisplay / 60);
+    const hours = Math.floor(extraMinutesForDisplay / 60);
     const minutes = extraMinutesForDisplay % 60;
     document.getElementById('elapsed-time').innerText = `${hours}시간 ${minutes}분`;
 
-    // 매번 기본 금액으로 초기화 후 초과 요금 반영
+    // 기본 금액으로 초기화 후 초과 요금 반영
     subtotalPrice = packageTotal + menuSubtotal;
     document.getElementById('over-charge-row').style.display = 'none';
 
-    // 초과 요금 계산
+    // 10분 단위 초과 요금 계산
     if (durationMinutes > 0 && extraPricePerMin > 0) {
         const overMinutes = elapsed - durationMinutes;
         if (overMinutes > 0) {
-            const overUnits  = Math.ceil(overMinutes / 10); // 10분 단위 올림
+            const overUnits = Math.ceil(overMinutes / 10);
             const overCharge = overUnits * extraPricePerMin * partySize;
             subtotalPrice = packageTotal + menuSubtotal + overCharge;
             updateAmounts();
@@ -69,11 +70,11 @@ function updateElapsedTime() {
     updateAmounts();
 }
 
-// ===== 금액 업데이트 =====
+/* 정산 금액 표시 갱신 */
 function updateAmounts() {
     const finalAmount = Math.max(subtotalPrice - appliedPoint, 0);
     document.getElementById('subtotal-amount').innerText = `₩${subtotalPrice.toLocaleString()}`;
-    document.getElementById('final-total').innerText     = `₩${finalAmount.toLocaleString()}`;
+    document.getElementById('final-total').innerText = `₩${finalAmount.toLocaleString()}`;
 
     const discountRow = document.getElementById('point-discount-row');
     if (appliedPoint > 0) {
@@ -84,7 +85,7 @@ function updateAmounts() {
     }
 }
 
-// ===== 위젯 금액 동기화 =====
+/* 토스 위젯 결제 금액 동기화 */
 async function updateWidgetAmount() {
     if (widgets) {
         await widgets.setAmount({
@@ -94,7 +95,7 @@ async function updateWidgetAmount() {
     }
 }
 
-// ===== 정산 데이터 로드 (세션 주문 기반) =====
+/* 세션 주문 기반 정산 데이터 조회 */
 async function loadCheckout() {
     try {
         const response = await fetch(`/kiosk/order/active`);
@@ -118,7 +119,7 @@ async function loadCheckout() {
     }
 }
 
-// ===== 포인트 잔액 조회 =====
+/* 회원 포인트 잔액 조회 */
 async function fetchPointBalance() {
     try {
         if (!customerPhone) return;
@@ -127,10 +128,10 @@ async function fetchPointBalance() {
         if (!response.ok) return;
         const contentType = response.headers.get('content-type') || '';
         if (!contentType.includes('application/json')) return;
-        const data     = await response.json();
+        const data = await response.json();
         currentPointBalance = data.balance || 0;
 
-        // 포인트 잔액 뱃지 업데이트 (있으면)
+        // 포인트 잔액 배지 갱신
         const badge = document.querySelector('.point-balance-badge');
         if (badge) {
             badge.innerText = `보유 ${currentPointBalance.toLocaleString()}P`;
@@ -140,11 +141,11 @@ async function fetchPointBalance() {
     }
 }
 
-// ===== 정산 내역 렌더링 =====
+/* 정산 주문 내역 렌더링 */
 function renderCheckout(orders) {
     const normalizedOrders = Array.isArray(orders) ? orders : [];
     const activeOrders = normalizedOrders.filter(o => o && o.status !== 'CANCELLED');
-    menuSubtotal  = activeOrders.reduce((sum, o) => sum + o.totalAmount, 0);
+    menuSubtotal = activeOrders.reduce((sum, o) => sum + o.totalAmount, 0);
     subtotalPrice = packageTotal + menuSubtotal;
 
     if (activeOrders.length === 0) {
@@ -181,10 +182,10 @@ function renderCheckout(orders) {
     lucide.createIcons();
 }
 
-// ===== 포인트 적용 (전역 함수 — onclick에서 호출) =====
+/* 포인트 할인 적용 */
 async function applyPoint() {
     const input = document.getElementById('point-input');
-    const val   = parseInt(input.value) || 0;
+    const val = parseInt(input.value) || 0;
 
     if (val <= 0) {
         showToast('1P 이상 입력해주세요.');
@@ -209,12 +210,12 @@ async function applyPoint() {
     showToast(`${val.toLocaleString()}P 적용되었습니다.`);
 }
 
-// ===== 포인트 취소 (전역 함수 — onclick에서 호출) =====
+/* 포인트 할인 취소 */
 async function resetPoint() {
     appliedPoint = 0;
-    const input  = document.getElementById('point-input');
+    const input = document.getElementById('point-input');
     if (input) {
-        input.value    = '';
+        input.value = '';
         input.disabled = false;
     }
     document.getElementById('point-applied-msg').style.display = 'none';
@@ -222,13 +223,13 @@ async function resetPoint() {
     await updateWidgetAmount();
 }
 
-// ===== 토스페이먼츠 위젯 초기화 =====
+/* 토스페이먼츠 위젯 초기화 */
 async function initializeTossWidget() {
     try {
         const prepRes = await fetch(`/kiosk/payment/prepare?tableNumber=${tableNumber}`, {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ pointUsed: appliedPoint })
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({pointUsed: appliedPoint})
         });
 
         const prepData = await prepRes.json();
@@ -238,13 +239,13 @@ async function initializeTossWidget() {
             return;
         }
 
-        orderId_toss    = prepData.orderIdToss;
-        orderName       = prepData.orderName;
-        const cKey      = prepData.clientKey;
+        orderId_toss = prepData.orderIdToss;
+        orderName = prepData.orderName;
+        const cKey = prepData.clientKey;
         const customerKey = prepData.customerKey;
 
         const tossPayments = TossPayments(cKey);
-        widgets = tossPayments.widgets({ customerKey });
+        widgets = tossPayments.widgets({customerKey});
 
         await widgets.setAmount({
             currency: "KRW",
@@ -252,8 +253,8 @@ async function initializeTossWidget() {
         });
 
         await Promise.all([
-            widgets.renderPaymentMethods({ selector: "#payment-widget", variantKey: "DEFAULT" }),
-            widgets.renderAgreement({ selector: "#agreement", variantKey: "DEFAULT" })
+            widgets.renderPaymentMethods({selector: "#payment-widget", variantKey: "DEFAULT"}),
+            widgets.renderAgreement({selector: "#agreement", variantKey: "DEFAULT"})
         ]);
 
     } catch (err) {
@@ -262,7 +263,7 @@ async function initializeTossWidget() {
     }
 }
 
-// ===== 결제 처리 (전역 함수 — onclick에서 호출) =====
+/* 토스페이먼츠 결제 요청 */
 async function processPayment() {
     if (subtotalPrice === 0) {
         showToast('결제할 금액이 없습니다.');
@@ -293,7 +294,9 @@ async function processPayment() {
     }
 }
 
+/* 테이블 청소 상태 감시 시작 */
 function startTableStatusWatcher() {
+    /* 테이블 상태 조회 및 청소 대기 화면 이동 */
     async function checkTableStatus() {
         try {
             const res = await fetch('/kiosk/table/status', {
@@ -323,19 +326,17 @@ function startTableStatusWatcher() {
     setInterval(checkTableStatus, 3000);
 }
 
-// ===== 페이지 로드 시 초기화 =====
+/* 정산 화면 초기화 */
 document.addEventListener('DOMContentLoaded', async function () {
     startTableStatusWatcher();
 
-    // 주문 데이터 + 포인트 잔액 동시 로드
+    // 주문 데이터와 포인트 잔액 동시 조회
     await Promise.all([
         loadCheckout(),
         fetchPointBalance()
     ]);
 
-    // 이용 시간 표시
     updateElapsedTime();
 
-    // 토스 위젯 초기화
     await initializeTossWidget();
 });

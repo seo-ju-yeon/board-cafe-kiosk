@@ -1,9 +1,11 @@
+/* 색상 변수 */
 :root {
     --primary-blue: #3b82f6;
     --text-dark: #1e293b;
     --border-color: #e2e8f0;
 }
 
+/* 상단 헤더 */
 .header-flex {
     display: flex;
     justify-content: space-between;
@@ -17,6 +19,7 @@
     color: var(--text-dark);
 }
 
+/* 메뉴 입력 폼 */
 .form-card {
     background: white;
     border-radius: 15px;
@@ -109,6 +112,7 @@ textarea.form-control {
     text-align: center;
 }
 
+/* 하단 버튼 */
 .btn-group {
     display: flex;
     gap: 12px;

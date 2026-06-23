@@ -1,9 +1,11 @@
+/* 기본값 */
 * {
     margin: 0;
     padding: 0;
     box-sizing: border-box;
 }
 
+/* 레이아웃 */
 body {
     font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
     background-color: #f4f6f8;
@@ -14,6 +16,7 @@ body {
     color: #333;
 }
 
+/* 상태 안내 배너 */
 .status-banner {
     background: #f0f7ff;
     border-bottom: 2px solid #0066cc;
@@ -33,6 +36,7 @@ body {
     height: 20px;
 }
 
+/* 상단 헤더 */
 .header {
     background: white;
     padding: 20px 30px;
@@ -91,6 +95,7 @@ body {
     height: 14px;
 }
 
+/* 본문 영역 */
 .content {
     flex: 1;
     padding: 28px 40px;
@@ -115,6 +120,7 @@ body {
     background: #888;
 }
 
+/* 주문 상태 카드 */
 .status-section {
     background: #f0f7ff;
     border: 1.5px solid #cfe6ff;
@@ -156,9 +162,16 @@ body {
     height: 26px;
 }
 
+/* 주문 상태 아이콘 강조 */
 @keyframes pulse {
-    0%, 100% { transform: scale(1); opacity: 1; }
-    50% { transform: scale(1.04); opacity: 0.9; }
+    0%, 100% {
+        transform: scale(1);
+        opacity: 1;
+    }
+    50% {
+        transform: scale(1.04);
+        opacity: 0.9;
+    }
 }
 
 .status-text {
@@ -185,6 +198,7 @@ body {
     white-space: nowrap;
 }
 
+/* 진행 상태 바 */
 .progress-bar {
     height: 8px;
     border-radius: 999px;
@@ -209,6 +223,7 @@ body {
     font-weight: 600;
 }
 
+/* 주문 정보 카드 */
 .card {
     background: white;
     border-radius: 20px;
@@ -235,6 +250,7 @@ body {
     color: #007bff;
 }
 
+/* 주문 상품 목록 */
 .order-item {
     display: flex;
     justify-content: space-between;
@@ -271,6 +287,7 @@ body {
     min-width: 95px;
 }
 
+/* 주문 부가 정보 */
 .info-row {
     display: flex;
     justify-content: space-between;
@@ -303,6 +320,7 @@ body {
     text-align: right;
 }
 
+/* 하단 결제 요약 */
 .footer {
     background: white;
     border-top: 1px solid #eaeaea;
@@ -337,6 +355,7 @@ body {
     font-size: 0.95rem;
 }
 
+/* 하단 버튼 */
 .button-group {
     display: flex;
     gap: 10px;
@@ -392,6 +411,7 @@ body {
     box-shadow: 0 4px 12px rgba(220, 38, 38, 0.3);
 }
 
+/* 관리자 상태 변경 컨트롤 */
 .status-control-item {
     background: #f9f9f9;
     border-radius: 12px;
@@ -432,6 +452,7 @@ body {
     justify-content: flex-end;
 }
 
+/* 상태 변경 버튼 */
 .status-btn {
     padding: 7px 11px;
     border: none;
@@ -497,6 +518,7 @@ body {
     color: white;
 }
 
+/* 토스트 알림 */
 .toast {
     position: fixed;
     bottom: 30px;
@@ -509,6 +531,7 @@ body {
     animation: slideInUp 0.3s ease;
 }
 
+/* 토스트 메시지 하단 진입 */
 @keyframes slideInUp {
     from {
         transform: translateY(100px);
@@ -520,6 +543,7 @@ body {
     }
 }
 
+/* 반응형 */
 @media (max-width: 768px) {
     .header {
         padding: 16px 20px;

@@ -2,12 +2,13 @@ const tableBody = document.getElementById('staffTableBody');
 let isIdValid = false;
 let idCheckTimeout = null;
 
-/** [모달 제어] */
+/* 직원 등록 모달 */
 function openStaffModal() {
     document.getElementById('staffModal').style.display = 'flex';
     document.body.style.overflow = 'hidden';
 }
 
+/* 직원 등록 모달 닫기 */
 function closeStaffModal() {
     document.getElementById('staffModal').style.display = 'none';
     document.body.style.overflow = 'auto';
@@ -16,7 +17,7 @@ function closeStaffModal() {
     isIdValid = false;
 }
 
-/** [실시간 아이디 중복 체크] */
+/* 아이디 중복 확인 */
 document.getElementById('staffId').addEventListener('input', function() {
     const loginId = this.value.trim();
     const msgElement = document.getElementById('idStatusMsg');
@@ -36,12 +37,12 @@ document.getElementById('staffId').addEventListener('input', function() {
     idCheckTimeout = setTimeout(() => {
         fetch(`/admin/staff/check-id?loginId=${loginId}`)
             .then(res => res.json())
-            .then(isDuplicate => { // 변수명을 이해하기 쉽게 isDuplicate로 생각하세요!
-                if (!isDuplicate) { // 중복이 아니라면 (false라면)
+            .then(isDuplicate => {
+                if (!isDuplicate) {
                     msgElement.textContent = "사용 가능한 아이디입니다. ✅";
                     msgElement.style.color = "#34C759";
                     isIdValid = true;
-                } else { // 중복이라면 (true라면)
+                } else {
                     msgElement.textContent = "이미 사용 중인 아이디입니다. ❌";
                     msgElement.style.color = "#FF3B30";
                     isIdValid = false;
@@ -54,11 +55,11 @@ document.getElementById('staffId').addEventListener('input', function() {
     }, 350);
 });
 
-/** [직원 등록 저장 - ManagerRequest 필드와 매핑] */
+/* 직원 등록 */
 function saveStaff() {
     const name = document.getElementById('staffName').value.trim();
     const loginId = document.getElementById('staffId').value.trim();
-    const email = document.getElementById('staffEmail').value.trim(); // 이메일 값 추출
+    const email = document.getElementById('staffEmail').value.trim();
     const role = document.getElementById('staffRole').value;
     const password = document.getElementById('tempPw').value;
 
@@ -67,7 +68,6 @@ function saveStaff() {
         return;
     }
 
-    // 이메일 유효성 검사
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!email || !emailRegex.test(email)) {
         alert("유효한 이메일 주소를 입력해주세요.");
@@ -79,7 +79,6 @@ function saveStaff() {
         return;
     }
 
-    // DTO 구조와 일치하도록 데이터 구성
     const staffData = {
         name: name,
         loginId: loginId,
@@ -107,8 +106,7 @@ function saveStaff() {
         });
 }
 
-/** [상태 토글] */
-// toggleStatus 함수에서 reload 후 filter 유지
+/* 직원 상태 변경 */
 function toggleStatus(btn, id) {
     const row = btn.closest('tr');
     const isCurrentlyActive = !row.classList.contains('is-disabled');
@@ -132,12 +130,12 @@ function toggleStatus(btn, id) {
         });
 }
 
-/** [유틸리티: 필터, 정렬, 카운트] */
-// 탭 클릭 시 서버로 filter 파라미터 전달
+/* 직원 필터 */
 function filterTab(filter) {
     location.href = `/admin/staff?page=1&filter=${filter}`;
 }
 
+/* 직원 수 갱신 */
 function updateCounts() {
     const rows = tableBody.querySelectorAll('tr');
     const total = rows.length;
@@ -147,10 +145,9 @@ function updateCounts() {
     document.getElementById('count-inactive').textContent = inactive;
 }
 
+/* 초기 정렬 */
 window.onload = () => {
-    // 초기 정렬 (비활성 아래로)
     const rows = Array.from(tableBody.querySelectorAll('tr'));
     rows.sort((a, b) => a.classList.contains('is-disabled') - b.classList.contains('is-disabled'));
     rows.forEach(row => tableBody.appendChild(row));
-    // updateCounts()는 서버에서 이미 정확한 카운트를 내려주므로 호출 불필요
 };

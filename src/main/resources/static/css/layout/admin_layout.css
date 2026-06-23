@@ -1,4 +1,4 @@
-/* 공통 설정 */
+/* 레이아웃 기본값 */
 :root {
     --primary-blue: #4285f4;
     --bg-light: #f8f9fa;
@@ -9,7 +9,12 @@
     --card-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
 }
 
-* { margin: 0; padding: 0; box-sizing: border-box; }
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
 body {
     font-family: 'Pretendard', sans-serif;
     background-color: var(--bg-light);
@@ -30,10 +35,26 @@ body {
     overflow-y: auto;
 }
 
-/* 브랜드 로고 */
-.brand-area { margin-bottom: 25px; }
-.brand-title { font-size: 11px; color: var(--text-gray); font-weight: 700; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 4px; }
-.brand-name { font-size: 24px; font-weight: 800; color: var(--primary-blue); letter-spacing: -0.5px; }
+/* 브랜드 */
+.brand-area {
+    margin-bottom: 25px;
+}
+
+.brand-title {
+    font-size: 11px;
+    color: var(--text-gray);
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 4px;
+}
+
+.brand-name {
+    font-size: 24px;
+    font-weight: 800;
+    color: var(--primary-blue);
+    letter-spacing: -0.5px;
+}
 
 /* 사용자 프로필 카드 */
 .sidebar-user-info {
@@ -45,8 +66,9 @@ body {
     border: 1px solid var(--border-color);
     border-radius: 12px;
     margin-bottom: 15px;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.02);
 }
+
 .user-avatar {
     width: 40px;
     height: 40px;
@@ -58,8 +80,22 @@ body {
     font-size: 20px;
     flex-shrink: 0;
 }
-.user-meta { display: flex; flex-direction: column; overflow: hidden; }
-.user-name { font-size: 15px; font-weight: 700; color: var(--text-dark); white-space: nowrap; text-overflow: ellipsis; overflow: hidden; }
+
+.user-meta {
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.user-name {
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--text-dark);
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    overflow: hidden;
+}
+
 .user-role-badge {
     font-size: 10px;
     font-weight: 800;
@@ -84,15 +120,47 @@ body {
     flex-direction: column;
     gap: 4px;
 }
-.date-display { font-size: 12px; color: var(--text-gray); font-weight: 600; margin-left: 28px; }
-.time-display { display: flex; align-items: center; gap: 10px; }
-#current-time { font-size: 18px; font-weight: 700; color: var(--text-dark); }
-.clock-icon { font-size: 16px; }
+
+.date-display {
+    font-size: 12px;
+    color: var(--text-gray);
+    font-weight: 600;
+    margin-left: 28px;
+}
+
+.time-display {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+#current-time {
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--text-dark);
+}
+
+.clock-icon {
+    font-size: 16px;
+}
 
 /* 네비게이션 메뉴 */
-.nav-menu { flex-grow: 1; }
-.nav-section { margin-bottom: 25px; }
-.nav-label { font-size: 12px; color: #9aa0a6; font-weight: 700; text-transform: uppercase; margin-bottom: 10px; padding-left: 10px; }
+.nav-menu {
+    flex-grow: 1;
+}
+
+.nav-section {
+    margin-bottom: 25px;
+}
+
+.nav-label {
+    font-size: 12px;
+    color: #9aa0a6;
+    font-weight: 700;
+    text-transform: uppercase;
+    margin-bottom: 10px;
+    padding-left: 10px;
+}
 
 .nav-item {
     display: flex;
@@ -106,9 +174,23 @@ body {
     font-weight: 500;
     transition: all 0.2s;
 }
-.nav-item:hover { background-color: #f1f3f4; }
-.nav-item.active { background-color: #e8f0fe; color: var(--primary-blue); font-weight: 700; }
-.nav-icon { margin-right: 12px; font-size: 18px; width: 20px; text-align: center; }
+
+.nav-item:hover {
+    background-color: #f1f3f4;
+}
+
+.nav-item.active {
+    background-color: #e8f0fe;
+    color: var(--primary-blue);
+    font-weight: 700;
+}
+
+.nav-icon {
+    margin-right: 12px;
+    font-size: 18px;
+    width: 20px;
+    text-align: center;
+}
 
 /* 메인 콘텐츠 */
 .main-content {
@@ -127,4 +209,7 @@ body {
     font-size: 14px;
     border-radius: 10px;
 }
-.logout-btn:hover { background: #fef2f2; }
+
+.logout-btn:hover {
+    background: #fef2f2;
+}

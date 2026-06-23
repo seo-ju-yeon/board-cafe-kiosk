@@ -1,3 +1,4 @@
+/* 레이아웃 */
 body {
     margin: 0;
     padding: 0;
@@ -9,6 +10,7 @@ body {
     height: 100vh;
 }
 
+/* OTP 인증 카드 */
 .auth-card {
     background: white;
     width: 460px;
@@ -18,6 +20,7 @@ body {
     text-align: center;
 }
 
+/* 상단 안내 */
 .icon-box {
     width: 60px;
     height: 60px;
@@ -53,6 +56,7 @@ h2 {
     margin-bottom: 16px;
 }
 
+/* 안내 박스 */
 .info-box {
     background: #eaf3fb;
     border: 1px solid #b5d4f4;
@@ -86,6 +90,7 @@ h2 {
     border: 1px solid #f5c6cb;
 }
 
+/* 입력 폼 */
 .input-group {
     text-align: left;
     margin-bottom: 20px;
@@ -164,6 +169,7 @@ input.input-error {
     display: none;
 }
 
+/* 버튼 */
 .btn-send {
     padding: 14px 16px;
     background-color: #2471a3;

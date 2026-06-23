@@ -1,18 +1,19 @@
+/* Lucide 아이콘 초기화 */
 lucide.createIcons({
     attrs: {'stroke-width': 2.5}
 });
 
+/* 장바구니 화면 상태 */
 const tableNumber = /*[[${tableNumber}]]*/ 1;
 let remainingTime = 300;
 const timerDisplay = document.getElementById('timer-display');
 const warningModal = document.getElementById('warning-modal');
 let timerInterval;
 
-// 현재 장바구니 정보를 메모리에 저장
 let currentCartItems = [];
 let currentTotalPrice = 0;
 
-// ===== 페이지 로드 시 장바구니 데이터 로드 =====
+/* 장바구니 화면 초기화 */
 document.addEventListener('DOMContentLoaded', function () {
     loadCart();
     loadActiveOrders();
@@ -20,7 +21,9 @@ document.addEventListener('DOMContentLoaded', function () {
     startTimer();
 });
 
+/* 테이블 청소 상태 감시 시작 */
 function startTableStatusWatcher() {
+    /* 테이블 상태 조회 및 청소 대기 화면 이동 */
     async function checkTableStatus() {
         try {
             const res = await fetch('/kiosk/table/status', {
@@ -50,7 +53,7 @@ function startTableStatusWatcher() {
     setInterval(checkTableStatus, 3000);
 }
 
-// ===== 장바구니 로드 =====
+/* 장바구니 데이터 조회 */
 function loadCart() {
     fetch('/kiosk/cart/items')
         .then(response => response.json())
@@ -67,7 +70,7 @@ function loadCart() {
         });
 }
 
-// ===== 장바구니 렌더링 =====
+/* 장바구니 목록 렌더링 */
 function renderCart(cartItems, totalPrice) {
     const cartContent = document.getElementById('cart-content');
 
@@ -112,7 +115,7 @@ function renderCart(cartItems, totalPrice) {
     lucide.createIcons();
 }
 
-// ===== 수량 업데이트 =====
+/* 장바구니 상품 수량 변경 */
 function updateQuantity(menuName, menuPrice, delta) {
     const cartItem = document.querySelector(
         `.cart-item[data-name="${menuName}"][data-price="${menuPrice}"]`
@@ -138,7 +141,7 @@ function updateQuantity(menuName, menuPrice, delta) {
         });
 }
 
-// ===== 상품 삭제 =====
+/* 장바구니 상품 삭제 */
 function deleteItem(menuName, menuPrice) {
     if (!confirm(`${menuName}을(를) 삭제하시겠습니까?`)) return;
 
@@ -160,7 +163,7 @@ function deleteItem(menuName, menuPrice) {
         });
 }
 
-// ===== 장바구니 비우기 =====
+/* 장바구니 전체 비우기 */
 function clearCart() {
     if (!confirm('장바구니를 비우시겠습니까?')) return;
 
@@ -178,7 +181,7 @@ function clearCart() {
         });
 }
 
-// ===== 활성 세션 주문 목록 =====
+/* 진행 중인 일반 주문 목록 조회 */
 function loadActiveOrders() {
     fetch('/kiosk/order/active')
         .then(async response => {
@@ -194,6 +197,8 @@ function loadActiveOrders() {
         })
         .then(orders => {
             const section = document.getElementById('active-orders-section');
+
+            /* 게임 대여 주문 여부 확인 */
             const isGameOrder = (order) => {
                 const items = Array.isArray(order?.items) ? order.items : [];
                 return items.length > 0
@@ -292,23 +297,19 @@ function loadActiveOrders() {
         .catch(err => console.error('주문 조회 실패:', err));
 }
 
-// ===== 주문 상태 실시간 업데이트 =====
+/* 진행 중인 주문 상태 주기 갱신 */
 setInterval(() => {
     loadActiveOrders();
-}, 5000); // 5초마다 업데이트
+}, 5000);
 
-// ========== 주문 확인 모달 함수들 ==========
-
-/**
- * 주문 확인 모달 열기
- */
+/* 주문 확인 모달 열기 */
 function openOrderConfirmModal() {
     if (currentCartItems.length === 0) {
         showToast('장바구니가 비어있습니다.');
         return;
     }
 
-    // 모달에 상품 정보 채우기
+    // 모달에 주문 상품 목록 표시
     const modalItemsList = document.getElementById('modal-items-list');
     modalItemsList.innerHTML = currentCartItems.map(item => `
       <div class="modal-item">
@@ -322,32 +323,22 @@ function openOrderConfirmModal() {
       </div>
     `).join('');
 
-    // 총액 채우기
     document.getElementById('modal-total').innerText = `₩${currentTotalPrice.toLocaleString()}`;
 
-    // 모달 표시
     document.getElementById('order-confirm-modal').style.display = 'flex';
     lucide.createIcons();
 }
 
-/**
- * 모달 닫기
- */
+/* 주문 확인 모달 닫기 */
 function closeOrderConfirmModal() {
     document.getElementById('order-confirm-modal').style.display = 'none';
 }
 
-/**
- * 주문 하기
- * 1. 서버에 주문 생성 API 호출 (POST /kiosk/order/create)
- * 2. 성공 시 /kiosk/order/{orderId} 페이지로 이동
- * 3. 실패 시 에러 메시지 표시
- */
+/* 장바구니 주문 생성 */
 async function confirmOrder() {
     const confirmBtn = document.getElementById('confirm-btn');
     const confirmBtnText = document.getElementById('confirm-btn-text');
 
-    // 버튼 비활성화
     confirmBtn.disabled = true;
     confirmBtnText.innerHTML = '<span class="spinner"></span>주문 처리 중...';
 
@@ -365,14 +356,14 @@ async function confirmOrder() {
         const data = await response.json();
 
         if (data.success) {
-            console.log('주문 생성 성공 - orderId:', data.id);
+            // console.log('주문 생성 성공 - orderId:', data.id);
             showToast(`✓ 주문이 생성되었습니다. (주문번호: ${data.id})`);
 
             const createdItems = Array.isArray(data.items) ? data.items : [];
             const gameOnlyOrder = createdItems.length > 0
                 && createdItems.every(item => Number(item?.price ?? item?.menuPrice ?? 0) === 0);
 
-            // 2초 후 주문 상세 페이지로 이동
+            // 주문 생성 안내 후 상세 페이지로 이동
             setTimeout(() => {
                 window.location.href = gameOnlyOrder
                     ? `/kiosk/order/game/${data.id}`
@@ -391,11 +382,12 @@ async function confirmOrder() {
     }
 }
 
-// ===== 타이머 =====
+/* 장바구니 화면 타이머 시작 */
 function startTimer() {
     timerInterval = setInterval(updateTimer, 1000);
 }
 
+/* 장바구니 화면 남은 시간 갱신 */
 function updateTimer() {
     remainingTime--;
     const m = Math.floor(remainingTime / 60);
@@ -411,6 +403,7 @@ function updateTimer() {
     }
 }
 
+/* 사용자 활동 타이머 초기화 */
 function resetActivityTimer() {
     remainingTime = 300;
     if (warningModal.style.display === 'flex') {
@@ -418,11 +411,12 @@ function resetActivityTimer() {
     }
 }
 
+/* 시간 만료 경고 모달 숨김 */
 function hideWarningModal() {
     warningModal.style.display = 'none';
 }
 
-// ===== 토스트 알림 =====
+/* 토스트 메시지 표시 */
 function showToast(message) {
     const toast = document.createElement('div');
     toast.className = 'toast';

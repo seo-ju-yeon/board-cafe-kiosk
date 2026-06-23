@@ -1,5 +1,7 @@
+/* 전화번호 입력 상태 */
 let rawNumber = "";
 
+/* 전화번호 숫자 입력 */
 function appendNumber(num) {
     if (rawNumber.length < 11) {
         rawNumber += num;
@@ -7,16 +9,19 @@ function appendNumber(num) {
     }
 }
 
+/* 전화번호 마지막 숫자 삭제 */
 function deleteLast() {
     rawNumber = rawNumber.slice(0, -1);
     renderPhone();
 }
 
+/* 전화번호 전체 삭제 */
 function clearAll() {
     rawNumber = "";
     renderPhone();
 }
 
+/* 전화번호 표시값 렌더링 */
 function renderPhone() {
     const display = document.getElementById('phone-display');
     const nextBtn = document.getElementById('next-button');
@@ -37,6 +42,7 @@ function renderPhone() {
     }
 }
 
+/* 회원 포인트 조회 및 다음 단계 이동 */
 function identifyMember() {
     if (rawNumber.length < 10) return;
 
@@ -45,8 +51,8 @@ function identifyMember() {
     btn.innerHTML = '<i data-lucide="loader" style="width:20px;"></i> 조회 중...';
     lucide.createIcons();
 
-    // 전화번호 포맷 (010-XXXX-XXXX)
-    const formatted = rawNumber.slice(0,3) + '-' + rawNumber.slice(3,7) + '-' + rawNumber.slice(7);
+    // 전화번호 하이픈 포맷 적용
+    const formatted = rawNumber.slice(0, 3) + '-' + rawNumber.slice(3, 7) + '-' + rawNumber.slice(7);
 
     fetch(`/kiosk/point/lookup?phone=${encodeURIComponent(formatted)}`)
         .then(res => res.json())
@@ -67,21 +73,24 @@ function identifyMember() {
         });
 }
 
+/* 회원 조회 생략 후 패키지 선택 이동 */
 function skipStep() {
-    // 포인트 조회 없이 패키지 선택으로 바로 이동
     location.href = `/kiosk/package_selection?tableNumber=${TABLE_NUMBER}&size=${PARTY_SIZE}`;
 }
 
+/* 현재 테이블 번호 반환 */
 function getTableNumber() {
     return TABLE_NUMBER;
 }
 
+/* 현재 이용 인원 반환 */
 function getPartySize() {
     return PARTY_SIZE;
 }
 
+/* 토스트 메시지 표시 */
 function showToast(message, type) {
-    const colors = { success: '#2e7d32', info: '#1565c0', error: '#c62828' };
+    const colors = {success: '#2e7d32', info: '#1565c0', error: '#c62828'};
     const toast = document.createElement('div');
     toast.style.cssText = `
       position:fixed; bottom:40px; left:50%; transform:translateX(-50%);

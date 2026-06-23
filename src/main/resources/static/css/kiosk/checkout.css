@@ -1,9 +1,11 @@
+/* 기본값 */
 * {
     margin: 0;
     padding: 0;
     box-sizing: border-box;
 }
 
+/* 레이아웃 */
 body {
     font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
     display: flex;
@@ -14,6 +16,7 @@ body {
     background-color: #f4f6f8;
 }
 
+/* 스크롤 영역 */
 .container {
     width: 100%;
     max-width: 700px;
@@ -41,6 +44,7 @@ body {
     background: #888;
 }
 
+/* 페이지 제목 */
 .page-title {
     font-size: 2rem;
     margin: 0 0 24px 0;
@@ -49,6 +53,7 @@ body {
     font-weight: 700;
 }
 
+/* 정산 카드 */
 .card {
     background: white;
     border-radius: 24px;
@@ -73,6 +78,7 @@ body {
     color: #007bff;
 }
 
+/* 주문 내역 */
 .order-item {
     display: flex;
     justify-content: space-between;
@@ -108,6 +114,7 @@ body {
     font-size: 1.1rem;
 }
 
+/* 이용 정보 */
 .info-row {
     display: flex;
     justify-content: space-between;
@@ -133,6 +140,7 @@ body {
     height: 18px;
 }
 
+/* 포인트 적용 */
 .point-card {
     background: linear-gradient(135deg, #fff8e1 0%, #fff3cd 100%);
     border: 1px solid #ffe082;
@@ -241,6 +249,7 @@ body {
     padding: 8px 0;
 }
 
+/* 금액 요약 */
 .amount-breakdown {
     margin-bottom: 16px;
 }
@@ -289,6 +298,7 @@ body {
     color: #007bff;
 }
 
+/* 결제 버튼 */
 .button-group {
     display: flex;
     gap: 14px;
@@ -346,6 +356,7 @@ body {
     color: #555;
 }
 
+/* 토스트 알림 */
 .toast {
     position: fixed;
     bottom: 30px;
@@ -359,6 +370,7 @@ body {
     animation: slideInUp 0.3s ease;
 }
 
+/* 토스트 메시지 하단 진입 */
 @keyframes slideInUp {
     from {
         transform: translateY(80px);

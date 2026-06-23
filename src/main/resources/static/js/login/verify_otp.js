@@ -11,34 +11,34 @@ const submitBtn = document.getElementById('submitBtn');
 const cancelBtn = document.getElementById('cancelBtn');
 const statusMsg = document.getElementById('statusMsg');
 
-let timerInterval = null;  // 타이머 멈춤/시작을 제어하기 위한 변수
-let otpSent = false;   // 인증번호가 성공적으로 발송되었는지 추적하는 플래그
+let timerInterval = null;  // 인증 타이머 제어용 interval ID
+let otpSent = false;  // OTP 발송 여부
 
-/* 성공(green) 또는 에러(red) 메시지를 상단에 띄워주는 함수 */
+/* 인증 상태 메시지 표시 */
 function showStatus(msg, type) {
     statusMsg.textContent = msg;
-    statusMsg.className = type;  // 'success' 또는 'error' 클래스 부여
+    statusMsg.className = type;
     statusMsg.style.display = 'block';
 }
 
+/* 인증 상태 메시지 숨김 */
 function hideStatus() {
     statusMsg.style.display = 'none';
 }
 
-/* 이메일 정규식 검사 및 UI 에러 표시 */
+/* 이메일 형식 검증 */
 function validateEmail() {
     const v = emailInput.value.trim();
-    // 이메일 형식이 맞는지 테스트
     const ok = v.length > 0 && /^[A-Za-z0-9+_.-]+@(.+)$/.test(v);
-    emailInput.classList.toggle('input-error', !ok);  // 틀리면 빨간 테두리
-    emailError.style.display = ok ? 'none' : 'block';  // 틀리면 에러 문구 노출
+    emailInput.classList.toggle('input-error', !ok);
+    emailError.style.display = ok ? 'none' : 'block';
     return ok;
 }
 
-/* 타이머 (3분) */
+/* OTP 인증 타이머 시작 */
 function startTimer() {
-    clearInterval(timerInterval);  // 기존에 돌던 타이머가 있다면 초기화
-    let remaining = 180;  // OtpStore 유효시간(3분)과 동기화
+    clearInterval(timerInterval);
+    let remaining = 180;  // OtpStore 유효시간 3분과 동기화
     timerEl.style.display = 'block';
     updateTimer(remaining);
 
@@ -46,21 +46,22 @@ function startTimer() {
         remaining--;
         updateTimer(remaining);
 
-        if (remaining <= 0) {  // 시간디 다 되면
+        if (remaining <= 0) {
             clearInterval(timerInterval);
             showStatus('인증 시간이 만료되었습니다. 인증번호를 다시 요청해 주세요.', 'error');
-            resetOtpSection();  // 입력창 초기화 및 숨김
+            resetOtpSection();
         }
-    }, 1000);  // 1초마다 반복 실행
+    }, 1000);
 }
 
-/* 초 단위 숫자를 '분:초' 형식으로 변환하여 화면에 출력 */
+/* OTP 남은 시간 표시 갱신 */
 function updateTimer(sec) {
     const m = String(Math.floor(sec / 60)).padStart(2, '0');
     const s = String(sec % 60).padStart(2, '0');
     timeLeftEl.textContent = `${m}:${s}`;
 }
 
+/* OTP 입력 영역 초기화 */
 function resetOtpSection() {
     clearInterval(timerInterval);
     otpInput.value = '';
@@ -72,43 +73,40 @@ function resetOtpSection() {
     sendOtpBtn.disabled = false;
 }
 
-/* 인증 요청 버튼 */
+/* 로그인 OTP 발송 요청 */
 sendOtpBtn.addEventListener('click', async () => {
     if (!validateEmail()) {
         emailInput.focus();
-        return;  // 이메일 형식이 틀리면 중단
+        return;
     }
 
-    sendOtpBtn.disabled = true;  // 중복 클릭 방지
+    sendOtpBtn.disabled = true;
     sendOtpBtn.textContent = '발송 중...';
     hideStatus();
 
     try {
-        // POST /login/sendOtp — 이메일 대조 후 OTP 생성 및 발송
+        // 로그인 2차 인증용 OTP 발송 요청
         const res = await fetch('/login/sendOtp', {
             method: 'POST',
             headers: {'Content-Type': 'application/x-www-form-urlencoded'},
             body: new URLSearchParams({email: emailInput.value.trim()})
         });
-        const text = await res.text();  // 서버가 보낸 응답 메시지
+        const text = await res.text();
 
         if (res.ok) {
-            // 성공(200 ok) -> OTP 섹션 노출 + 타이머 시작
             showStatus(text, 'success');
-            emailInput.readOnly = true;  // 이메일 수정 불가능하게 잠금
-            otpSection.style.display = 'block';  // OTP 입력창 노출
+            emailInput.readOnly = true;
+            otpSection.style.display = 'block';
             otpInput.focus();
             otpSent = true;
-            startTimer();  // 타이머 시작
+            startTimer();
             sendOtpBtn.textContent = '재발송';
             sendOtpBtn.disabled = false;
         } else {
-            // 실패: 400(이메일 불일치) / 401(세션 만료) / 500(메일 오류)
             showStatus(text, 'error');
             sendOtpBtn.textContent = '인증 요청';
             sendOtpBtn.disabled = false;
 
-            // 세션 만료(401)이면 로그인 페이지로
             if (res.status === 401) {
                 setTimeout(() => {
                     window.location.href = '/common/login';
@@ -122,31 +120,30 @@ sendOtpBtn.addEventListener('click', async () => {
     }
 });
 
-/* 숫자만 입력 */
+/* OTP 숫자 입력 필터링 */
 otpInput.addEventListener('input', function () {
     this.value = this.value.replace(/[^0-9]/g, '');
     if (this.value.length > 0) otpError.style.display = 'none';
 });
 
-/* 로그인 버튼 */
+/* OTP 검증 후 로그인 완료 */
 submitBtn.addEventListener('click', async () => {
-    // 클라이언트 사전 검증
     if (!otpSent) {
         showStatus('먼저 이메일 인증을 요청해 주세요.', 'error');
         return;
     }
-    if (otpInput.value.length !== 6) {  // 6자리 미입력 시 에러
+    if (otpInput.value.length !== 6) {
         otpError.style.display = 'block';
         otpInput.focus();
         return;
     }
 
-    submitBtn.disabled = true;  // 중복 클릭 방지
+    submitBtn.disabled = true;
     submitBtn.textContent = '로그인 중...';
     hideStatus();
 
     try {
-        // POST /login/verifyEmailOtp — 이메일과 입력한 OTP를 서버에 전달
+        // 입력한 이메일과 OTP 검증 요청
         const res = await fetch('/login/verifyEmailOtp', {
             method: 'POST',
             headers: {'Content-Type': 'application/x-www-form-urlencoded'},
@@ -155,18 +152,15 @@ submitBtn.addEventListener('click', async () => {
                 otp: otpInput.value.trim()
             })
         });
-        const text = await res.text();  // 성공 시 리다이렉트할 경로가 담겨져있음.
+        const text = await res.text();
 
         if (res.ok) {
-            // 서버가 내려준 경로로 이동 (현재: "/admin/dashboard")
             window.location.href = text;
         } else {
-            // 실패: 오류 메시지 표시 + 버튼 복원
             showStatus(text, 'error');
             submitBtn.disabled = false;
             submitBtn.textContent = '로그인';
 
-            // 세션 만료(401)이면 로그인 페이지로
             if (res.status === 401) {
                 setTimeout(() => {
                     window.location.href = '/common/login';
@@ -180,7 +174,7 @@ submitBtn.addEventListener('click', async () => {
     }
 });
 
-/* 취소 버튼 */
+/* 로그인 OTP 인증 취소 */
 cancelBtn.addEventListener('click', () => {
     if (confirm('로그인을 취소하시겠습니까?')) {
         clearInterval(timerInterval);
@@ -188,4 +182,5 @@ cancelBtn.addEventListener('click', () => {
     }
 });
 
+/* 이메일 입력 포커스 해제 시 검증 */
 emailInput.addEventListener('blur', validateEmail);

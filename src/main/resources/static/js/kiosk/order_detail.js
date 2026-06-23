@@ -1,6 +1,8 @@
+/* 주문 상세 상태 */
 let currentStatus = orderData.status || 'PENDING';
 
-document.addEventListener('DOMContentLoaded', function() {
+/* 주문 상세 화면 초기화 */
+document.addEventListener('DOMContentLoaded', function () {
     renderOrderItems();
     renderOrderTime();
     startTableStatusWatcher();
@@ -10,6 +12,7 @@ document.addEventListener('DOMContentLoaded', function() {
     pollOrderStatus();
 });
 
+/* 주문 상품 목록 렌더링 */
 function renderOrderItems() {
     const itemsContainer = document.getElementById('order-items');
     const items = Array.isArray(orderData.items)
@@ -27,6 +30,7 @@ function renderOrderItems() {
     `).join('');
 }
 
+/* 주문 시각 표시 */
 function renderOrderTime() {
     const orderedAt = orderData.orderedAt;
     if (!orderedAt) {
@@ -40,6 +44,7 @@ function renderOrderTime() {
     document.getElementById('order-time').innerText = `${hours}:${minutes}`;
 }
 
+/* 주문 상태 UI 갱신 */
 function updateStatusDisplay() {
     const status = currentStatus;
     const statusIcon = document.getElementById('status-icon');
@@ -50,12 +55,12 @@ function updateStatusDisplay() {
     const progressLabels = document.getElementById('progress-labels');
 
     const statusConfig = {
-        'ORDERED': { icon: 'clock', text: '주문 완료! 관리자 확인 중...', short: '주문 완료', progress: 20 },
-        'CONFIRMED': { icon: 'check-circle', text: '주문 확인! 조리 시작...', short: '주문 확인', progress: 40 },
-        'COOKING': { icon: 'flame', text: '조리 중입니다...', short: '조리 중', progress: 65 },
-        'DELIVERING': { icon: 'package-check', text: '배달 준비 중...', short: '서빙 준비', progress: 85 },
-        'COMPLETED': { icon: 'check-circle-2', text: '완료!', short: '완료', progress: 100 },
-        'CANCELLED': { icon: 'x-circle', text: '주문 취소됨', short: '취소', progress: 0 }
+        'ORDERED': {icon: 'clock', text: '주문 완료! 관리자 확인 중...', short: '주문 완료', progress: 20},
+        'CONFIRMED': {icon: 'check-circle', text: '주문 확인! 조리 시작...', short: '주문 확인', progress: 40},
+        'COOKING': {icon: 'flame', text: '조리 중입니다...', short: '조리 중', progress: 65},
+        'DELIVERING': {icon: 'package-check', text: '배달 준비 중...', short: '서빙 준비', progress: 85},
+        'COMPLETED': {icon: 'check-circle-2', text: '완료!', short: '완료', progress: 100},
+        'CANCELLED': {icon: 'x-circle', text: '주문 취소됨', short: '취소', progress: 0}
     };
 
     const config = statusConfig[status] || statusConfig['ORDERED'];
@@ -71,6 +76,7 @@ function updateStatusDisplay() {
     lucide.createIcons();
 }
 
+/* 주문 상태 주기 조회 */
 function pollOrderStatus() {
     const pollInterval = setInterval(() => {
         fetch(`/kiosk/order/api/${orderId}`)
@@ -99,11 +105,13 @@ function pollOrderStatus() {
     });
 }
 
+/* 테이블 청소 상태 감시 시작 */
 function startTableStatusWatcher() {
+    /* 테이블 상태 조회 및 청소 대기 화면 이동 */
     async function checkTableStatus() {
         try {
             const res = await fetch('/kiosk/table/status', {
-                headers: { 'Accept': 'application/json' },
+                headers: {'Accept': 'application/json'},
                 credentials: 'same-origin'
             });
             if (!res.ok) return;
@@ -129,6 +137,7 @@ function startTableStatusWatcher() {
     setInterval(checkTableStatus, 3000);
 }
 
+/* 주문 상태 표시 문구 변환 */
 function getStatusText(status) {
     const texts = {
         'ORDERED': '주문 완료',
@@ -141,24 +150,29 @@ function getStatusText(status) {
     return texts[status] || '상태 확인';
 }
 
+/* 메뉴 화면 이동 */
 function goToMenu() {
     window.location.href = `/kiosk/drinks?tableNumber=${tableNumber}`;
 }
 
+/* 장바구니 화면 이동 */
 function goToCart() {
     window.location.href = '/kiosk/cart';
 }
 
+/* 주문 취소 가능 상태 확인 */
 function canCancelOrder(status) {
     return status === 'ORDERED' || status === 'CONFIRMED';
 }
 
+/* 주문 취소 버튼 표시 갱신 */
 function updateCancelButtonVisibility() {
     const cancelBtn = document.getElementById('cancel-order-btn');
     if (!cancelBtn) return;
     cancelBtn.style.display = canCancelOrder(currentStatus) ? 'inline-flex' : 'none';
 }
 
+/* 주문 취소 요청 */
 async function cancelOrder() {
     if (!canCancelOrder(currentStatus)) {
         showToast('조리 시작 이후에는 취소할 수 없습니다.');
@@ -170,7 +184,7 @@ async function cancelOrder() {
     }
 
     try {
-        const response = await fetch(`/kiosk/order/${orderId}`, { method: 'DELETE' });
+        const response = await fetch(`/kiosk/order/${orderId}`, {method: 'DELETE'});
         const data = await response.json().catch(() => ({}));
 
         if (!response.ok || data.success === false) {
@@ -185,6 +199,7 @@ async function cancelOrder() {
     }
 }
 
+/* 토스트 메시지 표시 */
 function showToast(message) {
     const toast = document.createElement('div');
     toast.className = 'toast';
@@ -194,6 +209,7 @@ function showToast(message) {
     setTimeout(() => toast.remove(), 2500);
 }
 
+/* 관리자 상태 변경 컨트롤 초기화 */
 function initAdminControls() {
     const isAdmin = new URLSearchParams(window.location.search).get('admin') === 'true';
     const adminControlsDiv = document.getElementById('admin-controls');
@@ -205,11 +221,11 @@ function initAdminControls() {
     adminControlsDiv.style.display = 'block';
 
     const statuses = [
-        { key: 'ORDERED', label: '주문 완료' },
-        { key: 'CONFIRMED', label: '주문 확인' },
-        { key: 'COOKING', label: '조리 중' },
-        { key: 'DELIVERING', label: '배달 준비' },
-        { key: 'COMPLETED', label: '완료' }
+        {key: 'ORDERED', label: '주문 완료'},
+        {key: 'CONFIRMED', label: '주문 확인'},
+        {key: 'COOKING', label: '조리 중'},
+        {key: 'DELIVERING', label: '배달 준비'},
+        {key: 'COMPLETED', label: '완료'}
     ];
 
     const controlsContainer = document.getElementById('order-status-controls');
@@ -235,12 +251,13 @@ function initAdminControls() {
     }).join('');
 }
 
+/* 관리자 주문 상태 변경 요청 */
 async function changeOrderStatus(newStatus) {
     try {
         const response = await fetch(`/kiosk/order/${orderId}/status`, {
             method: 'PATCH',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ status: newStatus })
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({status: newStatus})
         });
 
         const data = await response.json();

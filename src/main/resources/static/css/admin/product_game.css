@@ -1,3 +1,4 @@
+/* 색상 변수 */
 :root {
     --primary-blue: #3b82f6;
     --danger-red: #ef4444;
@@ -6,6 +7,7 @@
     --border-color: #e2e8f0;
 }
 
+/* 상단 헤더 */
 .header-flex {
     display: flex;
     justify-content: space-between;
@@ -167,6 +169,7 @@
     color: var(--text-dark);
 }
 
+/* 상태 배지 */
 .status-badge {
     padding: 4px 8px;
     border-radius: 6px;
@@ -184,6 +187,7 @@
     color: #ef4444;
 }
 
+/* 테이블 액션 버튼 */
 .action-group {
     display: flex;
     gap: 8px;
@@ -224,6 +228,7 @@
     border-color: #dcfce7;
 }
 
+/* 게임 등록 버튼 */
 .btn-add-product {
     background: var(--primary-blue);
     color: white;
@@ -235,6 +240,7 @@
     text-decoration: none;
 }
 
+/* 빈 목록 */
 .empty-row td {
     text-align: center;
     color: #94a3b8;
@@ -274,13 +280,11 @@
     color: white;
 }
 
-/* 숨김 배지 */
 .badge-hidden {
     background: #f1f5f9;
     color: #64748b;
 }
 
-/* 수정 버튼 */
 .btn-edit {
     color: var(--primary-blue);
     border-color: #dbeafe;

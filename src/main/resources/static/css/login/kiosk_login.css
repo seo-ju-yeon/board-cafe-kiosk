@@ -1,4 +1,4 @@
-/* 기본 레이아웃 */
+/* 레이아웃 */
 body {
     margin: 0;
     padding: 0;
@@ -182,6 +182,7 @@ input:focus {
     animation: slideDown 0.3s ease;
 }
 
+/* 에러 메시지 상단 진입 */
 @keyframes slideDown {
     from {
         opacity: 0;

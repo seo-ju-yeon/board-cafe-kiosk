@@ -1,5 +1,11 @@
-* { margin: 0; padding: 0; box-sizing: border-box; }
+/* 기본값 */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
 
+/* 레이아웃 */
 body {
     font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
     background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
@@ -12,6 +18,7 @@ body {
     padding: 20px;
 }
 
+/* 성공 안내 컨테이너 */
 .container {
     display: flex;
     flex-direction: column;
@@ -20,27 +27,44 @@ body {
     animation: fadeInUp 0.5s ease;
 }
 
+/* 애니메이션 */
+/* 결제 성공 정보 상승 표시 */
 @keyframes fadeInUp {
-    from { opacity: 0; transform: translateY(30px); }
-    to   { opacity: 1; transform: translateY(0); }
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
-.check-icon { width: 110px; height: 110px; margin-bottom: 8px; }
+/* 결제 성공 정보 */
+.check-icon {
+    width: 110px;
+    height: 110px;
+    margin-bottom: 8px;
+}
 
-h1 { font-size: 2.6rem; font-weight: 800; margin: 0; }
+h1 {
+    font-size: 2.6rem;
+    font-weight: 800;
+    margin: 0;
+}
 
 .amount {
     font-size: 2.2rem;
     font-weight: 700;
-    background: rgba(255,255,255,0.15);
+    background: rgba(255, 255, 255, 0.15);
     padding: 14px 32px;
     border-radius: 20px;
-    border: 2px solid rgba(255,255,255,0.3);
+    border: 2px solid rgba(255, 255, 255, 0.3);
 }
 
 .point-badge {
-    background: rgba(255,255,255,0.2);
-    border: 2px solid rgba(255,255,255,0.35);
+    background: rgba(255, 255, 255, 0.2);
+    border: 2px solid rgba(255, 255, 255, 0.35);
     padding: 10px 24px;
     border-radius: 14px;
     font-size: 1.15rem;
@@ -52,7 +76,10 @@ h1 { font-size: 2.6rem; font-weight: 800; margin: 0; }
     opacity: 0.65;
 }
 
-.thanks { font-size: 1.05rem; opacity: 0.85; }
+.thanks {
+    font-size: 1.05rem;
+    opacity: 0.85;
+}
 
 .redirect-msg {
     font-size: 0.88rem;
@@ -60,10 +87,11 @@ h1 { font-size: 2.6rem; font-weight: 800; margin: 0; }
     margin-top: 8px;
 }
 
+/* 자동 이동 진행 바 */
 .progress-bar {
     width: 200px;
     height: 4px;
-    background: rgba(255,255,255,0.25);
+    background: rgba(255, 255, 255, 0.25);
     border-radius: 4px;
     overflow: hidden;
 }
@@ -75,7 +103,12 @@ h1 { font-size: 2.6rem; font-weight: 800; margin: 0; }
     animation: progress 3s linear forwards;
 }
 
+/* 자동 이동 진행률 채움 */
 @keyframes progress {
-    from { width: 0; }
-    to   { width: 100%; }
+    from {
+        width: 0;
+    }
+    to {
+        width: 100%;
+    }
 }

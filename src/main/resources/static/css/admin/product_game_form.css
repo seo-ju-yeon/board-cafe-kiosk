@@ -1,3 +1,4 @@
+/* 색상 변수 */
 :root {
     --primary-blue: #3b82f6;
     --danger-red: #ef4444;
@@ -6,6 +7,7 @@
     --border-color: #e2e8f0;
 }
 
+/* 상단 헤더 */
 .header-flex {
     display: flex;
     justify-content: space-between;
@@ -19,6 +21,7 @@
     color: var(--text-dark);
 }
 
+/* 게임 입력 폼 */
 .form-card {
     background: white;
     border-radius: 15px;
@@ -86,6 +89,7 @@
     cursor: pointer;
 }
 
+/* 이미지 미리보기 */
 .image-preview-box {
     width: 100%;
     height: 160px;
@@ -112,6 +116,7 @@
     text-align: center;
 }
 
+/* 재고 항목 목록 */
 .section-divider {
     border: none;
     border-top: 1px solid var(--border-color);
@@ -272,6 +277,7 @@
     padding: 4px 0;
 }
 
+/* 하단 버튼 */
 .btn-group {
     display: flex;
     gap: 12px;

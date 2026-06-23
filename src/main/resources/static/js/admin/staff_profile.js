@@ -1,4 +1,4 @@
-// 수정사항 2: 스크립트 로직 업데이트
+/* 프로필 수정 요청 */
 function updateProfile() {
     const name = document.getElementById('userName').value.trim();
     const password = document.getElementById('newPassword').value;
@@ -9,10 +9,10 @@ function updateProfile() {
         return;
     }
 
-    // 비밀번호 변경 시도 시 체크 (4자 이상으로 수정)
+    // 비밀번호 변경 요청이 있을 때만 검증
     if (password || confirmPw) {
         if (password.length < 4) {
-            alert("비밀번호는 8자 이상이어야 합니다.");
+            alert("비밀번호는 4자 이상이어야 합니다.");
             return;
         }
         if (password !== confirmPw) {
@@ -21,7 +21,6 @@ function updateProfile() {
         }
     }
 
-    // OTP 섹션 표시 및 기존 저장 버튼 숨김
     document.getElementById('otpSection').style.display = 'block';
     document.getElementById('initialSaveBtn').style.display = 'none';
 
@@ -29,6 +28,7 @@ function updateProfile() {
     sendOtp();
 }
 
+/* OTP 발송 */
 function sendOtp() {
     fetch('/admin/staff/profile/send-otp', { method: 'POST' })
         .then(res => {
@@ -44,6 +44,7 @@ function sendOtp() {
         });
 }
 
+/* OTP 인증 후 저장 */
 function submitWithOtp() {
     const otp = document.getElementById('otpInput').value.trim();
     if (otp.length !== 6) {

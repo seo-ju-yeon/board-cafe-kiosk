@@ -1,16 +1,19 @@
+/* 관리자 대시보드 전역 상태 */
 let currentTableId = null;
 let currentTableStatus = null;
-let serialAssignContext = { orderId: null, gameName: '', quantity: 1 };
-let rentalReturnContext = { orderId: null, gameName: '', quantity: 1 };
+let serialAssignContext = {orderId: null, gameName: '', quantity: 1};
+let rentalReturnContext = {orderId: null, gameName: '', quantity: 1};
 let pendingOrdersState = [];
 let latestModalOrderItems = [];
 const checkoutMetaCache = new Map();
 
+/* 신규 주문 ID 정규화 */
 function parsePendingOrderId(order) {
     const id = Number(order?.id ?? order?.orderId ?? 0);
     return Number.isFinite(id) && id > 0 ? id : 0;
 }
 
+/* 게임 대여 주문 여부 확인 */
 function isGameOnlyPendingOrder(order) {
     const items = Array.isArray(order?.items) ? order.items
         : (Array.isArray(order?.orderItems) ? order.orderItems : []);
@@ -18,6 +21,7 @@ function isGameOnlyPendingOrder(order) {
     return items.every(item => Number(item?.price ?? item?.menuPrice ?? 0) === 0);
 }
 
+/* 미확인 메시지 영역 숨김 */
 function hideMessageBox() {
     const box = document.getElementById('unreadMsgBox');
     const btn = document.getElementById('readBtn');
@@ -25,6 +29,7 @@ function hideMessageBox() {
     if (btn) btn.style.display = 'none';
 }
 
+/* 테이블 카드 실시간 금액 표시 */
 function syncCardLiveAmount(tableId, amount) {
     if (!tableId) return;
     const card = document.querySelector(`.table-card[data-id="${tableId}"]`);
@@ -35,6 +40,7 @@ function syncCardLiveAmount(tableId, amount) {
     }
 }
 
+/* 모달 정산 금액 렌더링 */
 async function renderModalLiveTotal(menuAmount) {
     const priceSpan = document.getElementById('totalPrice');
     if (!priceSpan) return;
@@ -58,6 +64,7 @@ async function renderModalLiveTotal(menuAmount) {
     syncCardLiveAmount(currentTableId, total);
 }
 
+/* 주문 목록 렌더링 */
 function renderOrders(orders, activeRentals = []) {
     const listDiv = document.getElementById('orderList');
     const priceSpan = document.getElementById('totalPrice');
@@ -68,13 +75,16 @@ function renderOrders(orders, activeRentals = []) {
 
     let orderItems = orders;
     if (!Array.isArray(orders)) {
-        if (orders?.items) { orderItems = orders.items; }
-        else if (orders?.orderItems) { orderItems = orders.orderItems; }
-        else { orderItems = []; }
+        if (orders?.items) {
+            orderItems = orders.items;
+        } else if (orders?.orderItems) {
+            orderItems = orders.orderItems;
+        } else {
+            orderItems = [];
+        }
     }
 
-    // WebSocket에서 OrdersDTO[] 형태(주문 헤더 + items[])로 오는 경우를
-    // 모달 표시용 OrderItem[] 형태로 평탄화한다.
+    // REST와 WebSocket 응답 형태가 달라 주문 헤더 배열은 항목 배열로 평탄화한다.
     if (Array.isArray(orderItems) && orderItems.length > 0) {
         const sample = orderItems[0];
         const hasNestedItems = sample?.items || sample?.orderItems;
@@ -181,52 +191,71 @@ function renderOrders(orders, activeRentals = []) {
 
         if (isGameRequest) {
             if (currentStatus === 'ORDERED') {
-                statusText = '게임 요청'; badgeBg = '#fff3cd'; badgeColor = '#856404';
+                statusText = '게임 요청';
+                badgeBg = '#fff3cd';
+                badgeColor = '#856404';
                 actionHtml = Array.from(gameQtyByName.entries()).map(([name, qty]) => `
                                 <button style="${btnSerial}" onclick='openGameSerialModal(${orderId}, ${JSON.stringify(name)}, ${qty})'>${name} 일련번호 선택</button>
                             `).join('');
             } else if (currentStatus === 'CONFIRMED') {
                 const hasAnyActiveRental = Array.from(gameQtyByName.keys()).some(name => (activeRentalCountByGame.get(name) || 0) > 0);
                 if (!hasAnyActiveRental) return '';
-                statusText = '대여 중'; badgeBg = '#d1ecf1'; badgeColor = '#0c5460';
+                statusText = '대여 중';
+                badgeBg = '#d1ecf1';
+                badgeColor = '#0c5460';
                 actionHtml = Array.from(gameQtyByName.entries()).map(([name, qty]) => {
                     const activeCount = activeRentalCountByGame.get(name) || 0;
                     if (activeCount <= 0) return '';
                     return `<button style="${btnReturn}" onclick='openRentalReturnModal(${orderId}, ${JSON.stringify(name)}, ${qty})'>${name} 반납</button>`;
                 }).join('');
             } else {
-                statusText = '대여 완료'; badgeBg = '#d1ecf1'; badgeColor = '#0c5460';
+                statusText = '대여 완료';
+                badgeBg = '#d1ecf1';
+                badgeColor = '#0c5460';
             }
         } else {
-            switch(currentStatus) {
+            switch (currentStatus) {
                 case 'ORDERED':
-                    statusText = '주문 완료'; badgeBg = '#fff3cd'; badgeColor = '#856404';
+                    statusText = '주문 완료';
+                    badgeBg = '#fff3cd';
+                    badgeColor = '#856404';
                     actionHtml = `
                                     <button style="${btnNext}" onclick="updateOrderStatus(${orderId}, 'CONFIRMED')">확인</button>
                                     <button style="${btnCancel}" onclick="updateOrderStatus(${orderId}, 'CANCELLED')">취소</button>`;
                     break;
                 case 'CONFIRMED':
-                    statusText = '주문 확인'; badgeBg = '#d1ecf1'; badgeColor = '#0c5460';
+                    statusText = '주문 확인';
+                    badgeBg = '#d1ecf1';
+                    badgeColor = '#0c5460';
                     actionHtml = `
                                     <button style="${btnNext}" onclick="updateOrderStatus(${orderId}, 'COOKING')">조리</button>
                                     <button style="${btnCancel}" onclick="updateOrderStatus(${orderId}, 'CANCELLED')">취소</button>`;
                     break;
                 case 'COOKING':
-                    statusText = '조리 중'; badgeBg = '#fde8e8'; badgeColor = '#721c24';
+                    statusText = '조리 중';
+                    badgeBg = '#fde8e8';
+                    badgeColor = '#721c24';
                     actionHtml = `
                                     <button style="${btnNext}" onclick="updateOrderStatus(${orderId}, 'DELIVERING')">배달</button>`;
                     break;
                 case 'DELIVERING':
-                    statusText = '배달 준비'; badgeBg = '#d4edda'; badgeColor = '#155724';
+                    statusText = '배달 준비';
+                    badgeBg = '#d4edda';
+                    badgeColor = '#155724';
                     actionHtml = `<button style="${btnNext}" onclick="updateOrderStatus(${orderId}, 'COMPLETED')">완료</button>`;
                     break;
                 case 'COMPLETED':
-                    statusText = '완료'; badgeBg = '#c8e6c9'; badgeColor = '#1b5e20';
+                    statusText = '완료';
+                    badgeBg = '#c8e6c9';
+                    badgeColor = '#1b5e20';
                     break;
                 case 'CANCELLED':
-                    statusText = '취소됨'; badgeBg = '#ffcdd2'; badgeColor = '#c62828';
+                    statusText = '취소됨';
+                    badgeBg = '#ffcdd2';
+                    badgeColor = '#c62828';
                     break;
-                default: statusText = currentStatus;
+                default:
+                    statusText = currentStatus;
             }
         }
 
@@ -270,6 +299,7 @@ function renderOrders(orders, activeRentals = []) {
     fetchRentedGameItems();
 }
 
+/* 선택된 테이블 카드의 주문 미니 배지 갱신 */
 function updateTableCardOrderStatus(latest) {
     const selectedCard = document.querySelector(`.table-card[data-id="${currentTableId}"]`);
     if (!selectedCard) return;
@@ -288,6 +318,7 @@ function updateTableCardOrderStatus(latest) {
     miniBadge.classList.add('visible');
 }
 
+/* 일반 주문 일괄 다음 단계 처리 */
 async function changeAllOrdersStatus() {
     const orders = document.querySelectorAll('.order-item-wrapper');
     const targets = Array.from(orders)
@@ -296,7 +327,7 @@ async function changeAllOrdersStatus() {
             const orderId = Number(orderItem.getAttribute('data-order-id'));
             const currentStatus = orderItem.getAttribute('data-status') || '';
             const nextStatus = getNextOrderStatus(currentStatus);
-            return { orderId, currentStatus, nextStatus };
+            return {orderId, currentStatus, nextStatus};
         })
         .filter(t => t.orderId > 0 && t.nextStatus);
 
@@ -319,6 +350,7 @@ async function changeAllOrdersStatus() {
     else alert(`주문 상태 변경 실패 (ID: ${target.orderId})`);
 }
 
+/* 일반 주문 다음 상태 계산 */
 function getNextOrderStatus(currentStatus) {
     if (currentStatus === 'ORDERED') return 'CONFIRMED';
     if (currentStatus === 'CONFIRMED') return 'COOKING';
@@ -327,6 +359,7 @@ function getNextOrderStatus(currentStatus) {
     return null;
 }
 
+/* 확인창 없이 주문 상태 변경 */
 async function updateOrderStatusSilent(orderId, nextStatus) {
     try {
         const headers = getJsonHeaders();
@@ -334,15 +367,16 @@ async function updateOrderStatusSilent(orderId, nextStatus) {
         const response = await fetch(`/admin/api/dashboard/orders/${orderId}/status`, {
             method: 'PATCH',
             headers,
-            body: JSON.stringify({ status: nextStatus })
+            body: JSON.stringify({status: nextStatus})
         });
         return response.ok;
     } catch (e) {
-        console.error('일괄 상태 변경 실패:', { orderId, nextStatus, error: e });
+        console.error('일괄 상태 변경 실패:', {orderId, nextStatus, error: e});
         return false;
     }
 }
 
+/* 주문 상태 변경 */
 async function updateOrderStatus(orderId, nextStatus) {
     const id = Number(orderId || 0);
     if (id <= 0) {
@@ -368,6 +402,7 @@ async function updateOrderStatus(orderId, nextStatus) {
     }
 }
 
+/* 주문 상태 일괄 변경 버튼 표시 제어 */
 function updateOrderStatusButton() {
     const btn = document.getElementById('orderStatusBtn');
     const orders = document.querySelectorAll('.order-item-wrapper');
@@ -387,6 +422,7 @@ function updateOrderStatusButton() {
     if (btn) btn.style.display = hasActiveOrder ? 'inline-flex' : 'none';
 }
 
+/* 테이블 상세 모달 열기 */
 async function openTableModal(element) {
     document.querySelectorAll('.table-card').forEach(c => c.classList.remove('selected'));
     element.classList.add('selected');
@@ -409,8 +445,7 @@ async function openTableModal(element) {
     }
 
     if (currentTableStatus === 'OCCUPIED') {
-        // 모달 오픈 즉시 REST로 1회 로드해서 첫 화면 공백을 방지하고,
-        // 이후 WebSocket 업데이트를 계속 수신한다.
+        // 첫 화면 공백을 막기 위해 REST로 즉시 조회한 뒤 WebSocket 갱신을 이어받는다.
         await fetchActiveOrders();
         await fetchRentedGameItems();
         subscribeToTableOrders(parseInt(currentTableId));
@@ -418,9 +453,12 @@ async function openTableModal(element) {
         renderOrders([]);
     }
 
-    if (hasMsg) { await fetchUnreadMessages(); }
+    if (hasMsg) {
+        await fetchUnreadMessages();
+    }
 }
 
+/* 테이블 상세 모달 닫기 */
 function closeTableModal() {
     const modal = document.getElementById('tableModal');
     if (modal) {
@@ -437,6 +475,7 @@ function closeTableModal() {
     currentTableStatus = null;
 }
 
+/* 테이블 미확인 메시지 조회 */
 async function fetchUnreadMessages() {
     try {
         const response = await fetch(`/admin/dashboard/messages/${currentTableId}`);
@@ -449,18 +488,26 @@ async function fetchUnreadMessages() {
                 document.getElementById('readBtn').style.display = 'block';
             }
         }
-    } catch (err) { console.error(err); }
+    } catch (err) {
+        console.error(err);
+    }
 }
 
+/* 테이블 메시지 읽음 처리 */
 async function handleReadMessage() {
     if (!currentTableId) return;
     if (!confirm("요청 내용을 모두 확인하셨습니까?")) return;
     try {
-        const response = await fetch(`/admin/dashboard/messages/${currentTableId}/read`, { method: 'PATCH' });
-        if (response.ok) { location.reload(); }
-    } catch (err) { console.error(err); }
+        const response = await fetch(`/admin/dashboard/messages/${currentTableId}/read`, {method: 'PATCH'});
+        if (response.ok) {
+            location.reload();
+        }
+    } catch (err) {
+        console.error(err);
+    }
 }
 
+/* 선택 테이블의 주문 및 대여 현황 조회 */
 async function fetchActiveOrders() {
     try {
         const [orderResponse, rentalResponse] = await Promise.all([
@@ -477,11 +524,13 @@ async function fetchActiveOrders() {
     }
 }
 
+/* 금액 0원 항목을 게임 대여 주문으로 분류 */
 function isGameOrderItem(item) {
     const price = Number(item?.price ?? item?.menuPrice ?? 0);
     return price === 0;
 }
 
+/* 테이블 카드에 표시할 최신 주문 상태 계산 */
 function computeLatestOrderStatus(orderItems) {
     if (!Array.isArray(orderItems) || orderItems.length === 0) return null;
 
@@ -492,7 +541,7 @@ function computeLatestOrderStatus(orderItems) {
         return !isGameOrderItem(item);
     });
 
-    // 게임 주문만 남아있으면 ORDERED / 대여 완료(그 외) 2단계만 표시한다.
+    // 게임 주문만 남은 경우에는 요청/대여 완료 흐름으로 단순화한다.
     if (validGameItems.length > 0 && !hasNormalActive) {
         const hasGameRequested = validGameItems.some(item => item?.status === 'ORDERED');
         return {
@@ -528,6 +577,7 @@ function computeLatestOrderStatus(orderItems) {
     };
 }
 
+/* 테이블 카드 미니 배지 문구 */
 function getMiniBadgeLabel(status, gameFlow) {
     const normalLabels = {
         ORDERED: '주문 접수',
@@ -548,6 +598,7 @@ function getMiniBadgeLabel(status, gameFlow) {
     return labels[status] || (gameFlow ? '대여 완료' : '주문 진행중');
 }
 
+/* 전체 이용 중 테이블의 주문 미니 배지 갱신 */
 async function refreshTableCardOrderBadges() {
     const cards = Array.from(document.querySelectorAll('.table-card.status-occupied'));
     if (!cards.length) return;
@@ -559,7 +610,7 @@ async function refreshTableCardOrderBadges() {
 
         try {
             const res = await fetch(`/admin/dashboard/${tableId}/orders`, {
-                headers: { 'Accept': 'application/json' },
+                headers: {'Accept': 'application/json'},
                 credentials: 'same-origin'
             });
             if (!res.ok) return;
@@ -587,6 +638,7 @@ async function refreshTableCardOrderBadges() {
     }));
 }
 
+/* 주문 응답 형태 정규화 */
 function toOrderItems(input) {
     if (!Array.isArray(input) || input.length === 0) return [];
 
@@ -612,6 +664,7 @@ function toOrderItems(input) {
     return flattened;
 }
 
+/* 취소 주문을 제외한 메뉴 주문 합계 계산 */
 function calcLiveAmount(orderItems) {
     const items = toOrderItems(orderItems);
     return items.reduce((sum, item) => {
@@ -623,6 +676,7 @@ function calcLiveAmount(orderItems) {
     }, 0);
 }
 
+/* 정산 메타 정보 조회 */
 async function fetchCheckoutMeta(tableId) {
     const cacheKey = String(tableId);
     const now = Date.now();
@@ -632,7 +686,7 @@ async function fetchCheckoutMeta(tableId) {
     }
 
     const res = await fetch(`/admin/dashboard/${tableId}/checkout-meta`, {
-        headers: { 'Accept': 'application/json' },
+        headers: {'Accept': 'application/json'},
         credentials: 'same-origin'
     });
     if (!res.ok) {
@@ -652,6 +706,7 @@ async function fetchCheckoutMeta(tableId) {
     return meta;
 }
 
+/* 초/밀리초 단위 타임스탬프 정규화 */
 function normalizeEpochMillis(rawValue) {
     const n = Number(rawValue);
     if (!n || Number.isNaN(n)) return 0;
@@ -659,6 +714,7 @@ function normalizeEpochMillis(rawValue) {
     return n;
 }
 
+/* 패키지 이용 시간 초과 요금 계산 */
 function calcOverCharge(meta) {
     const durationMinutes = Number(meta?.durationMinutes || 0);
     const extraPricePerMin = Number(meta?.extraPricePerMin || 0);
@@ -676,6 +732,7 @@ function calcOverCharge(meta) {
     return overUnits * extraPricePerMin * partySize;
 }
 
+/* 테이블 카드별 실시간 정산 금액 갱신 */
 async function refreshTableCardLiveAmounts() {
     const cards = Array.from(document.querySelectorAll('.table-card.status-occupied'));
     if (!cards.length) return;
@@ -686,7 +743,7 @@ async function refreshTableCardLiveAmounts() {
 
         try {
             const res = await fetch(`/admin/dashboard/${tableId}/orders`, {
-                headers: { 'Accept': 'application/json' },
+                headers: {'Accept': 'application/json'},
                 credentials: 'same-origin'
             });
             if (!res.ok) continue;
@@ -714,22 +771,27 @@ async function refreshTableCardLiveAmounts() {
     }
 }
 
+/* 테이블 상태 변경 API 호출 */
 async function callUpdateStatus(status) {
     try {
         const response = await fetch(`/admin/dashboard/${currentTableId}/status`, {
             method: 'PATCH',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ status: status })
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({status: status})
         });
         const result = await response.json();
-        if (response.ok) { location.reload(); }
-        else { alert("❌ " + (result.error || "상태 변경에 실패했습니다.")); }
+        if (response.ok) {
+            location.reload();
+        } else {
+            alert("❌ " + (result.error || "상태 변경에 실패했습니다."));
+        }
     } catch (err) {
         console.error(err);
         alert("서버와 통신 중 오류가 발생했습니다.");
     }
 }
 
+/* 정산 페이지 이동 처리 */
 function handlePayment() {
     if (!currentTableId) {
         alert('선택된 테이블이 없습니다.');
@@ -739,10 +801,10 @@ function handlePayment() {
         alert("이용 중인 테이블만 결제가 가능합니다.");
         return;
     }
-    // 결제완료 버튼은 항상 정산 페이지(checkout)로 즉시 이동한다.
     moveToCheckoutPage();
 }
 
+/* 정산 페이지 이동 */
 function moveToCheckoutPage() {
     if (!currentTableId) {
         alert('테이블 정보를 확인할 수 없어 정산 페이지로 이동할 수 없습니다.');
@@ -751,17 +813,19 @@ function moveToCheckoutPage() {
     window.location.href = `/admin/dashboard/${currentTableId}/checkout`;
 }
 
+/* JSON 요청 공통 헤더 */
 function getJsonHeaders() {
-    const headers = { 'Content-Type': 'application/json', 'Accept': 'application/json' };
+    const headers = {'Content-Type': 'application/json', 'Accept': 'application/json'};
     const csrfToken = document.querySelector('meta[name="_csrf"]')?.getAttribute('content');
     const csrfHeader = document.querySelector('meta[name="_csrf_header"]')?.getAttribute('content');
     if (csrfToken && csrfHeader) headers[csrfHeader] = csrfToken;
     return headers;
 }
 
+/* 게임 대여 일련번호 선택 모달 */
 async function openGameSerialModal(orderId, gameName, quantity) {
     if (!currentTableId) return;
-    serialAssignContext = { orderId, gameName, quantity: Math.max(1, Number(quantity) || 1) };
+    serialAssignContext = {orderId, gameName, quantity: Math.max(1, Number(quantity) || 1)};
 
     const modal = document.getElementById('serialAssignModal');
     const title = document.getElementById('serialAssignTitle');
@@ -794,6 +858,7 @@ async function openGameSerialModal(orderId, gameName, quantity) {
     }
 }
 
+/* 게임 대여 일련번호 선택 모달 닫기 */
 function closeGameSerialModal() {
     const modal = document.getElementById('serialAssignModal');
     if (!modal) return;
@@ -802,6 +867,7 @@ function closeGameSerialModal() {
     if (content) content.style.transform = 'translateY(-20px)';
 }
 
+/* 선택한 게임 일련번호 대여 처리 */
 async function submitGameSerialAssignment() {
     if (!currentTableId || !serialAssignContext.gameName) return;
     const selected = Array.from(document.querySelectorAll('.serial-checkbox:checked'))
@@ -841,6 +907,7 @@ async function submitGameSerialAssignment() {
     }
 }
 
+/* 게임 반납 모달 열기 */
 async function openRentalReturnModal(orderId, gameName, quantity) {
     if (!currentTableId) return;
     rentalReturnContext = {
@@ -891,6 +958,7 @@ async function openRentalReturnModal(orderId, gameName, quantity) {
     }
 }
 
+/* 게임 반납 모달 닫기 */
 function closeRentalReturnModal() {
     const modal = document.getElementById('rentalReturnModal');
     if (!modal) return;
@@ -899,6 +967,7 @@ function closeRentalReturnModal() {
     if (content) content.style.transform = 'translateY(-20px)';
 }
 
+/* 선택한 대여 게임 반납 처리 */
 async function submitRentalReturn() {
     if (!currentTableId) return;
 
@@ -944,6 +1013,7 @@ async function submitRentalReturn() {
     }
 }
 
+/* 테이블별 게임 대여/반납 현황 렌더링 */
 async function fetchRentedGameItems() {
     if (!currentTableId) return;
     const box = document.getElementById('rentedGameList');
@@ -981,7 +1051,7 @@ async function fetchRentedGameItems() {
                 if (!orderId || !gameName || qty <= 0) continue;
 
                 const key = `${orderId}::${gameName}`;
-                const cur = byOrder.get(key) || { orderId, gameName, quantity: 0 };
+                const cur = byOrder.get(key) || {orderId, gameName, quantity: 0};
                 cur.quantity += qty;
                 byOrder.set(key, cur);
             }
@@ -1053,6 +1123,7 @@ async function fetchRentedGameItems() {
     }
 }
 
+/* 대시보드 내 대여 목록에서 선택 반납 처리 */
 async function settleSelectedRentedFromList() {
     if (!currentTableId) return;
 
@@ -1074,7 +1145,7 @@ async function settleSelectedRentedFromList() {
         const res = await fetch(`/admin/product/game-items/rentals/settle`, {
             method: 'PATCH',
             headers: getJsonHeaders(),
-            body: JSON.stringify({ tableId: Number(currentTableId), updates })
+            body: JSON.stringify({tableId: Number(currentTableId), updates})
         });
         const data = await res.json().catch(() => ({}));
         if (!res.ok || data.success === false) {
@@ -1090,6 +1161,7 @@ async function settleSelectedRentedFromList() {
     }
 }
 
+/* 빈테이블 전환 전 대여 게임 상태 확인 */
 async function openPaymentGameCheckModal() {
     if (!currentTableId) return;
 
@@ -1136,6 +1208,7 @@ async function openPaymentGameCheckModal() {
     }
 }
 
+/* 대여 게임 상태 확인 모달 닫기 */
 function closePaymentGameCheckModal() {
     const modal = document.getElementById('paymentGameCheckModal');
     if (!modal) return;
@@ -1144,6 +1217,7 @@ function closePaymentGameCheckModal() {
     if (content) content.style.transform = 'translateY(-20px)';
 }
 
+/* 대여 게임 상태 반영 후 빈테이블 전환 */
 async function confirmPaymentWithGameItemCheck() {
     if (!currentTableId) return;
     const updates = Array.from(document.querySelectorAll('.payment-game-status')).map(el => ({
@@ -1157,7 +1231,7 @@ async function confirmPaymentWithGameItemCheck() {
             const res = await fetch(`/admin/product/game-items/rentals/settle`, {
                 method: 'PATCH',
                 headers: getJsonHeaders(),
-                body: JSON.stringify({ tableId: Number(currentTableId), updates })
+                body: JSON.stringify({tableId: Number(currentTableId), updates})
             });
             const data = await res.json().catch(() => ({}));
             if (!res.ok || data.success === false) {
@@ -1172,6 +1246,7 @@ async function confirmPaymentWithGameItemCheck() {
     }
 }
 
+/* 테이블 상태 전환 */
 async function handleStatusUpdate() {
     if (!currentTableId || !currentTableStatus) return;
 
@@ -1187,24 +1262,36 @@ async function handleStatusUpdate() {
 
     let nextStatus = '';
     let confirmMsg = '';
-    if (currentTableStatus === 'EMPTY') { nextStatus = 'OCCUPIED'; confirmMsg = "손님 입실 처리를 하시겠습니까?"; }
-    else if (currentTableStatus === 'OCCUPIED') { nextStatus = 'CLEANING'; confirmMsg = "퇴실 및 청소 중 상태로 변경하시겠습니까?"; }
-    else if (currentTableStatus === 'CLEANING') {
+    if (currentTableStatus === 'EMPTY') {
+        nextStatus = 'OCCUPIED';
+        confirmMsg = "손님 입실 처리를 하시겠습니까?";
+    } else if (currentTableStatus === 'OCCUPIED') {
+        nextStatus = 'CLEANING';
+        confirmMsg = "퇴실 및 청소 중 상태로 변경하시겠습니까?";
+    } else if (currentTableStatus === 'CLEANING') {
         openPaymentGameCheckModal();
         return;
     }
 
-    if (confirm(confirmMsg)) { await callUpdateStatus(nextStatus); }
+    if (confirm(confirmMsg)) {
+        await callUpdateStatus(nextStatus);
+    }
 }
 
+/* 전체 테이블 및 운영 데이터 초기화 */
 async function handleTotalReset() {
     if (!confirm("⚠️ 주의: 모든 데이터가 초기화됩니다. 진행하시겠습니까?")) return;
     try {
-        const response = await fetch('/admin/dashboard/reset', { method: 'DELETE' });
-        if (response.ok) { location.reload(); }
-    } catch (err) { console.error(err); }
+        const response = await fetch('/admin/dashboard/reset', {method: 'DELETE'});
+        if (response.ok) {
+            location.reload();
+        }
+    } catch (err) {
+        console.error(err);
+    }
 }
 
+/* 직원 메시지 발송 모달 열기 */
 function openMessageModal() {
     const targetSelect = document.getElementById('targetTableSelect');
     targetSelect.innerHTML = '<option value="">테이블을 선택하세요</option>';
@@ -1228,6 +1315,7 @@ function openMessageModal() {
     }
 }
 
+/* 직원 메시지 발송 모달 닫기 */
 function closeMessageModal() {
     const modal = document.getElementById('messageModal');
     if (modal) {
@@ -1239,6 +1327,7 @@ function closeMessageModal() {
     document.getElementById('macroMessageSelect').value = '';
 }
 
+/* 직원 발송용 매크로 메시지 조회 */
 async function fetchMacroMessagesForAdmin() {
     try {
         const response = await fetch('/admin/macro/api?direction=STAFF_TO_TABLE');
@@ -1259,9 +1348,12 @@ async function fetchMacroMessagesForAdmin() {
                 }
             });
         }
-    } catch (err) { console.error("매크로 메세지 로딩 실패:", err); }
+    } catch (err) {
+        console.error("매크로 메세지 로딩 실패:", err);
+    }
 }
 
+/* 테이블 또는 전체 테이블로 메시지 전송 */
 async function submitMessage() {
     const tableSelect = document.getElementById('targetTableSelect');
     const messageSelect = document.getElementById('macroMessageSelect');
@@ -1280,14 +1372,14 @@ async function submitMessage() {
     try {
         const response = await fetch('/admin/macro/api/send', {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: {'Content-Type': 'application/json'},
             body: JSON.stringify(sendData)
         });
 
         if (response.ok) {
             alert(tableId === "ALL" ? '📢 전체 메세지가 전송되었습니다.' : '✅ 메세지가 전송되었습니다.');
             closeMessageModal();
-            if(tableId === "ALL") location.reload();
+            if (tableId === "ALL") location.reload();
         } else {
             const errorData = await response.text();
             alert('❌ 전송 실패: ' + errorData);
@@ -1298,6 +1390,7 @@ async function submitMessage() {
     }
 }
 
+/* 신규 주문 목록 조회 */
 async function fetchPendingOrders() {
     try {
         const response = await fetch('/admin/api/dashboard/orders/latest');
@@ -1316,6 +1409,7 @@ async function fetchPendingOrders() {
     }
 }
 
+/* 신규 주문 알림 영역 렌더링 */
 function renderPendingOrders(orders) {
     const section = document.getElementById('pending-orders-section');
     const list = document.getElementById('pending-orders-list');
@@ -1370,6 +1464,7 @@ function renderPendingOrders(orders) {
     }).join('');
 }
 
+/* 신규 일반 주문 일괄 확인 */
 async function confirmAllPendingOrders() {
     const visible = pendingOrdersState.filter(order => {
         const id = parsePendingOrderId(order);
@@ -1411,6 +1506,7 @@ async function confirmAllPendingOrders() {
     }
 }
 
+/* 신규 주문 단건 확인 */
 async function confirmPendingOrder(orderId) {
     const id = Number(orderId || 0);
     if (id <= 0) return;
@@ -1433,6 +1529,7 @@ async function confirmPendingOrder(orderId) {
     alert(`일반 신규 주문 1건을 확인했습니다. (ID: ${id})`);
 }
 
+/* 신규 게임 주문의 테이블 모달 열기 */
 async function openPendingGameOrder(tableId) {
     const numericTableId = Number(tableId || 0);
     if (!numericTableId) {
@@ -1441,7 +1538,7 @@ async function openPendingGameOrder(tableId) {
     }
     let card = document.querySelector(`.table-card[data-id="${numericTableId}"]`);
     if (!card) {
-        // 백엔드가 tableId 대신 tableNumber를 내려준 경우를 대비한 폴백
+        // 일부 응답이 tableId 대신 tableNumber를 내려주는 경우를 보정한다.
         card = document.querySelector(`.table-card[data-num="${numericTableId}"]`);
     }
     if (!card) {
@@ -1451,6 +1548,7 @@ async function openPendingGameOrder(tableId) {
     await openTableModal(card);
 }
 
+/* 대시보드 주기 갱신 초기화 */
 document.addEventListener('DOMContentLoaded', () => {
     fetchPendingOrders();
     refreshTableCardOrderBadges();
@@ -1468,14 +1566,14 @@ document.addEventListener('DOMContentLoaded', () => {
     async function pollTableSnapshot() {
         try {
             const res = await fetch('/admin/dashboard/tables', {
-                headers: { 'Accept': 'application/json' },
+                headers: {'Accept': 'application/json'},
                 credentials: 'same-origin'
             });
             if (!res.ok) return;
 
             const contentType = res.headers.get('content-type') || '';
             if (!contentType.includes('application/json')) {
-                // 세션 만료 등으로 로그인 HTML이 반환된 경우
+                // 세션 만료 등으로 로그인 HTML이 반환되면 로그인 화면으로 이동한다.
                 if (res.redirected && res.url) {
                     window.location.href = res.url;
                 }
@@ -1494,20 +1592,20 @@ document.addEventListener('DOMContentLoaded', () => {
                 const currentHasMsg = card.classList.contains('has-msg');
                 const serverHasMsg = !!t.hasUnreadMessage;
 
-                // 상태 변경 감지
+                // 테이블 상태가 바뀌면 카드 목록 전체를 새로 맞춘다.
                 if (currentStatus !== t.status) {
                     changed = true;
                     break;
                 }
 
-                // 메시지 알림 점은 페이지 리로드 없이 즉시 반영
+                // 메시지 알림 점은 페이지 리로드 없이 즉시 반영한다.
                 if (currentHasMsg !== serverHasMsg) {
                     if (serverHasMsg) card.classList.add('has-msg');
                     else card.classList.remove('has-msg');
                 }
             }
 
-            // 모달이 열려있으면 사용자 작업 방해를 피하기 위해 갱신 보류
+            // 모달 작업 중에는 리로드를 보류해 직원 입력 흐름을 끊지 않는다.
             const tableModal = document.getElementById('tableModal');
             const isModalOpen = tableModal && tableModal.style.display === 'flex';
             if (changed && !isModalOpen) {

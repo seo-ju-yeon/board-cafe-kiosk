@@ -1,18 +1,20 @@
+/* Lucide 아이콘 초기화 */
 lucide.createIcons();
 
+/* 게임 주문 상세 상태 */
 const gameDetailState = window.gameDetailState || {};
 const tableNumber = Number(gameDetailState.tableNumber || 0);
 const orderId = Number(gameDetailState.orderId || 0);
 const orderData = gameDetailState.order || {};
-const requestedGames = Array.isArray(gameDetailState.requestedGames)
-    ? gameDetailState.requestedGames
-    : [];
+const requestedGames = Array.isArray(gameDetailState.requestedGames) ? gameDetailState.requestedGames : [];
 
+/* 테이블 청소 상태 감시 시작 */
 function startTableStatusWatcher() {
+    /* 테이블 상태 조회 및 청소 대기 화면 이동 */
     async function checkTableStatus() {
         try {
             const res = await fetch('/kiosk/table/status', {
-                headers: { 'Accept': 'application/json' },
+                headers: {'Accept': 'application/json'},
                 credentials: 'same-origin'
             });
             if (!res.ok) return;
@@ -38,6 +40,7 @@ function startTableStatusWatcher() {
     setInterval(checkTableStatus, 3000);
 }
 
+/* 선택 게임 상세 정보 렌더링 */
 function renderDetail(game) {
     const image = document.getElementById('game-image');
     image.src = game.imageUrl || '';
@@ -53,6 +56,7 @@ function renderDetail(game) {
         : '설명이 등록되지 않았습니다.';
 }
 
+/* 요청 게임 목록 렌더링 */
 function renderList() {
     const listEl = document.getElementById('game-list');
     if (!Array.isArray(requestedGames) || requestedGames.length === 0) {
@@ -79,9 +83,11 @@ function renderList() {
     renderDetail(requestedGames[0]);
 }
 
+/* 게임 목록 화면 이동 */
 function goToMenu() {
     window.location.href = `/kiosk/games?tableNumber=${tableNumber}`;
 }
 
+/* 게임 주문 상세 화면 초기화 */
 startTableStatusWatcher();
 renderList();

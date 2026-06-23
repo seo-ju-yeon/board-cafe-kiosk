@@ -151,7 +151,7 @@
     min-width: 80px;
 }
 
-/* 버튼 호버 */
+/* 버튼 상호작용 */
 .btn-table:hover {
     background: #f8fafc;
     transform: translateY(-2px);
@@ -178,7 +178,7 @@
     border-color: var(--danger-red);
 }
 
-/* 카테고리 추가 버튼 */
+/* 카테고리 등록 버튼 */
 .btn-add-product {
     background: var(--primary-blue);
     color: white;
@@ -222,6 +222,7 @@
     animation: modalIn 0.2s ease;
 }
 
+/* 카테고리 모달 등장 */
 @keyframes modalIn {
     from {
         opacity: 0;
@@ -359,6 +360,7 @@
     background: var(--danger-red);
 }
 
+/* 플래시 토스트 진입 */
 @keyframes toastIn {
     from {
         opacity: 0;
@@ -370,6 +372,7 @@
     }
 }
 
+/* 플래시 토스트 퇴장 */
 @keyframes toastOut {
     from {
         opacity: 1;

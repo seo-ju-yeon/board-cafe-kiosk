@@ -1,3 +1,4 @@
+/* 상품 검색 */
 function filterProducts() {
     const input = document.querySelector('.search-input').value.toLowerCase();
     const rows = document.querySelectorAll('#productList tr:not(.empty-row)');

@@ -1,5 +1,11 @@
-* { margin: 0; padding: 0; box-sizing: border-box; }
+/* 기본값 */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
 
+/* 레이아웃 */
 body {
     font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
     background: #f4f6f8;
@@ -11,6 +17,7 @@ body {
     padding: 20px;
 }
 
+/* 실패 안내 카드 */
 .container {
     display: flex;
     flex-direction: column;
@@ -19,20 +26,38 @@ body {
     background: white;
     padding: 50px 40px;
     border-radius: 28px;
-    box-shadow: 0 8px 30px rgba(0,0,0,0.08);
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.08);
     max-width: 460px;
     width: 100%;
     animation: fadeIn 0.4s ease;
 }
 
+/* 애니메이션 */
+/* 결제 실패 카드 등장 */
 @keyframes fadeIn {
-    from { opacity: 0; transform: translateY(20px); }
-    to   { opacity: 1; transform: translateY(0); }
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
-.fail-icon { width: 90px; height: 90px; color: #f44336; margin-bottom: 8px; }
+/* 실패 메시지 */
+.fail-icon {
+    width: 90px;
+    height: 90px;
+    color: #f44336;
+    margin-bottom: 8px;
+}
 
-h1 { font-size: 2rem; font-weight: 800; color: #333; }
+h1 {
+    font-size: 2rem;
+    font-weight: 800;
+    color: #333;
+}
 
 .error-msg {
     font-size: 1rem;
@@ -45,6 +70,7 @@ h1 { font-size: 2rem; font-weight: 800; color: #333; }
     width: 100%;
 }
 
+/* 버튼 */
 .button-group {
     display: flex;
     gap: 12px;
@@ -66,14 +92,18 @@ h1 { font-size: 2rem; font-weight: 800; color: #333; }
 .retry-btn {
     background: #007bff;
     color: white;
-    box-shadow: 0 4px 12px rgba(0,123,255,0.3);
+    box-shadow: 0 4px 12px rgba(0, 123, 255, 0.3);
 }
 
-.retry-btn:hover { background: #0056b3; }
+.retry-btn:hover {
+    background: #0056b3;
+}
 
 .back-btn {
     background: #f0f2f5;
     color: #666;
 }
 
-.back-btn:hover { background: #e0e2e7; }
+.back-btn:hover {
+    background: #e0e2e7;
+}

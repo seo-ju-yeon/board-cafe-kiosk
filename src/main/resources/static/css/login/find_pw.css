@@ -195,6 +195,7 @@ input.input-error {
     animation: blink 0.8s step-start infinite;
 }
 
+/* 인증 만료 임박 타이머 깜빡임 */
 @keyframes blink {
     50% {
         opacity: 0.3;

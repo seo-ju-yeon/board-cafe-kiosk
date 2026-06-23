@@ -1,5 +1,7 @@
+/* 외부 폰트 */
 @import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css');
 
+/* 색상 변수 */
 :root {
     --guide-blue: #4FC3F7;
     --guide-blue-dark: #0288D1;
@@ -7,10 +9,12 @@
     --bg-color: #FFFFFF;
 }
 
+/* 기본값 */
 * {
     box-sizing: border-box;
 }
 
+/* 키오스크 프레임 */
 body {
     font-family: 'Pretendard', sans-serif;
     background: linear-gradient(120deg, #e0f2f1 0%, #f5f5f5 100%);
@@ -34,7 +38,7 @@ body {
     position: relative;
 }
 
-/* ── 왼쪽 AI 구역 ── */
+/* AI 안내 캐릭터 영역 */
 .ai-guide-zone {
     flex: 1.2;
     background: #E1F5FE;
@@ -47,6 +51,7 @@ body {
     position: relative;
 }
 
+/* AI 캐릭터 애니메이션 */
 .ai-character {
     width: 240px;
     height: 240px;
@@ -75,6 +80,7 @@ body {
     transition: 0.3s;
 }
 
+/* AI 캐릭터 물결 형태 변형 */
 @keyframes waveMorph {
     0% {
         border-radius: 60% 40% 30% 70% / 60% 30% 70% 40%;
@@ -98,6 +104,7 @@ body {
     background: #E1F5FE;
 }
 
+/* AI 캐릭터 녹음 중 부유 */
 @keyframes float {
     0%, 100% {
         transform: translateY(0) rotate(0deg);
@@ -119,6 +126,7 @@ body {
     animation: shadowScale 1.5s infinite ease-in-out;
 }
 
+/* AI 캐릭터 그림자 크기 변화 */
 @keyframes shadowScale {
     0%, 100% {
         transform: scale(1);
@@ -130,6 +138,7 @@ body {
     }
 }
 
+/* STT 상태 표시 */
 .stt-bubble {
     margin-top: 24px;
     background: white;
@@ -146,6 +155,7 @@ body {
     word-break: keep-all;
 }
 
+/* 녹음 타이머 */
 .countdown-bar-wrap {
     width: 90%;
     height: 6px;
@@ -168,6 +178,7 @@ body {
     transition: width linear;
 }
 
+/* 마이크 버튼 */
 .mic-btn {
     margin-top: 28px;
     width: 76px;
@@ -179,12 +190,12 @@ body {
     color: white;
     cursor: pointer;
     box-shadow: 0 8px 0 #C62828;
-    transition: transform 0.15s, box-shadow 0.15s, background 0.2s; /* [수정 포인트] 부드러운 색상 전환을 위해 transition 속성 추가 */
+    transition: transform 0.15s, box-shadow 0.15s, background 0.2s;
 }
 
 .mic-btn:active {
     transform: translateY(4px);
-    box-shadow: 0 4px 0 #C62828 !important; /* [수정 포인트] 클릭 시에도 동적으로 변경된 그림자 색상 유지되도록 !important 적용 */
+    box-shadow: 0 4px 0 #C62828 !important;
 }
 
 .mic-btn:disabled {
@@ -193,7 +204,7 @@ body {
     cursor: not-allowed;
 }
 
-/* ── 오른쪽 콘텐츠 구역 ── */
+/* AI 답변 콘텐츠 영역 */
 .content-zone {
     flex: 1.5;
     background: white;
@@ -243,6 +254,7 @@ body {
     white-space: nowrap;
 }
 
+/* TTS 설정 패널 */
 .settings-panel {
     background: #F0F4F8;
     border-radius: 14px;
@@ -325,6 +337,7 @@ body {
     line-height: 1.8;
 }
 
+/* STT 보정 입력 */
 .feedback-box {
     margin-top: 16px;
     padding: 18px;
@@ -338,6 +351,7 @@ body {
     animation: slideUp 0.3s;
 }
 
+/* STT 보정 입력 영역 상승 표시 */
 @keyframes slideUp {
     from {
         opacity: 0;
@@ -381,7 +395,7 @@ body {
     border-color: var(--guide-blue);
 }
 
-/* ── 가상 키보드 ── */
+/* 가상 키보드 */
 .vk-wrap {
     margin-top: 10px;
     display: none;
@@ -459,6 +473,7 @@ body {
     align-self: flex-end;
 }
 
+/* 하단 액션 버튼 */
 .action-btns {
     display: flex;
     gap: 12px;
@@ -491,6 +506,7 @@ body {
     filter: brightness(0.95);
 }
 
+/* 로딩 스피너 */
 .spinner {
     display: none;
     width: 22px;
@@ -506,6 +522,7 @@ body {
     display: inline-block;
 }
 
+/* 로딩 스피너 회전 */
 @keyframes spin {
     to {
         transform: rotate(360deg);

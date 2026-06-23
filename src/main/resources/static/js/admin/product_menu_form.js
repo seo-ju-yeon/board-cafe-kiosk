@@ -1,4 +1,4 @@
-/* 이미지 파일 선택 시 미리보기 표시 */
+/* 이미지 미리보기 */
 function previewImage(event) {
     const file = event.target.files[0];
     if (!file) return;

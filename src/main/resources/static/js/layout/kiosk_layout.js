@@ -1,44 +1,49 @@
+/* 키오스크 메뉴 페이지 이동 */
 function navigateMenu(menu) {
     window.location.href = `/kiosk/${menu}`;
 }
 
+/* 장바구니 페이지 이동 */
 function navigateCart() {
     window.location.href = `/kiosk/cart`;
 }
 
+/* 정산 확인 후 결제 페이지 이동 */
 function navigateCheckout() {
     if (confirm('정산하시겠습니까?')) window.location.href = `/kiosk/checkout`;
 }
 
+/* 직원 호출 모달 열기 */
 function openServiceModal() {
     document.getElementById('serviceModal').classList.add('active');
 }
 
+/* 직원 호출 모달 닫기 */
 function closeServiceModal() {
     document.getElementById('serviceModal').classList.remove('active');
 }
 
-/* ================= 스크린세이버 로직 추가 ================= */
+/* 스크린세이버 이동 처리 */
 let idleTimer;
 
+/* 사용자 미입력 시간 초기화 */
 function resetIdleTimer() {
     clearTimeout(idleTimer);
-    // 30초 동안 활동이 없으면 screensaver로 이동
+    // 30초 동안 활동이 없을 때 스크린세이버로 이동
     idleTimer = setTimeout(() => {
         localStorage.setItem('returnUrl', window.location.pathname);
         window.location.href = '/kiosk/screensaver';
     }, 30000);
 }
 
-// 활동 감지 이벤트 리스너 등록
+/* 사용자 활동 감지 */
 window.onload = resetIdleTimer;
 window.onmousemove = resetIdleTimer;
 window.onclick = resetIdleTimer;
 window.onkeydown = resetIdleTimer;
 window.ontouchstart = resetIdleTimer;
 
-/* ======================================================= */
-
+/* 직원 호출 요청 전송 */
 async function callService(serviceType) {
     try {
         const res = await fetch('/kiosk/service-request', {
@@ -57,9 +62,12 @@ async function callService(serviceType) {
     }
 }
 
+/* 이용 시간 타이머 시작 */
 function startTimer() {
     const timerText = document.getElementById('timer-text');
     const badge = document.getElementById('timer-badge');
+
+    /* 남은 시간/초과 시간 포맷 변환 */
     const formatHoursMinutes = (ms) => {
         const totalMinutes = Math.floor(ms / 60000);
         const hours = Math.floor(totalMinutes / 60);
@@ -74,6 +82,7 @@ function startTimer() {
 
     const endTime = SESSION_START_TIME + (DURATION_MINUTES * 60 * 1000);
 
+    /* 현재 시각 기준 타이머 갱신 */
     function tick() {
         const now = Date.now();
         const remaining = endTime - now;
@@ -91,6 +100,7 @@ function startTimer() {
     setInterval(tick, 1000);
 }
 
+/* 토스트 메시지 표시 */
 function showToast(message, durationMs = 2000) {
     const toast = document.createElement('div');
     toast.className = 'toast';
@@ -99,6 +109,7 @@ function showToast(message, durationMs = 2000) {
     setTimeout(() => toast.remove(), durationMs);
 }
 
+/* 메뉴 상품 즉시 장바구니 추가 */
 async function addItemToCartDirect(btn) {
     const item = btn.closest('.menu-item');
     const menuName = item.dataset.name;
@@ -126,6 +137,7 @@ async function addItemToCartDirect(btn) {
     }
 }
 
+/* 키오스크 공통 감시 기능 초기화 */
 document.addEventListener('DOMContentLoaded', () => {
     startTimer();
     startTableStatusWatcher();
@@ -133,7 +145,9 @@ document.addEventListener('DOMContentLoaded', () => {
     startStaffMacroWatcher();
 });
 
+/* 테이블 청소 상태 감시 시작 */
 function startTableStatusWatcher() {
+    /* 테이블 상태 조회 및 청소 대기 화면 이동 */
     async function checkTableStatus() {
         try {
             const res = await fetch('/kiosk/table/status', {
@@ -161,7 +175,9 @@ function startTableStatusWatcher() {
     setInterval(checkTableStatus, 3000);
 }
 
+/* 직원 매크로 메시지 감시 시작 */
 function startStaffMacroWatcher() {
+    /* 읽지 않은 직원 메시지 조회 및 읽음 처리 */
     async function checkStaffMessages() {
         try {
             const res = await fetch('/kiosk/messages/staff/unread', {
@@ -195,7 +211,7 @@ function startStaffMacroWatcher() {
     setInterval(checkStaffMessages, 5000);
 }
 
-// 주문 상태 감시 함수
+/* 주문 상태 감시 */
 function startOrderStatusWatcher() {
     const statusBox = document.getElementById('order-status-box');
     const statusText = document.getElementById('order-status-text');
@@ -203,12 +219,14 @@ function startOrderStatusWatcher() {
     const gameStatusText = document.getElementById('game-status-text');
     let lastOrderCount = 0;
 
+    /* 게임 대여 주문 여부 확인 */
     const isGameOnlyOrder = (order) => {
         const items = Array.isArray(order?.items) ? order.items : (Array.isArray(order?.orderItems) ? order.orderItems : []);
         if (!items.length) return false;
         return items.every(item => Number(item?.price ?? item?.menuPrice ?? 0) === 0);
     };
 
+    /* 주문 상태 표시 문구 변환 */
     const toStatusLabel = (status, gameFlow) => {
         const normalLabels = {
             ORDERED: '주문 완료',
@@ -226,11 +244,14 @@ function startOrderStatusWatcher() {
         return (gameFlow ? gameLabels : normalLabels)[status] || status;
     };
 
+    /* 일반 주문 상세 페이지 이동 */
     const goToOrderDetail = () => {
         const orderId = statusBox.dataset.orderId;
         if (!orderId) return;
         window.location.href = `/kiosk/order/${orderId}`;
     };
+
+    /* 게임 대여 주문 상세 페이지 이동 */
     const goToGameDetail = () => {
         const orderId = gameStatusBox.dataset.orderId;
         if (!orderId) return;
@@ -252,6 +273,7 @@ function startOrderStatusWatcher() {
         }
     });
 
+    /* 활성 주문 조회 및 상태 배지 갱신 */
     function checkOrderStatus() {
         fetch('/kiosk/order/active')
             .then(async response => {
@@ -270,7 +292,7 @@ function startOrderStatusWatcher() {
                     return;
                 }
 
-                // 완료되지 않은 주문만 필터링
+                // 완료되지 않은 주문만 표시
                 const activeOrders = orders.filter(o => o.status !== 'COMPLETED' && o.status !== 'CANCELLED');
                 const normalOrders = activeOrders.filter(o => !isGameOnlyOrder(o));
                 const gameOrders = activeOrders.filter(o => isGameOnlyOrder(o));
@@ -317,7 +339,7 @@ function startOrderStatusWatcher() {
             });
     }
 
-    // 초기 실행 및 5초마다 체크
+    // 초기 실행 후 5초마다 상태 갱신
     checkOrderStatus();
     setInterval(checkOrderStatus, 5000);
 }

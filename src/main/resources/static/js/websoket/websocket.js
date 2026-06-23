@@ -1,69 +1,61 @@
 /**
  * 관리자 대시보드 - 웹소켓 실시간 주문 동기화
  *
- * [제거된 항목]
- * - currentTableId 선언 → dashboard.html에서 선언
- * - openTableModal 래핑 → dashboard.html 원본 사용
- * - closeTableModal 래핑 → dashboard.html 원본 사용
- * - DOMContentLoaded 내 fetchPendingOrders 폴링 → dashboard.html에서 5초 폴링 수행
+ * 역할:
+ * - 신규 주문/게임 요청 실시간 수신
+ * - 선택 테이블 주문 목록 구독
+ * - 주문 상태 변경 API 호출
+ * - 대시보드 주문 목록 및 테이블 배지 갱신
  */
 
+/* WebSocket 연결 상태 */
 let stompClient = null;
 let tableOrderSubscription = null;
 let commonChannelSubscribed = false;
 
-// ===================================================
-// 1. 웹소켓 연결 (자동 실행)
-// ===================================================
-
+/* WebSocket 연결 */
 function connectWebSocket() {
     if (stompClient && stompClient.connected) {
-        console.log('이미 연결됨');
+        // console.log('이미 연결됨');
         return;
     }
 
     const socket = new SockJS('/ws/orders');
     stompClient = Stomp.over(socket);
 
-    stompClient.connect({}, function(frame) {
-        console.log('✅ WebSocket 연결됨');
+    stompClient.connect({}, function (frame) {
+        // console.log('✅ WebSocket 연결됨');
         subscribeToChannels();
-    }, function(error) {
+    }, function (error) {
         console.error('❌ WebSocket 연결 실패:', error);
         setTimeout(connectWebSocket, 3000);
     });
 }
 
-// ===================================================
-// 2. 채널 구독
-// ===================================================
-
+/* 공통 주문 채널 구독 */
 function subscribeToChannels() {
     if (!stompClient || !stompClient.connected) return;
     if (commonChannelSubscribed) return;
 
-    // 신규 일반 주문 알림
-    stompClient.subscribe('/topic/new-orders', function(message) {
+    // 신규 일반 주문 알림 수신
+    stompClient.subscribe('/topic/new-orders', function (message) {
         const order = JSON.parse(message.body);
-        console.log('🚨 신규 일반 주문:', order);
+        // console.log('🚨 신규 일반 주문:', order);
         onNewOrder(order);
     });
 
-    // 신규 게임 요청 알림 (일반 주문 알림창과 분리)
-    stompClient.subscribe('/topic/new-game-orders', function(message) {
+    // 신규 게임 요청 알림 수신
+    stompClient.subscribe('/topic/new-game-orders', function (message) {
         const order = JSON.parse(message.body);
-        console.log('🎲 신규 게임 요청:', order);
+        // console.log('🎲 신규 게임 요청:', order);
         onNewGameOrder(order);
     });
 
     commonChannelSubscribed = true;
-    console.log('✅ 채널 구독 완료');
+    // console.log('✅ 채널 구독 완료');
 }
 
-// ===================================================
-// 3. 테이블 선택 시 주문 구독
-// ===================================================
-
+/* 선택 테이블 주문 채널 구독 */
 function subscribeToTableOrders(tableId) {
     if (!stompClient || !stompClient.connected) {
         console.warn('WebSocket 미연결 - REST 폴백');
@@ -71,30 +63,26 @@ function subscribeToTableOrders(tableId) {
         return;
     }
 
-    // 기존 테이블 구독이 있으면 먼저 해제한다.
+    // 기존 테이블 구독 해제 후 새 테이블 구독
     unsubscribeFromOrders();
 
-    // 테이블별 주문 구독
-    tableOrderSubscription = stompClient.subscribe(`/topic/orders/${tableId}`, function(message) {
+    tableOrderSubscription = stompClient.subscribe(`/topic/orders/${tableId}`, function (message) {
         const orders = JSON.parse(message.body);
-        console.log(`📨 테이블 ${tableId} 주문:`, orders);
+        // console.log(`📨 테이블 ${tableId} 주문:`, orders);
         onOrdersUpdated(orders, tableId);
     });
 
-    // 초기 데이터 요청
+    // 구독 직후 초기 데이터 요청
     stompClient.send(`/app/subscribe/${tableId}`, {}, '');
-    console.log(`✅ 테이블 ${tableId} 구독`);
+    // console.log(`✅ 테이블 ${tableId} 구독`);
 }
 
-// ===================================================
-// 4. 구독 해제
-// ===================================================
-
+/* 선택 테이블 주문 구독 해제 */
 function unsubscribeFromOrders() {
     if (tableOrderSubscription) {
         try {
             tableOrderSubscription.unsubscribe();
-            console.log('📴 주문 구독 해제');
+            // console.log('📴 주문 구독 해제');
         } catch (e) {
             console.warn('주문 구독 해제 실패:', e);
         } finally {
@@ -103,10 +91,7 @@ function unsubscribeFromOrders() {
     }
 }
 
-// ===================================================
-// 5. 신규 주문 수신 처리
-// ===================================================
-
+/* 신규 일반 주문 수신 처리 */
 function onNewOrder(order) {
     showNewOrderNotificationModal(order);
     playNotificationSound();
@@ -118,8 +103,9 @@ function onNewOrder(order) {
     }
 }
 
+/* 신규 게임 주문 수신 처리 */
 function onNewGameOrder(order) {
-    // 게임 주문은 일반 주문 알림창과 분리: 목록만 갱신
+    // 일반 주문 알림창과 분리해 목록만 갱신
     if (typeof window.fetchPendingOrders === 'function') {
         window.fetchPendingOrders();
     }
@@ -128,10 +114,11 @@ function onNewGameOrder(order) {
     }
 }
 
+/* 신규 주문 알림 모달 표시 */
 function showNewOrderNotificationModal(order) {
     const modal = document.getElementById('newOrderNotificationModal');
     if (!modal) {
-        // 대시보드 템플릿에 모달이 없는 버전도 있으므로 예외 없이 종료
+        // 알림 모달이 없는 대시보드 템플릿 대응
         console.warn('⚠️ newOrderNotificationModal 없음 - 모달 표시 생략');
         return;
     }
@@ -183,12 +170,13 @@ function showNewOrderNotificationModal(order) {
         utterance.pitch = 1;
         speechSynthesis.speak(utterance);
     } catch (e) {
-        console.log('음성 알림 불가:', e);
+        // console.log('음성 알림 불가:', e);
     }
 
-    console.log('✅ 신규 주문 알림 모달 표시');
+    // console.log('✅ 신규 주문 알림 모달 표시');
 }
 
+/* 신규 주문 알림 모달 닫기 */
 function closeNewOrderNotification() {
     const modal = document.getElementById('newOrderNotificationModal');
     if (modal) {
@@ -206,9 +194,10 @@ function closeNewOrderNotification() {
             });
         }, 300);
     }
-    console.log('✅ 신규 주문 알림 모달 닫음');
+    // console.log('✅ 신규 주문 알림 모달 닫음');
 }
 
+/* 신규 주문 알림음 재생 */
 function playNotificationSound() {
     try {
         const audioContext = new (window.AudioContext || window.webkitAudioContext)();
@@ -239,35 +228,29 @@ function playNotificationSound() {
             osc2.stop(now2 + 0.2);
         }, 250);
 
-        console.log('🔊 사운드 알림 재생');
+        // console.log('🔊 사운드 알림 재생');
     } catch (e) {
-        console.log('⚠️ 사운드 알림 불가:', e.message);
+        // console.log('⚠️ 사운드 알림 불가:', e.message);
     }
 }
 
-// ===================================================
-// 6. 주문 목록 업데이트 처리
-// ===================================================
-
+/* 테이블 주문 목록 갱신 처리 */
 function onOrdersUpdated(orders, tableId) {
-    // 대기 주문 영역도 함께 갱신해서 신규 주문 누락을 방지
+    // 대기 주문 영역도 함께 갱신해 신규 주문 누락 방지
     if (typeof window.fetchPendingOrders === 'function') {
         window.fetchPendingOrders();
     }
-    // 모달은 REST 재조회로 렌더링(활성 대여 목록 포함)
+    // 활성 대여 목록 포함을 위해 모달 데이터 REST 재조회
     if (typeof fetchActiveOrders === 'function') {
         fetchActiveOrders();
     }
-    // 대시보드 카드의 상단 주문 상태 배지도 최신화
+    // 대시보드 카드의 상단 주문 상태 배지 최신화
     if (typeof refreshTableCardOrderBadges === 'function') {
         refreshTableCardOrderBadges();
     }
 }
 
-// ===================================================
-// 7. 주문 상태 변경 API
-// ===================================================
-
+/* 주문 상태 변경 API 요청 */
 async function updateOrderStatusViaApi(orderId, nextStatus) {
     if (!orderId) {
         alert('주문 번호를 찾을 수 없습니다.');
@@ -284,20 +267,19 @@ async function updateOrderStatusViaApi(orderId, nextStatus) {
     if (!confirm(confirmMsg)) return;
 
     try {
-        console.log('📝 주문 상태 변경 요청:', { orderId, nextStatus });
+        // console.log('📝 주문 상태 변경 요청:', { orderId, nextStatus });
 
-        // 버튼에서 요청한 상태를 그대로 서버에 전달한다.
-        // (대여 주문은 CANCELLED 같은 분기 상태가 있어 next-status 강제 보정과 충돌함)
+        // 버튼에서 요청한 상태를 그대로 서버에 전달
         const statusToSend = nextStatus;
 
-        // 관리자 대시보드 전용 API로 상태 변경
+        // 관리자 대시보드 전용 API 호출
         const response = await fetch(`/admin/api/dashboard/orders/${orderId}/status`, {
             method: 'PATCH',
             headers: {
                 'Content-Type': 'application/json',
                 'Accept': 'application/json'
             },
-            body: JSON.stringify({ status: statusToSend })
+            body: JSON.stringify({status: statusToSend})
         });
 
         if (response.ok) {
@@ -306,12 +288,12 @@ async function updateOrderStatusViaApi(orderId, nextStatus) {
             return;
         }
 
-        const errorData = await response.json().catch(() => ({ message: response.statusText }));
+        const errorData = await response.json().catch(() => ({message: response.statusText}));
         const errorMessage = errorData.message || errorData.error || "주문 상태 변경에 실패했습니다.";
 
-        // 동시성 충돌(이미 같은 상태/다른 상태로 변경됨) 시 최신값으로 재조회 후 안내
+        // 동시성 충돌 시 최신 상태 재조회 후 안내
         if (typeof errorMessage === 'string' && errorMessage.includes('허용되지 않는 상태 전이')) {
-            console.warn('⚠️ 상태 전이 충돌 감지 - 최신 상태 재조회', { orderId, statusToSend, errorMessage });
+            console.warn('⚠️ 상태 전이 충돌 감지 - 최신 상태 재조회', {orderId, statusToSend, errorMessage});
             if (typeof fetchActiveOrders === 'function') await fetchActiveOrders();
             alert('다른 화면에서 먼저 상태가 변경되었습니다. 최신 상태로 갱신했습니다.');
             return;
@@ -324,14 +306,12 @@ async function updateOrderStatusViaApi(orderId, nextStatus) {
     }
 }
 
+/* 전역 주문 상태 변경 함수 등록 */
 if (typeof window.updateOrderStatus !== 'function') {
     window.updateOrderStatus = updateOrderStatusViaApi;
 }
 
-// ===================================================
-// 9. 초기화 (페이지 로드 시) - WebSocket 연결만 담당
-// ===================================================
-
+/* WebSocket 연결 초기화 */
 document.addEventListener('DOMContentLoaded', () => {
     connectWebSocket();
 });

@@ -1,14 +1,15 @@
-const PAGE_SIZE     = 6;
+/* 패키지 목록 페이징 상태 */
+const PAGE_SIZE = 6;
 
-let currentPage       = 0; // 0-based
-let selectedPackageId   = null;
+let currentPage = 0;  // 현재 페이지 번호
+let selectedPackageId = null;
 let selectedPackageName = "";
 let selectedPackagePrice = 0;
 
-// ===== 페이지 렌더링 =====
+/* 패키지 페이지 렌더링 */
 function renderPage() {
-    const start   = currentPage * PAGE_SIZE;
-    const end     = start + PAGE_SIZE;
+    const start = currentPage * PAGE_SIZE;
+    const end = start + PAGE_SIZE;
     const pageItems = ALL_PACKAGES.slice(start, end);
     const totalPages = Math.ceil(ALL_PACKAGES.length / PAGE_SIZE);
 
@@ -34,19 +35,21 @@ function renderPage() {
         </div>`).join('');
     }
 
-    // 화살표 버튼 상태 업데이트
+    // 이전/다음 버튼 활성 상태 갱신
     document.getElementById('prev-btn').disabled = (currentPage === 0);
     document.getElementById('next-btn').disabled = (currentPage >= totalPages - 1);
 
     lucide.createIcons();
 }
 
+/* 패키지 이용 시간 표시값 변환 */
 function getDisplayTime(minutes) {
     if (!minutes) return 'Free';
     if (minutes < 60) return minutes + '분';
     return (minutes / 60) + '시간';
 }
 
+/* 이전 패키지 페이지 이동 */
 function prevPage() {
     if (currentPage > 0) {
         currentPage--;
@@ -54,6 +57,7 @@ function prevPage() {
     }
 }
 
+/* 다음 패키지 페이지 이동 */
 function nextPage() {
     const totalPages = Math.ceil(ALL_PACKAGES.length / PAGE_SIZE);
     if (currentPage < totalPages - 1) {
@@ -62,13 +66,13 @@ function nextPage() {
     }
 }
 
-// ===== 패키지 선택 =====
+/* 이용 패키지 선택 */
 function selectPackage(el) {
     document.querySelectorAll('.package-card').forEach(c => c.classList.remove('selected'));
     el.classList.add('selected');
 
-    selectedPackageId    = parseInt(el.dataset.id);
-    selectedPackageName  = el.dataset.name;
+    selectedPackageId = parseInt(el.dataset.id);
+    selectedPackageName = el.dataset.name;
     selectedPackagePrice = parseInt(el.dataset.price);
 
     const btn = document.getElementById('next-button');
@@ -76,13 +80,14 @@ function selectPackage(el) {
     btn.innerText = `[${selectedPackageName}] 선택 완료 - 메뉴로 이동`;
 }
 
+/* 선택 패키지 저장 후 메뉴 이동 */
 function completeSelection() {
     if (!selectedPackageId) return;
 
     fetch('/kiosk/package/select', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ packageId: selectedPackageId })
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({packageId: selectedPackageId})
     })
         .then(res => res.json())
         .then(data => {
@@ -97,5 +102,5 @@ function completeSelection() {
         });
 }
 
-// 초기 렌더링
+/* 패키지 선택 화면 초기 렌더링 */
 renderPage();

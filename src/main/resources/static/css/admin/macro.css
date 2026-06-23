@@ -1,10 +1,11 @@
-/* 기본 레이아웃 */
+/* 페이지 제목 */
 .page-title {
     font-size: 28px;
     font-weight: 700;
     margin-bottom: 24px;
 }
 
+/* 매크로 메시지 테이블 */
 .table-container {
     background: white;
     border-radius: 15px;
@@ -41,6 +42,7 @@
     color: #333;
 }
 
+/* 탭 메뉴 */
 .tabs {
     display: flex;
     gap: 10px;
@@ -68,6 +70,7 @@
     color: white;
 }
 
+/* 페이징 */
 .pagination {
     display: flex;
     justify-content: center;
@@ -96,6 +99,7 @@
     border-color: #007bff;
 }
 
+/* 버튼 */
 .btn-add {
     background: #007bff;
     color: white;
@@ -116,6 +120,7 @@
     cursor: pointer;
 }
 
+/* 모달 */
 .modal-overlay {
     display: none;
     position: fixed;
@@ -136,6 +141,7 @@
     width: 400px;
 }
 
+/* 입력 폼 */
 .form-control {
     width: 100%;
     padding: 10px;

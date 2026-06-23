@@ -1,3 +1,4 @@
+/* 페이지 제목 */
 .page-title {
     font-size: 28px;
     font-weight: 700;
@@ -170,6 +171,7 @@
     animation: modalIn 0.2s ease;
 }
 
+/* 포인트 내역 모달 등장 */
 @keyframes modalIn {
     from {
         opacity: 0;

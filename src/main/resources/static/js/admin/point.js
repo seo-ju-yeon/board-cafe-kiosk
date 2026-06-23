@@ -1,29 +1,4 @@
-/* ===================================================
-       전화번호 검색 (클라이언트 사이드 필터링)
-       =================================================== */
-/** filterTable() 함수가 DOM만 건드리는 클라이언트 필터라서, 그대로 두면 검색어를 서버로 못 보냅니다. */
-// function filterTable(keyword) {
-//     const rows    = document.querySelectorAll('#pointTableBody tr[data-phone]');
-//     const noResult = document.getElementById('noResultMsg');
-//     const trimmed = keyword.trim();
-//     let visibleCount = 0;
-//
-//     rows.forEach(row => {
-//         const phone = row.getAttribute('data-phone') || '';
-//         const match = trimmed === '' || phone.includes(trimmed);
-//         row.style.display = match ? '' : 'none';
-//         if (match) visibleCount++;
-//     });
-//
-//     noResult.style.display = (visibleCount === 0 && trimmed !== '') ? 'block' : 'none';
-// }
-//
-// function clearSearch() {
-//     document.getElementById('searchInput').value = '';
-//     filterTable('');
-// }
-
-// 이걸로 교체
+/* 전화번호 검색 */
 function doSearch() {
     const keyword = document.getElementById('searchInput').value.trim();
     const size = 10;
@@ -33,13 +8,12 @@ function doSearch() {
     location.href = url;
 }
 
+/* 검색 초기화 */
 function clearSearch() {
     location.href = '/admin/points/list?page=1&size=10';
 }
 
-/* ===================================================
-   History 모달
-   =================================================== */
+/* 포인트 이력 모달 */
 function openHistoryModal(pointId, phone) {
     document.getElementById('modalPhone').textContent = phone;
     document.getElementById('modalBody').innerHTML =
@@ -55,6 +29,7 @@ function openHistoryModal(pointId, phone) {
         });
 }
 
+/* 포인트 이력 렌더링 */
 function renderHistoryModal(list) {
     if (!list || list.length === 0) {
         document.getElementById('modalBody').innerHTML =
@@ -95,15 +70,17 @@ function renderHistoryModal(list) {
             </table>`;
 }
 
+/* 포인트 이력 모달 닫기 */
 function closeHistoryModal() {
     document.getElementById('historyModal').classList.remove('active');
 }
 
+/* 모달 외부 클릭 */
 function closeModalOnOverlay(e) {
     if (e.target === document.getElementById('historyModal')) closeHistoryModal();
 }
 
-/* ESC 키로 모달 닫기 */
+/* 키보드 닫기 */
 document.addEventListener('keydown', e => {
     if (e.key === 'Escape') closeHistoryModal();
 });

@@ -1,4 +1,9 @@
-* { box-sizing: border-box; }
+/* 기본값 */
+* {
+    box-sizing: border-box;
+}
+
+/* 레이아웃 */
 body {
     margin: 0;
     font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
@@ -10,6 +15,8 @@ body {
     color: #4e342e;
     overflow: hidden;
 }
+
+/* 안내 카드 */
 .container {
     width: min(92vw, 760px);
     background: rgba(255, 255, 255, 0.86);
@@ -19,6 +26,8 @@ body {
     text-align: center;
     box-shadow: 0 16px 40px rgba(0, 0, 0, 0.08);
 }
+
+/* 상태 아이콘 */
 .icon-wrap {
     width: 96px;
     height: 96px;
@@ -31,19 +40,28 @@ body {
     color: white;
     animation: pulse 1.8s infinite;
 }
-.icon-wrap i { width: 48px; height: 48px; }
+
+/* 안내 문구 */
+.icon-wrap i {
+    width: 48px;
+    height: 48px;
+}
+
 h1 {
     margin: 0;
     font-size: 2.1rem;
     font-weight: 800;
     color: #e65100;
 }
+
 .subtitle {
     margin-top: 14px;
     font-size: 1.05rem;
     color: #6d4c41;
     line-height: 1.55;
 }
+
+/* 대기 상태 배지 */
 .touch {
     margin-top: 28px;
     display: inline-flex;
@@ -57,17 +75,34 @@ h1 {
     font-weight: 700;
     animation: blink 1.6s infinite;
 }
+
+/* 테이블 정보 */
 .table {
     margin-top: 10px;
     font-size: 0.95rem;
     color: #8d6e63;
     font-weight: 600;
 }
+
+/* 애니메이션 */
+/* 대기 아이콘 확대/축소 */
 @keyframes pulse {
-    0%, 100% { transform: scale(1); opacity: 1; }
-    50% { transform: scale(1.06); opacity: 0.88; }
+    0%, 100% {
+        transform: scale(1);
+        opacity: 1;
+    }
+    50% {
+        transform: scale(1.06);
+        opacity: 0.88;
+    }
 }
+
+/* 대기 안내 배지 깜빡임 */
 @keyframes blink {
-    0%, 100% { opacity: 0.5; }
-    50% { opacity: 1; }
+    0%, 100% {
+        opacity: 0.5;
+    }
+    50% {
+        opacity: 1;
+    }
 }

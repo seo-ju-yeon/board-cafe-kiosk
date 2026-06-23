@@ -1,12 +1,9 @@
-/*
-         * [핵심] Thymeleaf가 서버 사이드에서 권한을 평가하여 JS 변수로 주입
-         * renderTable()에서 동적으로 버튼을 생성할 때 이 변수를 참조
-         */
-// const IS_ADMIN_OR_SUPER = /*[[${#authorization.expression('hasAnyRole(''ADMIN'', ''SUPER'')')}]]*/ false;
+/* 권한 상태 */
 const IS_ADMIN_OR_SUPER = document.getElementById('isAdminOrSuper') !== null;
 
-let currentDirection = 'STAFF_TO_TABLE'; // 기본값을 고정
+let currentDirection = 'STAFF_TO_TABLE';
 
+/* 탭 전환 */
 function openTab(evt) {
     const btn = evt.currentTarget;
     currentDirection = btn.getAttribute('data-dir');
@@ -18,17 +15,13 @@ function openTab(evt) {
     document.querySelectorAll('.tab-content').forEach(c => c.style.display = 'none');
     document.getElementById(tabId).style.display = 'block';
 
-    /*
-     * [수정] btnAddMacro는 ADMIN/SUPER에게만 렌더링되므로 null 체크 필수
-     * STAFF에게는 btnAddMacroDisabled가 렌더링됨
-     */
-    // STAFF는 btnAddMacro가 업으므로 null 체크
     const addBtn = document.getElementById('btnAddMacro');
     if (addBtn) addBtn.style.display = 'block';
 
     loadMacroList(currentDirection, 1);
 }
 
+/* 메시지 목록 조회 */
 function loadMacroList(direction, page) {
     fetch(`/admin/macro/list?direction=${direction}&page=${page}&size=10`)
         .then(res => res.json())
@@ -38,6 +31,7 @@ function loadMacroList(direction, page) {
         });
 }
 
+/* 메시지 목록 렌더링 */
 function renderTable(list, direction) {
     const tbody = document.getElementById('tbody-' + direction);
     if (!tbody) return;
@@ -48,15 +42,9 @@ function renderTable(list, direction) {
     }
 
     tbody.innerHTML = list.map(item => {
-        // [핵심] 서버 데이터에서 ID 역할을 하는 값을 강제로 찾습니다.
-        // item.id가 없으면 item.mno, 그것도 없으면 item.macroId를 순차적으로 대입
+        // 응답 DTO 필드명이 달라도 삭제 대상 ID를 찾을 수 있도록 보정
         const valId = item.id || item.mno || item.macroId || (item.dto && item.dto.id);
 
-        /*
-         * [핵심 수정] IS_ADMIN_OR_SUPER 변수로 삭제 버튼 분기
-         * renderTable()이 동적으로 DOM을 덮어써도 권한 체크가 유지됨
-         */
-        // IS_ADMIN_OR_SUPER로 동적 렌더링 시에도 권한 분기
         const deleteBtn = IS_ADMIN_OR_SUPER
             ? `<button type="button" class="btn-delete"
                                data-id="${valId}"
@@ -74,6 +62,7 @@ function renderTable(list, direction) {
     }).join('');
 }
 
+/* 페이지네이션 렌더링 */
 function renderPagination(data, direction) {
     const container = document.getElementById('macroPagination');
     let html = '';
@@ -83,11 +72,10 @@ function renderPagination(data, direction) {
     container.innerHTML = html;
 }
 
+/* 메시지 삭제 */
 function deleteMacro(btn) {
-    // 1. data-id 값을 가져옴
     let id = btn.getAttribute('data-id');
 
-    // 2. 검증 (undefined 문자열 방어)
     if (!id || id === 'undefined' || id === 'null') {
         alert("데이터 오류: 서버에서 ID를 보내주지 않았거나 필드명이 다릅니다.\nF12 -> Console 탭의 '데이터 원본'을 확인해주세요.");
         return;
@@ -109,14 +97,17 @@ function deleteMacro(btn) {
         .catch(err => console.error("통신 오류:", err));
 }
 
+/* 등록 모달 */
 function openAddModal() {
     document.getElementById('addMacroModal').style.display = 'flex';
 }
 
+/* 등록 모달 닫기 */
 function closeAddModal() {
     document.getElementById('addMacroModal').style.display = 'none';
 }
 
+/* 메시지 등록 */
 function submitNewMacro() {
     const direction = document.getElementById('newDirection').value;
     const messageText = document.getElementById('newMessageText').value.trim();
@@ -128,6 +119,7 @@ function submitNewMacro() {
     }).then(() => location.reload());
 }
 
+/* 초기화 */
 document.addEventListener('DOMContentLoaded', () => {
     const firstBtn = document.querySelector('.tab-btn');
     if (firstBtn) firstBtn.click();

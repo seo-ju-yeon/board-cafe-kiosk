@@ -24,7 +24,7 @@ function openAddModal() {
 
 /* 수정 모달 */
 function openEditModal(btn) {
-    const id   = btn.dataset.id;
+    const id = btn.dataset.id;
     const name = btn.dataset.name;
     const type = btn.dataset.type;
 
@@ -41,9 +41,9 @@ function openEditModal(btn) {
 
 /* 삭제 처리 */
 function handleDelete(btn) {
-    const id    = btn.dataset.id;
+    const id = btn.dataset.id;
     const count = parseInt(btn.dataset.count, 10);
-    const name  = btn.dataset.name;
+    const name = btn.dataset.name;
 
     if (count > 0) {
         document.getElementById('deleteBlockMsg').innerHTML =

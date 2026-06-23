@@ -1,5 +1,7 @@
+/* 스크린세이버 시작 영역 참조 */
 const screen = document.getElementById('tap-to-start');
 
+/* 스크린세이버 클릭 후 이전 화면 복귀 */
 screen.addEventListener('click', function() {
     const returnUrl = localStorage.getItem('returnUrl');
 
@@ -7,7 +9,7 @@ screen.addEventListener('click', function() {
         localStorage.removeItem('returnUrl');
         window.location.href = returnUrl;
     } else {
-        // 결제 완료 후 or 첫 진입 → 메뉴 화면으로
+        // 복귀 경로가 없을 때 인원 선택 화면으로 이동
         window.location.href = `/kiosk/headcount`;
     }
 });

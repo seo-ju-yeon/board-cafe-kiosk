@@ -1,9 +1,11 @@
+/* 기본값 */
 * {
     margin: 0;
     padding: 0;
     box-sizing: border-box;
 }
 
+/* 레이아웃 */
 body {
     font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
     background-color: #f4f6f8;
@@ -33,7 +35,7 @@ body {
     height: 24px;
 }
 
-/* 헤더 */
+/* 상단 헤더 */
 .header {
     background: white;
     padding: 20px 30px;
@@ -71,7 +73,7 @@ body {
     color: #333;
 }
 
-/* 장바구니 아이템 영역 */
+/* 장바구니 목록 영역 */
 .content {
     flex: 1;
     padding: 30px 40px;
@@ -96,6 +98,7 @@ body {
     background: #888;
 }
 
+/* 빈 장바구니 */
 .empty-cart {
     text-align: center;
     padding: 80px 20px;
@@ -115,6 +118,7 @@ body {
     color: #333;
 }
 
+/* 장바구니 아이템 카드 */
 .cart-item {
     background: white;
     border-radius: 20px;
@@ -153,7 +157,7 @@ body {
     margin-top: 5px;
 }
 
-/* 수량 조절 UI */
+/* 수량 조절 */
 .quantity-control {
     display: flex;
     align-items: center;
@@ -301,7 +305,7 @@ body {
     color: #555;
 }
 
-/* ========== 주문 확인 모달 ========== */
+/* 주문 확인 모달 */
 #order-confirm-modal {
     position: fixed;
     top: 0;
@@ -530,6 +534,7 @@ body {
     gap: 12px;
 }
 
+/* 주문 상태 카드 */
 .order-status-card {
     background: white;
     border-radius: 12px;
@@ -557,6 +562,7 @@ body {
     color: #333;
 }
 
+/* 상태 배지 */
 .status-badge {
     display: inline-flex;
     align-items: center;
@@ -744,6 +750,7 @@ body {
     animation: slideInUp 0.3s ease;
 }
 
+/* 토스트 메시지 하단 진입 */
 @keyframes slideInUp {
     from {
         transform: translateY(100px);
@@ -767,6 +774,7 @@ body {
     margin-right: 10px;
 }
 
+/* 로딩 스피너 회전 */
 @keyframes spin {
     0% {
         transform: rotate(0deg);

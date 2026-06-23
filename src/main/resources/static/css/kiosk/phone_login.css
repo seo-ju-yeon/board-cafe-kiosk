@@ -1,29 +1,51 @@
+/* 레이아웃 */
 body {
-    margin: 0; padding: 0;
+    margin: 0;
+    padding: 0;
     font-family: 'Pretendard', sans-serif;
     background-color: #f0f2f5;
-    display: flex; align-items: center; justify-content: center;
-    height: 100vh; overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100vh;
+    overflow: hidden;
 }
 
+/* 전화번호 입력 컨테이너 */
 .container {
     text-align: center;
     width: 100%;
     max-width: 500px;
 }
 
+/* 상단 안내 */
 .icon-header {
-    width: 80px; height: 80px;
+    width: 80px;
+    height: 80px;
     background-color: #007bff;
     border-radius: 50%;
-    display: flex; align-items: center; justify-content: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     margin: 0 auto 20px;
     color: white;
 }
 
-h1 { font-size: 2rem; margin: 10px 0; color: #111; }
-.subtitle { color: #888; margin-bottom: 30px; font-size: 1rem; line-height: 1.5; }
+/* 안내 문구 */
+h1 {
+    font-size: 2rem;
+    margin: 10px 0;
+    color: #111;
+}
 
+.subtitle {
+    color: #888;
+    margin-bottom: 30px;
+    font-size: 1rem;
+    line-height: 1.5;
+}
+
+/* 전화번호 표시 */
 .phone-display {
     background: white;
     border-radius: 20px;
@@ -32,18 +54,20 @@ h1 { font-size: 2rem; margin: 10px 0; color: #111; }
     font-weight: bold;
     color: #007bff;
     margin-bottom: 30px;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
     min-height: 40px;
     display: flex;
     align-items: center;
     justify-content: center;
     letter-spacing: 2px;
 }
+
 .phone-display:empty::before {
     content: "010-0000-0000";
     color: #e2e4e7;
 }
 
+/* 숫자 키패드 */
 .keypad {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
@@ -60,7 +84,7 @@ h1 { font-size: 2rem; margin: 10px 0; color: #111; }
     font-weight: bold;
     color: #333;
     cursor: pointer;
-    box-shadow: 0 4px 10px rgba(0,0,0,0.03);
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.03);
     transition: all 0.1s ease;
 }
 
@@ -75,16 +99,16 @@ h1 { font-size: 2rem; margin: 10px 0; color: #111; }
     font-size: 1.1rem;
 }
 
-/* --- 하단 버튼 그룹 수정 --- */
+/* 하단 버튼 */
 .button-group {
     display: flex;
-    flex-direction: row; /* 가로 배치 */
+    flex-direction: row;
     gap: 15px;
     padding: 0 5px;
 }
 
 .action-btn {
-    flex: 1; /* 동일한 너비 할당 */
+    flex: 1;
     padding: 22px;
     border: none;
     border-radius: 15px;
@@ -98,12 +122,12 @@ h1 { font-size: 2rem; margin: 10px 0; color: #111; }
     transition: all 0.3s ease;
 }
 
-/* 확인 버튼 스타일 */
+/* 확인 버튼 */
 .submit-btn {
     background-color: #e2e4e7;
     color: #a0a3a7;
     cursor: not-allowed;
-    flex: 1.5; /* 확인 버튼을 조금 더 크게 강조 */
+    flex: 1.5;
 }
 
 .submit-btn.active {
@@ -113,7 +137,7 @@ h1 { font-size: 2rem; margin: 10px 0; color: #111; }
     box-shadow: 0 4px 15px rgba(0, 123, 255, 0.3);
 }
 
-/* 스킵 버튼 스타일 */
+/* 스킵 버튼 */
 .skip-btn {
     background-color: #ffffff;
     color: #666;

@@ -1,14 +1,16 @@
-// CSRF 토큰을 메타 태그에서 읽어오는 헬퍼
+/* CSRF 헤더 */
 function getCsrfHeaders() {
     const token  = document.querySelector('meta[name="_csrf"]').getAttribute('content');
     const header = document.querySelector('meta[name="_csrf_header"]').getAttribute('content');
     return {
         'Content-Type': 'application/json',
-        [header]: token   // 예: 'X-CSRF-TOKEN': 'abc123...'
+        [header]: token
     };
 }
 
+/* 정책 모달 */
 function openPolicyModal() { document.getElementById('policyModal').style.display = 'flex'; }
+
 function closePolicyModal(e) {
     if (e && e.target !== document.getElementById('policyModal')) return;
     document.getElementById('policyModal').style.display = 'none';
@@ -18,6 +20,7 @@ function closePolicyModal(e) {
     document.getElementById('extraPrice').value = 0;
 }
 
+/* 숫자 입력 보정 */
 function stepValue(inputId, delta) {
     const input = document.getElementById(inputId);
     let val = parseInt(input.value) || 0;
@@ -26,13 +29,12 @@ function stepValue(inputId, delta) {
     input.value = val;
 }
 
-// ===== 패키지 등록 =====
+/* 패키지 등록 */
 function savePolicy() {
     const name = document.getElementById('policyName').value.trim();
     const type     = document.querySelector('input[name="policyType"]:checked').value;
     const price    = parseInt(document.getElementById('basePrice').value);
 
-    // FREE 타입이면 duration, extra는 null
     const duration = type === 'FREE' ? null : parseInt(document.getElementById('baseTime').value);
     const extra    = type === 'FREE' ? null : (parseFloat(document.getElementById('extraPrice').value) || null);
 
@@ -55,7 +57,7 @@ function savePolicy() {
                 showToast('O ' + data.message);
                 closePolicyModal();
                 setTimeout(() => {
-                    window.location.href = `/admin/policy?page=1&filter=${currentFilter}`;  // ← location.reload() 대신
+                    window.location.href = `/admin/policy?page=1&filter=${currentFilter}`;
                 }, 800);
             } else {
                 showToast('X ' + data.message);
@@ -64,7 +66,7 @@ function savePolicy() {
         .catch(() => showToast('X 오류가 발생했습니다.'));
 }
 
-// ===== 활성/비활성 토글 =====
+/* 활성 상태 변경 */
 function toggleStatus(btn, active) {
     const id = parseInt(btn.getAttribute('data-id'));
 
@@ -78,7 +80,7 @@ function toggleStatus(btn, active) {
             if (data.success) {
                 showToast('O' + data.message);
                 setTimeout(() => {
-                    window.location.href = `/admin/policy?page=${currentPage}&filter=${currentFilter}`;  // ← location.reload() 대신
+                    window.location.href = `/admin/policy?page=${currentPage}&filter=${currentFilter}`;
                 }, 800);
             } else {
                 showToast('X ' + data.message);
@@ -87,10 +89,12 @@ function toggleStatus(btn, active) {
         .catch(() => showToast('X 오류가 발생했습니다.'));
 }
 
+/* 정책 필터 */
 function filterTable(filter) {
     window.location.href = `/admin/policy?page=1&filter=${filter}`;
 }
 
+/* 정책 유형 전환 */
 function onTypeChange(type) {
     const timeRow  = document.getElementById('time-row');
     const extraRow = document.getElementById('extra-row');
@@ -103,7 +107,7 @@ function onTypeChange(type) {
     }
 }
 
-// ===== 토스트 =====
+/* 토스트 */
 function showToast(message) {
     const toast = document.createElement('div');
     toast.className = 'toast';

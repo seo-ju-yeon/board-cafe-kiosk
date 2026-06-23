@@ -162,6 +162,7 @@ tr.is-disabled {
     animation: modalPop 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
+/* 패키지 모달 확대 등장 */
 @keyframes modalPop {
     from {
         transform: scale(0.9);
@@ -268,7 +269,7 @@ tr.is-disabled {
     outline: none;
 }
 
-/* 숫자 기본 화살표 제거 */
+/* 숫자 입력 기본 화살표 */
 .stepper-input::-webkit-inner-spin-button, .stepper-input::-webkit-outer-spin-button {
     -webkit-appearance: none;
     margin: 0;

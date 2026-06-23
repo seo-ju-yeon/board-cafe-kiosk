@@ -1,4 +1,4 @@
-// [실시간 시계 기능]
+/* 실시간 시계 표시 */
 function updateClock() {
     const now = new Date();
     const year = now.getFullYear();
@@ -18,23 +18,23 @@ function updateClock() {
 setInterval(updateClock, 1000);
 updateClock();
 
-// [상품 메뉴 활성화 보정]
+/* 관리자 사이드바 활성 메뉴 표시 */
 document.addEventListener("DOMContentLoaded", function() {
     const currentPath = window.location.pathname;
 
-    // 모든 메뉴 링크를 가져옵니다.
+    // 현재 경로와 비교할 사이드바 메뉴 링크
     const productMenu = document.querySelector('a[href*="/admin/product"]');
     const staffMenu = document.querySelector('a[href*="/admin/staff"]');
     const profileMenu = document.querySelector('a[href*="/admin/staff/profile"]');
     const macroMenu = document.querySelector('a[href*="/admin/macro"]');
     const dashboardMenu = document.querySelector('a[href*="/admin/dashboard"]');
 
-    // --- 1. 테이블 현황 (대시보드) 활성화 ---
+    // 테이블 현황 메뉴 활성화
     if (currentPath.includes('/admin/dashboard') && dashboardMenu) {
         dashboardMenu.classList.add('active');
     }
 
-    // --- 2. 상품 관리 활성화 ---
+    // 상품 관리 및 카테고리 관리 메뉴 활성화
     if (currentPath.includes('/admin/product') && productMenu) {
         productMenu.classList.add('active');
     }
@@ -42,19 +42,19 @@ document.addEventListener("DOMContentLoaded", function() {
         productMenu.classList.add('active');
     }
 
-    // --- 3. 매크로 메시지 활성화 ---
+    // 매크로 메시지 메뉴 활성화
     if (currentPath.includes('/admin/macro') && macroMenu) {
         macroMenu.classList.add('active');
     }
 
-    // --- 4. 직원 관리 및 내 정보 관리 (경로 중첩 처리) ---
+    // 직원 관리와 내 정보 관리의 경로 중첩 처리
     if (currentPath.includes('/admin/staff')) {
         if (currentPath.includes('/admin/staff/profile')) {
-            // '내 정보 관리'인 경우
+            // 내 정보 관리 메뉴 활성화
             if (profileMenu) profileMenu.classList.add('active');
-            if (staffMenu) staffMenu.classList.remove('active'); // 직원 관리 불 끄기
+            if (staffMenu) staffMenu.classList.remove('active'); // 직원 관리 메뉴 비활성화
         } else {
-            // '직원 관리' 본체인 경우
+            // 직원 관리 메뉴 활성화
             if (staffMenu) staffMenu.classList.add('active');
         }
     }

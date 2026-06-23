@@ -62,7 +62,7 @@ body, html {
     z-index: 20;
 }
 
-/* 파도 애니메이션 (CSS) */
+/* 파도 애니메이션 */
 .waves {
     position: absolute;
     bottom: 0;
@@ -102,6 +102,7 @@ body, html {
 }
 
 /* 키프레임 애니메이션 */
+/* 하단 파도 흐름 이동 */
 @keyframes move-forever {
     0% {
         transform: translate3d(-90px, 0, 0);
@@ -111,6 +112,7 @@ body, html {
     }
 }
 
+/* 중앙 로고 상하 부유 */
 @keyframes float {
     0%, 100% {
         transform: translateY(0);
@@ -120,6 +122,7 @@ body, html {
     }
 }
 
+/* 터치 안내 문구 강조 */
 @keyframes pulse {
     0%, 100% {
         opacity: 0.4;

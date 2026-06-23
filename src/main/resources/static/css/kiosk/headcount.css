@@ -1,29 +1,50 @@
+/* 레이아웃 */
 body {
-    margin: 0; padding: 0;
+    margin: 0;
+    padding: 0;
     font-family: 'Pretendard', sans-serif;
     background-color: #f0f2f5;
-    display: flex; align-items: center; justify-content: center;
-    height: 100vh; overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100vh;
+    overflow: hidden;
 }
 
+/* 인원 선택 컨테이너 */
 .container {
     text-align: center;
     width: 100%;
     max-width: 800px;
 }
 
+/* 상단 안내 */
 .icon-header {
-    width: 80px; height: 80px;
+    width: 80px;
+    height: 80px;
     background-color: #007bff;
     border-radius: 50%;
-    display: flex; align-items: center; justify-content: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     margin: 0 auto 20px;
     color: white;
 }
 
-h1 { font-size: 2.5rem; margin: 10px 0; color: #111; }
-.subtitle { color: #888; margin-bottom: 40px; font-size: 1.1rem; }
+/* 안내 문구 */
+h1 {
+    font-size: 2.5rem;
+    margin: 10px 0;
+    color: #111;
+}
 
+.subtitle {
+    color: #888;
+    margin-bottom: 40px;
+    font-size: 1.1rem;
+}
+
+/* 인원 선택 카드 */
 .grid {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
@@ -37,7 +58,7 @@ h1 { font-size: 2.5rem; margin: 10px 0; color: #111; }
     border-radius: 20px;
     padding: 30px 10px;
     cursor: pointer;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
     transition: all 0.2s ease;
     display: flex;
     flex-direction: column;
@@ -47,7 +68,7 @@ h1 { font-size: 2.5rem; margin: 10px 0; color: #111; }
 
 .number-card:hover {
     transform: translateY(-5px);
-    box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
 }
 
 .number-card.selected {
@@ -58,7 +79,8 @@ h1 { font-size: 2.5rem; margin: 10px 0; color: #111; }
 .number-card i {
     color: #333;
     margin-bottom: 15px;
-    width: 32px; height: 32px;
+    width: 32px;
+    height: 32px;
 }
 
 .number-card span {
@@ -67,6 +89,7 @@ h1 { font-size: 2.5rem; margin: 10px 0; color: #111; }
     color: #111;
 }
 
+/* 다음 단계 버튼 */
 .submit-btn {
     width: calc(100% - 40px);
     margin: 0 20px;
@@ -85,11 +108,20 @@ h1 { font-size: 2.5rem; margin: 10px 0; color: #111; }
     background-color: #007bff;
     color: white;
     cursor: pointer;
-    box-shadow: 0 10px 20px rgba(0,123,255,0.2);
+    box-shadow: 0 10px 20px rgba(0, 123, 255, 0.2);
 }
 
+/* 도움말 버튼 */
 .help-btn {
-    position: fixed; bottom: 20px; right: 20px;
-    background: #333; color: white; width: 40px; height: 40px;
-    border-radius: 50%; display: flex; align-items: center; justify-content: center;
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    background: #333;
+    color: white;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
