@@ -1,8 +1,8 @@
 package org.example.board_cafe_kiosk_2603.repository.admin.product;
 
 import lombok.extern.log4j.Log4j2;
-import org.example.board_cafe_kiosk_2603.domain.admin.product.Category;
 import org.example.board_cafe_kiosk_2603.domain.admin.product.CategoryType;
+import org.example.board_cafe_kiosk_2603.dto.admin.product.CategoryResponseDTO;
 import org.example.board_cafe_kiosk_2603.mapper.admin.product.CategoryMapper;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -10,6 +10,8 @@ import org.springframework.boot.test.context.SpringBootTest;
 
 import java.util.List;
 import java.util.Optional;
+
+import static org.junit.jupiter.api.Assertions.*;
 
 
 @Log4j2
@@ -22,27 +24,37 @@ class CategoryMapperTest {
     /* 전체 카테고리 목록 조회 */
     @Test
     void findAllTest() {
-        List<Category> list = categoryMapper.findAll();
+        List<CategoryResponseDTO> list = categoryMapper.findAll();
+
         log.info("=== 전체 카테고리 목록 ===");
         list.forEach(category -> log.info("전체 카테고리 목록: {}", category));
+
+        assertNotNull(list);
     }
 
     /* type 기준 카테고리 조회 */
     // GAME, FOOD, DRINK, GUEST
     @Test
     void findByTypeTest() {
-        List<Category> list = categoryMapper.findByType(CategoryType.GAME);
+        List<CategoryResponseDTO> list = categoryMapper.findByType(CategoryType.GAME);
+
         log.info("=== type 기준 카테고리 조회 ===");
         list.forEach(category -> log.info("type 기준 카테고리 조회: {}", category));
+
+        assertNotNull(list);
+        assertTrue(list.stream().allMatch(category -> category.getType() == CategoryType.GAME));
     }
 
     /* 카테고리 단건 조회 */
     @Test
     void findByIdTest() {
         // DB에 존재하는 id
-        Optional<Category> category = categoryMapper.findById(1);
+        Optional<CategoryResponseDTO> category = categoryMapper.findById(1);
+
         log.info("카테고리 단건 조회: {}", category);
-        // Optional[Category(id=1, name=커피·에스프레소, type=DRINK)]
+
+        assertTrue(category.isPresent());
+        assertEquals(1, category.get().getId());
     }
 
     /* 카테고리 - 등록 */

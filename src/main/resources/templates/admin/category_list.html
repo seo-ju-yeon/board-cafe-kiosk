@@ -15,17 +15,17 @@
 <body>
 <th:block layout:fragment="content">
 
-    <!-- ── 헤더 ── -->
+    <!-- 헤더 -->
     <div class="header-flex">
         <h1 class="page-title">분류(카테고리) 관리</h1>
 
-        <!-- ADMIN, SUPER 전용 추가 버튼 -->
+        <!-- ADMIN/SUPER 전용 -->
         <button sec:authorize="hasAnyRole('ADMIN', 'SUPER')"
                 class="btn-add-product"
                 onclick="openAddModal()">+ 새 카테고리 추가
         </button>
 
-        <!-- STAFF 비활성 버튼 -->
+        <!-- STAFF 비활성 처리 -->
         <button sec:authorize="hasRole('STAFF')"
                 class="btn-add-product"
                 style="opacity: 0.4; cursor: not-allowed;"
@@ -33,25 +33,23 @@
         </button>
     </div>
 
-    <!-- ── 상단 탭 네비게이션 ── -->
+    <!-- 상단 탭 네비게이션 -->
     <div class="tab-container">
-        <a href="/admin/product/game"            class="tab-btn">게임 관리</a>
-        <a href="/admin/product/menu?tab=food"   class="tab-btn">음식 관리</a>
-        <a href="/admin/product/menu?tab=drink"  class="tab-btn">음료 관리</a>
-        <a href="/admin/product/menu?tab=guest"  class="tab-btn">인원 추가</a>
+        <a href="/admin/product/game" class="tab-btn">게임 관리</a>
+        <a href="/admin/product/menu?tab=food" class="tab-btn">음식 관리</a>
+        <a href="/admin/product/menu?tab=drink" class="tab-btn">음료 관리</a>
+        <a href="/admin/product/menu?tab=guest" class="tab-btn">인원 추가</a>
         <a href="/admin/product/game?tab=hidden" class="tab-btn">게임 숨김 목록</a>
         <a href="/admin/product/menu?tab=hidden" class="tab-btn">메뉴 숨김 목록</a>
         <a href="/admin/category" class="tab-btn"
            th:classappend="${activePage == 'category'} ? ' active'">카테고리 관리</a>
     </div>
 
-    <!-- ── 성공/에러 플래시 메시지 → 토스트로 표시 ── -->
-    <div th:if="${successMsg}" class="toast success" id="successToast"
-         th:text="${successMsg}"></div>
-    <div th:if="${errorMsg}" class="toast error" id="errorToast"
-         th:text="${errorMsg}"></div>
+    <!-- 성공/에러 플래시 메시지 → 토스트로 표시 -->
+    <div th:if="${successMsg}" class="toast success" id="successToast" th:text="${successMsg}"></div>
+    <div th:if="${errorMsg}" class="toast error" id="errorToast" th:text="${errorMsg}"></div>
 
-    <!-- ── 카테고리 목록 테이블 ── -->
+    <!-- 카테고리 목록 테이블 -->
     <div class="list-card">
         <table class="cat-table">
             <thead>
@@ -65,13 +63,11 @@
             <tbody>
 
             <!-- 빈 목록 -->
-<!--            <tr th:if="${#lists.isEmpty(categoryList)}" class="empty-row">-->
             <tr th:if="${#lists.isEmpty(pageResponse.dtoList)}" class="empty-row">
                 <td colspan="4">등록된 카테고리가 없습니다.</td>
             </tr>
 
             <!-- 카테고리 행 반복 -->
-<!--            <tr th:each="cat : ${categoryList}">-->
             <tr th:each="cat : ${pageResponse.dtoList}">
                 <td>
                     <span class="status-badge"

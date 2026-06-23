@@ -11,10 +11,9 @@ import org.springframework.batch.core.repository.JobRepository;
 import org.springframework.batch.core.step.builder.StepBuilder;
 import org.springframework.batch.core.step.tasklet.Tasklet;
 import org.springframework.batch.repeat.RepeatStatus;
-import org.springframework.beans.factory.annotation.Value; // 👈 이 부분이 핵심입니다!
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.transaction.PlatformTransactionManager;
 
 import java.time.LocalDate;
@@ -22,7 +21,6 @@ import java.time.LocalDate;
 /**
  * [Spring Batch 설정] 매출 및 방문자 통계 생성을 위한 배치 설정 클래스
  */
-
 @Log4j2
 @Configuration
 @RequiredArgsConstructor
