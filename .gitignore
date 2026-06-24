@@ -42,6 +42,11 @@ Thumbs.db
 ### Logs ###
 *.log
 
+### Environment ###
+.env
+.env.*
+!.env.example
+
 ### NetBeans ###
 /nbproject/private/
 /nbbuild/
