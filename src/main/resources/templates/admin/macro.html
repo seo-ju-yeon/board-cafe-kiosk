@@ -14,18 +14,21 @@
 
 <body>
 <th:block layout:fragment="content">
+    <!-- ADMIN/SUPER 권한 확인 플래그 -->
     <span id="isAdminOrSuper" sec:authorize="hasAnyRole('ADMIN', 'SUPER')" style="display:none;"></span>
+
+    <!-- 페이지 헤더 -->
     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
         <h1 class="page-title">매크로 메시지 관리</h1>
 
-        <!-- 매크로 등록 버튼: ADMIN, SUPER 가능-->
+        <!-- ADMIN/SUPER 매크로 등록 -->
         <button id="btnAddMacro" class="btn-add"
                 sec:authorize="hasAnyRole('ADMIN', 'SUPER')"
                 onclick="openAddModal()">
             + 새 매크로 등록
         </button>
 
-        <!-- 매크로 등록 버튼: STAFF 불가능 -->
+        <!-- STAFF 매크로 등록 제한 -->
         <button id="btnAddMacroDisabled" class="btn-add"
                 sec:authorize="hasRole('STAFF')"
                 style="opacity: 0.4; cursor: not-allowed;"
@@ -35,6 +38,7 @@
 
     </div>
 
+    <!-- 매크로 방향 탭 -->
     <div class="tabs">
         <button th:each="entry, stat : ${macroGroups}"
                 th:if="${entry.key == 'STAFF_TO_TABLE'}"
@@ -47,6 +51,7 @@
         </button>
     </div>
 
+    <!-- 매크로 메시지 목록 -->
     <div class="table-container">
         <div th:each="entry, stat : ${macroGroups}"
              th:if="${entry.key == 'STAFF_TO_TABLE'}"
@@ -66,14 +71,14 @@
                     <td class="messageText" th:text="${macro.messageText}"></td>
                     <td style="text-align: right;">
 
-                        <!-- 삭제 버튼: ADMIN, SUPER 가능 -->
+                        <!-- ADMIN/SUPER 매크로 삭제 -->
                         <button type="button" class="btn-delete"
                                 sec:authorize="hasAnyRole('ADMIN', 'SUPER')"
                                 th:data-id="${macro.id}" onclick="deleteMacro(this)">
                             삭제
                         </button>
 
-                        <!-- 삭제 버튼: STAFF 불가능 -->
+                        <!-- STAFF 매크로 삭제 제한 -->
                         <button type="button" class="btn-delete"
                                 sec:authorize="hasRole('STAFF')"
                                 style="opacity: 0.4; cursor: not-allowed;"
@@ -89,6 +94,7 @@
         <div class="pagination" id="macroPagination"></div>
     </div>
 
+    <!-- 매크로 등록 모달 -->
     <div class="modal-overlay" id="addMacroModal">
         <div class="modal-content">
             <h3>새 매크로 등록</h3>
@@ -110,6 +116,7 @@
     </div>
 </th:block>
 
+<!-- 매크로 관리 스크립트 -->
 <th:block layout:fragment="scripts">
     <script th:src="@{/js/admin/macro.js}"></script>
 </th:block>

@@ -56,6 +56,58 @@ h2 {
     margin-bottom: 16px;
 }
 
+/* 포트폴리오 시연용 인증 가이드 영역 */
+.demo-info {
+    background: #f1f5f9;
+    border: 1px dashed #cbd5e1;
+    border-radius: 10px;
+    padding: 12px;
+    margin-bottom: 20px;
+    text-align: left;
+}
+
+.demo-info-title {
+    font-size: 11px;
+    font-weight: 700;
+    color: #475569;
+    margin-bottom: 6px;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.demo-email-list {
+    font-size: 11px;
+    color: #64748b;
+    line-height: 1.6;
+}
+
+.demo-email-item {
+    display: flex;
+    justify-content: space-between;
+    border-bottom: 1px solid #e2e8f0;
+    padding: 2px 0;
+    cursor: pointer;
+}
+
+.demo-email-item:last-child {
+    border-bottom: none;
+}
+
+.demo-email-item:hover {
+    color: #3b82f6;
+}
+
+.tag-admin {
+    color: #3b82f6;
+    font-weight: bold;
+}
+
+.tag-super {
+    color: #8b5cf6;
+    font-weight: bold;
+}
+
 /* 안내 박스 */
 .info-box {
     background: #eaf3fb;

@@ -13,13 +13,17 @@
 
 <body>
 <th:block layout:fragment="content">
+    <!-- 내 정보 카드 -->
     <div class="profile-card">
+        <!-- 프로필 헤더 -->
         <div class="profile-header">
             <h2 th:text="${manager.name} + ' 님, 안녕하세요'">홍길동 님, 안녕하세요</h2>
             <p style="color: var(--text-gray); font-size: 14px;">내 정보를 확인하고 수정할 수 있습니다.</p>
         </div>
 
+        <!-- 프로필 수정 폼 -->
         <form id="profileForm">
+            <!-- 기본 정보 -->
             <div class="form-section">
                 <span class="section-title">기본 정보</span>
                 <div class="form-group">
@@ -36,6 +40,7 @@
                 </div>
             </div>
 
+            <!-- 비밀번호 변경 -->
             <div class="form-section">
                 <span class="section-title">비밀번호 변경</span>
                 <p style="font-size: 12px; color: #FF3B30; margin-bottom: 10px;">* 변경을 원하실 때만 입력하세요.</p>
@@ -49,6 +54,7 @@
                 </div>
             </div>
 
+            <!-- 이메일 OTP 본인 인증 -->
             <div class="form-section" id="otpSection" style="display:none;">
                 <span class="section-title">본인 인증</span>
                 <p style="font-size: 12px; color: #86868b; margin-bottom: 10px;">
@@ -66,11 +72,13 @@
                 </button>
             </div>
 
+            <!-- 저장 요청 -->
             <button type="button" id="initialSaveBtn" class="btn-save" onclick="updateProfile()">저장하기</button>
         </form>
     </div>
 </th:block>
 
+<!-- 내 정보 관리 스크립트 -->
 <th:block layout:fragment="scripts">
     <script th:src="@{/js/admin/staff_profile.js}"></script>
 </th:block>

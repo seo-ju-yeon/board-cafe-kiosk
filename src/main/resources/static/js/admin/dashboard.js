@@ -7,6 +7,19 @@ let pendingOrdersState = [];
 let latestModalOrderItems = [];
 const checkoutMetaCache = new Map();
 
+/* 동적 제목에 Lucide 아이콘 적용 */
+function setIconTitle(element, iconName, text) {
+    if (!element) return;
+    element.textContent = '';
+    const icon = document.createElement('i');
+    icon.setAttribute('data-lucide', iconName);
+    element.appendChild(icon);
+    element.appendChild(document.createTextNode(text));
+    if (window.lucide) {
+        lucide.createIcons();
+    }
+}
+
 /* 신규 주문 ID 정규화 */
 function parsePendingOrderId(order) {
     const id = Number(order?.id ?? order?.orderId ?? 0);
@@ -519,7 +532,7 @@ async function fetchActiveOrders() {
         const activeRentals = rentalResponse.ok ? await rentalResponse.json() : [];
         renderOrders(orders, activeRentals);
     } catch (err) {
-        console.error('❌ fetchActiveOrders 에러:', err);
+        console.error('fetchActiveOrders 에러:', err);
         renderOrders([], []);
     }
 }
@@ -783,7 +796,7 @@ async function callUpdateStatus(status) {
         if (response.ok) {
             location.reload();
         } else {
-            alert("❌ " + (result.error || "상태 변경에 실패했습니다."));
+            alert(result.error || "상태 변경에 실패했습니다.");
         }
     } catch (err) {
         console.error(err);
@@ -921,7 +934,7 @@ async function openRentalReturnModal(orderId, gameName, quantity) {
     const desc = document.getElementById('rentalReturnDesc');
     const list = document.getElementById('rentalReturnList');
 
-    title.textContent = `↩️ ${rentalReturnContext.gameName || '게임'} 반납`;
+    setIconTitle(title, 'undo-2', ` ${rentalReturnContext.gameName || '게임'} 반납`);
     desc.textContent = '반납 처리할 일련번호를 선택하세요.';
 
     try {
@@ -1173,7 +1186,7 @@ async function openPaymentGameCheckModal() {
         const title = document.getElementById('paymentGameCheckTitle');
         const desc = document.getElementById('paymentGameCheckDesc');
         const confirmBtn = document.getElementById('paymentGameCheckConfirmBtn');
-        if (title) title.textContent = '🧹 빈테이블 전환 전 게임 상태 확인';
+        if (title) setIconTitle(title, 'clipboard-check', ' 빈테이블 전환 전 게임 상태 확인');
         if (desc) desc.textContent = '대여 중인 일련번호 상태를 확인한 뒤 빈테이블로 전환합니다.';
         if (confirmBtn) confirmBtn.textContent = '상태 반영 후 빈테이블 전환';
 
@@ -1255,7 +1268,7 @@ async function handleStatusUpdate() {
 
     if (currentTableStatus === 'EMPTY') {
         if (!token || token.trim() === "" || token === 'null') {
-            alert("⚠️ 인증 토큰이 없는 테이블입니다.\n토큰 발급 후에만 입실(OCCUPIED)이 가능합니다.");
+            alert("인증 토큰이 없는 테이블입니다.\n토큰 발급 후에만 입실(OCCUPIED)이 가능합니다.");
             return;
         }
     }
@@ -1280,7 +1293,7 @@ async function handleStatusUpdate() {
 
 /* 전체 테이블 및 운영 데이터 초기화 */
 async function handleTotalReset() {
-    if (!confirm("⚠️ 주의: 모든 데이터가 초기화됩니다. 진행하시겠습니까?")) return;
+    if (!confirm("주의: 모든 데이터가 초기화됩니다. 진행하시겠습니까?")) return;
     try {
         const response = await fetch('/admin/dashboard/reset', {method: 'DELETE'});
         if (response.ok) {
@@ -1295,7 +1308,7 @@ async function handleTotalReset() {
 function openMessageModal() {
     const targetSelect = document.getElementById('targetTableSelect');
     targetSelect.innerHTML = '<option value="">테이블을 선택하세요</option>';
-    targetSelect.innerHTML += '<option value="ALL" style="font-weight:bold; color:#4285f4;">📢 이용 중인 전체 테이블</option>';
+    targetSelect.innerHTML += '<option value="ALL" style="font-weight:bold; color:#4285f4;">이용 중인 전체 테이블</option>';
 
     document.querySelectorAll('.table-card.status-occupied').forEach(card => {
         const tableId = card.getAttribute('data-id');
@@ -1377,12 +1390,12 @@ async function submitMessage() {
         });
 
         if (response.ok) {
-            alert(tableId === "ALL" ? '📢 전체 메세지가 전송되었습니다.' : '✅ 메세지가 전송되었습니다.');
+            alert(tableId === "ALL" ? '전체 메세지가 전송되었습니다.' : '메세지가 전송되었습니다.');
             closeMessageModal();
             if (tableId === "ALL") location.reload();
         } else {
             const errorData = await response.text();
-            alert('❌ 전송 실패: ' + errorData);
+            alert('전송 실패: ' + errorData);
         }
     } catch (err) {
         console.error(err);
@@ -1400,11 +1413,11 @@ async function fetchPendingOrders() {
             const orders = Array.isArray(data) ? data : (data.orders || []);
             renderPendingOrders(orders);
         } else {
-            console.error('❌ 신규 주문 API 응답 실패:', response.status);
+            console.error('신규 주문 API 응답 실패:', response.status);
             renderPendingOrders([]);
         }
     } catch (err) {
-        console.error('❌ fetchPendingOrders 에러:', err);
+        console.error('fetchPendingOrders 에러:', err);
         renderPendingOrders([]);
     }
 }
@@ -1612,7 +1625,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 location.reload();
             }
         } catch (e) {
-            console.error('❌ 테이블 상태 폴링 실패:', e);
+            console.error('테이블 상태 폴링 실패:', e);
         }
     }
 

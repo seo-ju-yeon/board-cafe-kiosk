@@ -1,3 +1,6 @@
+/* Lucide 아이콘 초기화 */
+lucide.createIcons();
+
 /* DOM 참조 */
 const emailInput = document.getElementById('email');
 const submitBtn = document.getElementById('submitBtn');

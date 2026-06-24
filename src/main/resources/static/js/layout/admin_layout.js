@@ -20,6 +20,8 @@ updateClock();
 
 /* 관리자 사이드바 활성 메뉴 표시 */
 document.addEventListener("DOMContentLoaded", function() {
+    lucide.createIcons();
+
     const currentPath = window.location.pathname;
 
     // 현재 경로와 비교할 사이드바 메뉴 링크

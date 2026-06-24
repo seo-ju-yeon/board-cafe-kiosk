@@ -1,49 +1,15 @@
 <!DOCTYPE html>
 <html lang="ko" xmlns:th="http://www.thymeleaf.org">
 <head>
+    <!-- OTP 2차 인증 화면 head 설정 -->
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>2차 인증 - OTP 확인</title>
     <script src="https://unpkg.com/lucide@latest"></script>
     <link rel="stylesheet" th:href="@{/css/login/verify_otp.css}">
-    <style>
-        /* 시연용 가이드 섹션 스타일 (기존 디자인 유지하며 추가) */
-        .demo-info {
-            background: #f1f5f9;
-            border: 1px dashed #cbd5e1;
-            border-radius: 10px;
-            padding: 12px;
-            margin-bottom: 20px;
-            text-align: left;
-        }
-        .demo-info-title {
-            font-size: 11px;
-            font-weight: 700;
-            color: #475569;
-            margin-bottom: 6px;
-            display: flex;
-            align-items: center;
-            gap: 5px;
-        }
-        .demo-email-list {
-            font-size: 11px;
-            color: #64748b;
-            line-height: 1.6;
-        }
-        .demo-email-item {
-            display: flex;
-            justify-content: space-between;
-            border-bottom: 1px solid #e2e8f0;
-            padding: 2px 0;
-            cursor: pointer;
-        }
-        .demo-email-item:last-child { border-bottom: none; }
-        .demo-email-item:hover { color: #3b82f6; }
-        .tag-admin { color: #3b82f6; font-weight: bold; }
-        .tag-super { color: #8b5cf6; font-weight: bold; }
-    </style>
 </head>
 <body>
+<!-- OTP 2차 인증 카드 -->
 <div class="auth-card">
     <div class="icon-box">
         <i data-lucide="shield-check" style="width:28px;height:28px;"></i>
@@ -52,7 +18,7 @@
     <div class="role-badge">보안 구역 (ADMIN / SUPER)</div>
     <p class="subtitle">보안을 위해 등록된 이메일 인증이 필요합니다.</p>
 
-    <!-- [추가] 시연용 계정 이메일 가이드 -->
+    <!-- 포트폴리오 시연용 이메일 빠른 입력 -->
     <div class="demo-info">
         <div class="demo-info-title">
             <i data-lucide="info" size="12"></i> 시연용 등록 이메일 정보 (클릭 시 입력)
@@ -67,22 +33,25 @@
                 <strong>example@naver.com</strong>
             </div>
         </div>
-        <!-- 슈퍼패스 OTP 안내 추가 -->
+        <!-- SUPER 계정 시연용 OTP 안내 -->
         <div style="margin-top: 10px; padding-top: 8px; border-top: 1px dashed #cbd5e1; font-size: 11px; color: #1e293b;">
             <i data-lucide="key" size="10" style="vertical-align: middle;"></i>
             시연용 슈퍼패스 OTP: <strong style="color: #ef4444; font-family: monospace; font-size: 13px;">369369</strong>
         </div>
     </div>
 
+    <!-- OTP 인증 안내 메시지 -->
     <div class="info-box">
         등록된 이메일 주소로 인증번호를 발송합니다.<br>
         인증번호는 <strong>3분간</strong> 유효합니다.
     </div>
 
+    <!-- 인증 처리 결과 메시지 -->
     <div id="statusMsg"></div>
 
+    <!-- OTP 인증 폼 -->
     <form id="otpForm" action="#" onsubmit="return false;">
-        <!-- 이메일 입력 + 인증 요청 -->
+        <!-- 이메일 입력 및 인증번호 발송 요청 -->
         <div class="input-group">
             <label class="label" for="email">이메일 주소</label>
             <div class="email-row">
@@ -95,7 +64,7 @@
             <div class="field-error" id="emailError">올바른 이메일 형식을 입력해 주세요.</div>
         </div>
 
-        <!-- OTP 입력 영역 -->
+        <!-- 인증번호 입력 및 로그인 처리 -->
         <div id="otpSection">
             <div class="input-group">
                 <label class="label" for="otp">인증번호</label>
@@ -117,16 +86,7 @@
     </form>
 </div>
 
-<script>
-    lucide.createIcons();
-
-    // 시연용 이메일 자동 입력 함수
-    function fillEmail(emailAddr) {
-        const emailInput = document.getElementById('email');
-        emailInput.value = emailAddr;
-        emailInput.focus();
-    }
-</script>
+<!-- OTP 인증 스크립트 -->
 <script th:src="@{/js/login/verify_otp.js}"></script>
 </body>
 </html>

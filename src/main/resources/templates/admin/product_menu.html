@@ -15,16 +15,17 @@
 <body>
 <th:block layout:fragment="content">
 
+    <!-- 페이지 헤더 -->
     <div class="header-flex">
         <h1 class="page-title">상품 관리 시스템</h1>
 
-        <!-- 새 메뉴 추가: ADMIN, SUPER 정상 버튼 -->
+        <!-- ADMIN/SUPER 메뉴 등록 -->
         <a sec:authorize="hasAnyRole('ADMIN', 'SUPER')"
            th:if="${activeTab != 'hidden'}"
            th:href="@{/admin/product/menu/add(tab=${activeTab})}"
            class="btn-add-product">+ 새 메뉴 추가</a>
 
-        <!-- 새 메뉴 추가: STAFF 비활성 버튼 -->
+        <!-- STAFF 메뉴 등록 제한 -->
         <a sec:authorize="hasRole('STAFF')"
            th:if="${activeTab != 'hidden'}"
            href="#" class="btn-add-product"
@@ -32,52 +33,35 @@
            onclick="alert('관리자 권한이 필요합니다.'); return false;">+ 새 메뉴 추가</a>
     </div>
 
-    <!-- 상단 탭 네비게이션 (5개) -->
+    <!-- 상품 관리 탭 네비게이션 -->
     <div class="tab-container">
-        <a href="/admin/product/game"            class="tab-btn">게임 관리</a>
-        <!-- 메뉴 탭들: menu 페이지이고 각 tab과 일치할 때 -->
-        <a href="/admin/product/menu?tab=food"  class="tab-btn"
+        <a href="/admin/product/game" class="tab-btn">게임 관리</a>
+        <a href="/admin/product/menu?tab=food" class="tab-btn"
            th:classappend="${currentPage == 'menu' and activeTab == 'food'}   ? ' active'">음식 관리</a>
         <a href="/admin/product/menu?tab=drink" class="tab-btn"
            th:classappend="${currentPage == 'menu' and activeTab == 'drink'}  ? ' active'">음료 관리</a>
         <a href="/admin/product/menu?tab=guest" class="tab-btn"
            th:classappend="${currentPage == 'menu' and activeTab == 'guest'}  ? ' active'">인원 추가</a>
-
-        <!-- 게임 숨김: game 페이지이고 hidden일 때 -->
         <a href="/admin/product/game?tab=hidden" class="tab-btn">
             게임 숨김 목록</a>
-
-        <!-- 메뉴 숨김: menu 페이지이고 hidden일 때 -->
         <a href="/admin/product/menu?tab=hidden" class="tab-btn"
            th:classappend="${currentPage == 'menu' and activeTab == 'hidden'} ? ' active'">메뉴 숨김 목록</a>
-
-        <!-- 카테고리 관리: category 페이지일 때 active -->
         <a href="/admin/category" class="tab-btn"
            th:classappend="${activePage == 'category'} ? ' active'">카테고리 관리</a>
 
     </div>
 
-    <!--
-        ── 카테고리 필터 바 ──
-        숨김 탭은 카테고리 필터 표시 안 함.
-        컨트롤러에서 categoryList(List<CategoryDto>)와
-        selectedCategoryId(Long, 없으면 null)를 모델에 담아주세요.
-
-        URL 예시: /admin/product/menu?tab=food&categoryId=2
-    -->
-    <!--    <div class="category-filter"-->
-    <!--         th:if="${activeTab != 'hidden' and categoryList != null and not #lists.isEmpty(categoryList)}">-->
-    <!-- hidden 탭도 포함 -->
+    <!-- 카테고리 필터 -->
     <div class="category-filter"
          th:if="${categoryList != null and not #lists.isEmpty(categoryList)}">
         <span class="category-filter-label">카테고리</span>
 
-        <!-- 전체 버튼 -->
+        <!-- 전체 카테고리 선택 -->
         <a th:href="@{/admin/product/menu(tab=${activeTab}, size=${pageRequestDTO.size})}"
            th:classappend="${selectedCategoryId == null} ? ' active'"
            class="cat-btn">전체</a>
 
-        <!-- 카테고리 버튼 목록 -->
+        <!-- 카테고리별 필터 버튼 -->
         <a th:each="cat : ${categoryList}"
            th:href="@{/admin/product/menu(tab=${activeTab}, categoryId=${cat.id}, size=${pageRequestDTO.size})}"
            th:text="${cat.name}"
@@ -85,15 +69,15 @@
            class="cat-btn"></a>
     </div>
 
-    <!-- 검색 -->
+    <!-- 메뉴 검색 -->
     <div class="search-container">
-        <span>🔍</span>
+        <i data-lucide="search"></i>
         <input type="text" class="search-input"
                th:placeholder="${activeTab == 'guest'} ? '인원추가 상품명을 검색하세요...' : '메뉴명을 입력하여 검색하세요...'"
                onkeyup="filterProducts()">
     </div>
 
-    <!-- ===== 음식 / 음료 / 인원추가 탭 ===== -->
+    <!-- 판매 메뉴 목록 -->
     <div class="list-card" th:if="${activeTab == 'food' or activeTab == 'drink' or activeTab == 'guest'}">
         <table class="product-table">
             <thead>
@@ -106,16 +90,20 @@
             </tr>
             </thead>
             <tbody id="productList">
-            <!--            <tr th:if="${menuList == null or #lists.isEmpty(menuList)}" class="empty-row">-->
+            <!-- 판매 메뉴 없음 상태 -->
             <tr th:if="${pageResponse.dtoList == null or #lists.isEmpty(pageResponse.dtoList)}" class="empty-row">
                 <td colspan="5">등록된 메뉴가 없습니다.</td>
             </tr>
-            <!--            <tr th:each="menu : ${menuList}">-->
+
+            <!-- 판매 메뉴 행 반복 렌더링 -->
             <tr th:each="menu : ${pageResponse.dtoList}">
                 <td>
                     <div class="prod-info">
-                        <div class="prod-thumb"
-                             th:text="${activeTab == 'food'} ? '🍔' : (${activeTab == 'drink'} ? '☕' : '👥')"></div>
+                        <div class="prod-thumb">
+                            <i th:if="${activeTab == 'food'}" data-lucide="utensils"></i>
+                            <i th:if="${activeTab == 'drink'}" data-lucide="coffee"></i>
+                            <i th:if="${activeTab == 'guest'}" data-lucide="users"></i>
+                        </div>
                         <div class="prod-name" th:text="${menu.name}"></div>
                     </div>
                 </td>
@@ -131,54 +119,56 @@
                 <td>
                     <div class="action-group">
 
-                        <!-- 수정: ADMIN, SUPER -->
+                        <!-- ADMIN/SUPER 메뉴 수정 -->
                         <a sec:authorize="hasAnyRole('ADMIN', 'SUPER')"
                            class="btn-table btn-edit"
                            th:href="@{/admin/product/menu/edit/{id}(id=${menu.id}, tab=${activeTab})}">수정</a>
 
-                        <!-- 수정: STAFF -->
+                        <!-- STAFF 메뉴 수정 제한 -->
                         <a sec:authorize="hasRole('STAFF')"
                            href="#" class="btn-table btn-edit"
                            style="opacity: 0.4; cursor: not-allowed;"
                            onclick="alert('관리자 권한이 필요합니다.'); return false;">수정</a>
 
-                        <!-- 품절/입고: ADMIN, SUPER -->
+                        <!-- ADMIN/SUPER 품절/입고 전환 -->
                         <form sec:authorize="hasAnyRole('ADMIN', 'SUPER')"
                               th:action="@{/admin/product/menu/{id}/toggle-soldout(id=${menu.id})}"
                               method="post" style="display:inline;">
-                            <input type="hidden" name="tab"        th:value="${activeTab}"/>
-                            <!-- 카테고리 필터 유지 -->
+                            <!-- 상태 변경 후 현재 탭/필터/페이지 유지 -->
+                            <input type="hidden" name="tab" th:value="${activeTab}"/>
                             <input type="hidden" name="categoryId" th:value="${selectedCategoryId}"/>
-                            <input type="hidden" name="page"       th:value="${pageResponse.page}"/>
-                            <input type="hidden" name="size"       th:value="${pageResponse.size}"/>
+                            <input type="hidden" name="page" th:value="${pageResponse.page}"/>
+                            <input type="hidden" name="size" th:value="${pageResponse.size}"/>
                             <button type="submit" class="btn-table"
                                     th:classappend="${menu.isAvailable} ? 'btn-soldout' : 'btn-instock'"
                                     th:text="${menu.isAvailable} ? '품절' : '입고'"></button>
                         </form>
 
-                        <!-- 품절/입고: STAFF -->
+                        <!-- STAFF 품절/입고 전환 제한 -->
                         <button sec:authorize="hasRole('STAFF')"
                                 class="btn-table btn-soldout"
                                 style="opacity: 0.4; cursor: not-allowed;"
                                 onclick="alert('관리자 권한이 필요합니다.'); return false;"
                                 th:text="${menu.isAvailable} ? '품절' : '입고'"></button>
 
-                        <!-- 숨기기: ADMIN, SUPER -->
+                        <!-- ADMIN/SUPER 메뉴 숨김 -->
                         <form sec:authorize="hasAnyRole('ADMIN', 'SUPER')"
                               th:action="@{/admin/product/menu/{id}/toggle-hide(id=${menu.id})}"
                               method="post" style="display:inline;">
-                            <input type="hidden" name="tab"        th:value="${activeTab}"/>
+                            <!-- 숨김 처리 후 현재 탭/필터/페이지 유지 -->
+                            <input type="hidden" name="tab" th:value="${activeTab}"/>
                             <input type="hidden" name="categoryId" th:value="${selectedCategoryId}"/>
-                            <input type="hidden" name="page"       th:value="${pageResponse.page}"/>
-                            <input type="hidden" name="size"       th:value="${pageResponse.size}"/>
+                            <input type="hidden" name="page" th:value="${pageResponse.page}"/>
+                            <input type="hidden" name="size" th:value="${pageResponse.size}"/>
                             <button type="submit" class="btn-table btn-hide">숨기기</button>
                         </form>
 
-                        <!-- 숨기기: STAFF -->
+                        <!-- STAFF 메뉴 숨김 제한 -->
                         <button sec:authorize="hasRole('STAFF')"
                                 class="btn-table btn-hide"
                                 style="opacity: 0.4; cursor: not-allowed;"
-                                onclick="alert('관리자 권한이 필요합니다.'); return false;">숨기기</button>
+                                onclick="alert('관리자 권한이 필요합니다.'); return false;">숨기기
+                        </button>
 
                     </div>
                 </td>
@@ -186,11 +176,13 @@
             </tbody>
         </table>
 
-        <!-- 페이징 -->
+        <!-- 페이지네이션 -->
         <div class="pagination">
             <a th:if="${pageResponse.prev}"
                th:href="@{/admin/product/menu(tab=${activeTab}, page=${pageResponse.start - 1}, size=${pageResponse.size}, categoryId=${selectedCategoryId})}"
-               class="page-link">◀</a>
+               class="page-link" aria-label="이전 페이지">
+                <i data-lucide="chevron-left"></i>
+            </a>
 
             <a th:each="i : ${#numbers.sequence(pageResponse.start, pageResponse.end)}"
                th:href="@{/admin/product/menu(tab=${activeTab}, page=${i}, size=${pageResponse.size}, categoryId=${selectedCategoryId})}"
@@ -200,11 +192,13 @@
 
             <a th:if="${pageResponse.next}"
                th:href="@{/admin/product/menu(tab=${activeTab}, page=${pageResponse.end + 1}, size=${pageResponse.size}, categoryId=${selectedCategoryId})}"
-               class="page-link">▶</a>
+               class="page-link" aria-label="다음 페이지">
+                <i data-lucide="chevron-right"></i>
+            </a>
         </div>
     </div>
 
-    <!-- ===== 숨김 탭 (카테고리 필터 없음) ===== -->
+    <!-- 숨김 메뉴 목록 -->
     <div class="list-card" th:if="${activeTab == 'hidden'}">
         <table class="product-table">
             <thead>
@@ -217,15 +211,16 @@
             </tr>
             </thead>
             <tbody id="productList_hidden">
-            <!--            <tr th:if="${menuList == null or #lists.isEmpty(menuList)}" class="empty-row">-->
+            <!-- 숨김 메뉴 없음 상태 -->
             <tr th:if="${pageResponse.dtoList == null or #lists.isEmpty(pageResponse.dtoList)}" class="empty-row">
                 <td colspan="5">숨김 처리된 상품이 없습니다.</td>
             </tr>
-            <!--            <tr th:each="menu : ${menuList}">-->
+
+            <!-- 숨김 메뉴 행 반복 렌더링 -->
             <tr th:each="menu : ${pageResponse.dtoList}">
                 <td>
                     <div class="prod-info">
-                        <div class="prod-thumb">🔒</div>
+                        <div class="prod-thumb"><i data-lucide="lock"></i></div>
                         <div class="prod-name" th:text="${menu.name}"></div>
                     </div>
                 </td>
@@ -238,20 +233,24 @@
                 <td>
                     <div class="action-group">
 
-                        <!-- 다시 표시: ADMIN, SUPER -->
+                        <!-- ADMIN/SUPER 메뉴 복구 -->
                         <form sec:authorize="hasAnyRole('ADMIN', 'SUPER')"
                               th:action="@{/admin/product/menu/{id}/restore(id=${menu.id})}"
                               method="post" style="display:inline;">
+                            <!-- 복구 후 숨김 목록 페이지 유지 -->
                             <input type="hidden" name="page" th:value="${pageResponse.page}"/>
                             <input type="hidden" name="size" th:value="${pageResponse.size}"/>
                             <button type="submit" class="btn-table btn-instock">다시 표시</button>
                         </form>
 
-                        <!-- 다시 표시: STAFF -->
+                        <!-- STAFF 메뉴 복구 제한 -->
                         <button sec:authorize="hasRole('STAFF')"
                                 class="btn-table btn-instock"
                                 style="opacity: 0.4; cursor: not-allowed;"
-                                onclick="alert('관리자 권한이 필요합니다.'); return false;">🔓 다시 표시</button>
+                                onclick="alert('관리자 권한이 필요합니다.'); return false;">
+                            <i data-lucide="unlock"></i>
+                            다시 표시
+                        </button>
 
                     </div>
                 </td>
@@ -259,11 +258,13 @@
             </tbody>
         </table>
 
-        <!-- 페이징 -->
+        <!-- 페이지네이션 -->
         <div class="pagination">
             <a th:if="${pageResponse.prev}"
                th:href="@{/admin/product/menu(tab='hidden', page=${pageResponse.start - 1}, size=${pageResponse.size})}"
-               class="page-link">◀</a>
+               class="page-link" aria-label="이전 페이지">
+                <i data-lucide="chevron-left"></i>
+            </a>
 
             <a th:each="i : ${#numbers.sequence(pageResponse.start, pageResponse.end)}"
                th:href="@{/admin/product/menu(tab='hidden', page=${i}, size=${pageResponse.size})}"
@@ -273,12 +274,15 @@
 
             <a th:if="${pageResponse.next}"
                th:href="@{/admin/product/menu(tab='hidden', page=${pageResponse.end + 1}, size=${pageResponse.size})}"
-               class="page-link">▶</a>
+               class="page-link" aria-label="다음 페이지">
+                <i data-lucide="chevron-right"></i>
+            </a>
         </div>
     </div>
 
 </th:block>
 
+<!-- 메뉴 관리 스크립트 -->
 <th:block layout:fragment="scripts">
     <script th:src="@{/js/admin/product_menu.js}"></script>
 </th:block>

@@ -24,6 +24,33 @@
     gap: 6px;
 }
 
+.icon-title {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.icon-title i {
+    width: 18px;
+    height: 18px;
+    stroke-width: 2.3;
+    flex-shrink: 0;
+}
+
+.table-info-icon {
+    width: 14px;
+    height: 14px;
+    stroke-width: 2.3;
+    flex-shrink: 0;
+}
+
+.btn i {
+    width: 16px;
+    height: 16px;
+    stroke-width: 2.3;
+    flex-shrink: 0;
+}
+
 .dot {
     width: 12px;
     height: 12px;
@@ -294,11 +321,19 @@
 }
 
 .close-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
     cursor: pointer;
-    font-size: 28px;
     border: none;
     background: none;
     line-height: 1;
+}
+
+.close-btn i {
+    width: 24px;
+    height: 24px;
+    stroke-width: 2.4;
 }
 
 .order-list {

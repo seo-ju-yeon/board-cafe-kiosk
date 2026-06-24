@@ -39,11 +39,11 @@ document.getElementById('staffId').addEventListener('input', function() {
             .then(res => res.json())
             .then(isDuplicate => {
                 if (!isDuplicate) {
-                    msgElement.textContent = "사용 가능한 아이디입니다. ✅";
+                    msgElement.textContent = "사용 가능한 아이디입니다.";
                     msgElement.style.color = "#34C759";
                     isIdValid = true;
                 } else {
-                    msgElement.textContent = "이미 사용 중인 아이디입니다. ❌";
+                    msgElement.textContent = "이미 사용 중인 아이디입니다.";
                     msgElement.style.color = "#FF3B30";
                     isIdValid = false;
                 }

@@ -345,6 +345,12 @@ tr.is-disabled {
     transition: all 0.2s;
 }
 
+.page-btn i {
+    width: 16px;
+    height: 16px;
+    stroke-width: 2.4;
+}
+
 .page-btn:hover {
     background: #f1f3f4;
 }

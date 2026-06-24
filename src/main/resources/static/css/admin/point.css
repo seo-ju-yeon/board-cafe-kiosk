@@ -52,6 +52,14 @@
     border: 1px solid var(--border-color);
 }
 
+.search-box i {
+    width: 18px;
+    height: 18px;
+    color: var(--text-gray);
+    stroke-width: 2.2;
+    flex-shrink: 0;
+}
+
 .search-box input {
     border: none;
     outline: none;
@@ -191,9 +199,18 @@
 }
 
 .modal-title {
+    display: flex;
+    align-items: center;
+    gap: 8px;
     font-size: 18px;
     font-weight: 700;
     color: var(--text-dark);
+}
+
+.modal-title i {
+    width: 18px;
+    height: 18px;
+    stroke-width: 2.2;
 }
 
 .modal-phone {
@@ -203,12 +220,20 @@
 }
 
 .modal-close {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
     background: none;
     border: none;
-    font-size: 22px;
     cursor: pointer;
     color: var(--text-gray);
     line-height: 1;
+}
+
+.modal-close i {
+    width: 22px;
+    height: 22px;
+    stroke-width: 2.4;
 }
 
 .modal-close:hover {

@@ -261,7 +261,7 @@ function loadActiveOrders() {
                                     ${steps.map((label, idx) => `
                                         <div class="progress-step">
                                             <div class="step-dot ${idx <= currentStep ? (idx === currentStep ? 'active' : 'completed') : ''}">
-                                                ${idx < currentStep ? '✓' : idx + 1}
+                                                ${idx < currentStep ? '<i data-lucide="check"></i>' : idx + 1}
                                             </div>
                                             <div class="step-label ${idx <= currentStep ? (idx === currentStep ? 'active' : 'completed') : ''}">${label}</div>
                                         </div>
@@ -357,7 +357,7 @@ async function confirmOrder() {
 
         if (data.success) {
             // console.log('주문 생성 성공 - orderId:', data.id);
-            showToast(`✓ 주문이 생성되었습니다. (주문번호: ${data.id})`);
+            showToast(`주문이 생성되었습니다. (주문번호: ${data.id})`);
 
             const createdItems = Array.isArray(data.items) ? data.items : [];
             const gameOnlyOrder = createdItems.length > 0
@@ -370,7 +370,7 @@ async function confirmOrder() {
                     : `/kiosk/order/${data.id}`;
             }, 1500);
         } else {
-            showToast(`✗ 주문 생성 실패: ${data.message}`);
+            showToast(`주문 생성 실패: ${data.message}`);
             confirmBtn.disabled = false;
             confirmBtnText.innerText = '주문하기';
         }

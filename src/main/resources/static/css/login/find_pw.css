@@ -183,11 +183,19 @@ input.input-error {
 
 /* 타이머 */
 .timer {
+    align-items: center;
+    gap: 5px;
     font-size: 0.82rem;
     color: #dc3545;
     font-weight: 700;
     margin-top: 6px;
     display: none;
+}
+
+.timer i {
+    width: 14px;
+    height: 14px;
+    stroke-width: 2.3;
 }
 
 /* 타이머 경고 */
@@ -291,13 +299,22 @@ input.input-error {
 }
 
 .back-link {
-    display: block;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
     text-align: center;
     margin-top: 14px;
     color: #aaa;
     font-size: 0.82rem;
     cursor: pointer;
     text-decoration: underline;
+}
+
+.back-link i {
+    width: 14px;
+    height: 14px;
+    stroke-width: 2.3;
 }
 
 .back-link:hover {

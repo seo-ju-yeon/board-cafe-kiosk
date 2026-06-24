@@ -392,6 +392,11 @@
 }
 
 .page-link {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 34px;
+    min-height: 34px;
     padding: 7px 13px;
     border-radius: 8px;
     border: 1px solid var(--border-color);
@@ -401,6 +406,12 @@
     font-weight: 600;
     text-decoration: none;
     transition: 0.2s;
+}
+
+.page-link i {
+    width: 16px;
+    height: 16px;
+    stroke-width: 2.4;
 }
 
 .page-link:hover {

@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="ko" xmlns:th="http://www.thymeleaf.org">
 <head>
+    <!-- 키오스크 공통 head 설정 -->
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title th:text="'Kiosk - ' + ${pageTitle != null ? pageTitle : 'Main'}">Kiosk Main Menu</title>
@@ -9,39 +10,54 @@
 </head>
 <body>
 
+<!-- 키오스크 좌측 메뉴 -->
 <div class="sidebar-left">
+    <!-- 상품/게임 메뉴 네비게이션 -->
     <div class="nav-group">
-        <button class="nav-btn" th:classappend="${currentMenu == 'drinks' ? 'active' : ''}" onclick="navigateMenu('drinks')">
+        <button class="nav-btn" th:classappend="${currentMenu == 'drinks' ? 'active' : ''}"
+                onclick="navigateMenu('drinks')">
             <i data-lucide="coffee"></i><span class="nav-label">음료</span>
         </button>
-        <button class="nav-btn" th:classappend="${currentMenu == 'food' ? 'active' : ''}" onclick="navigateMenu('food')">
+        <button class="nav-btn" th:classappend="${currentMenu == 'food' ? 'active' : ''}"
+                onclick="navigateMenu('food')">
             <i data-lucide="utensils"></i><span class="nav-label">음식</span>
         </button>
-        <button class="nav-btn" th:classappend="${currentMenu == 'games' ? 'active' : ''}" onclick="navigateMenu('games')">
+        <button class="nav-btn" th:classappend="${currentMenu == 'games' ? 'active' : ''}"
+                onclick="navigateMenu('games')">
             <i data-lucide="gamepad-2"></i><span class="nav-label">게임</span>
         </button>
-        <button class="nav-btn" th:classappend="${currentMenu == 'members' ? 'active' : ''}" onclick="navigateMenu('members')">
+        <button class="nav-btn" th:classappend="${currentMenu == 'members' ? 'active' : ''}"
+                onclick="navigateMenu('members')">
             <i data-lucide="user-plus"></i><span class="nav-label">인원추가</span>
         </button>
     </div>
+
+    <!-- 서비스 메뉴 -->
     <div class="nav-group">
         <button class="nav-btn ai-service" onclick="location.href='/kiosk/ai'">
             <i data-lucide="sparkles"></i> <span class="nav-label">AI Service</span>
         </button>
-        <button class="nav-btn orange" onclick="openServiceModal()"><i data-lucide="bell"></i><span class="nav-label">직원호출</span></button>
-        <button class="nav-btn red" onclick="navigateCheckout()"><i data-lucide="credit-card"></i><span class="nav-label">정산</span></button>
+        <button class="nav-btn orange" onclick="openServiceModal()"><i data-lucide="bell"></i><span class="nav-label">직원호출</span>
+        </button>
+        <button class="nav-btn red" onclick="navigateCheckout()"><i data-lucide="credit-card"></i><span
+                class="nav-label">정산</span></button>
     </div>
 </div>
 
+<!-- 키오스크 메인 영역 -->
 <div class="main-area">
     <div class="header">
+        <!-- 테이블/인원 정보 -->
         <div class="header-left">
-            <span class="table-info" th:text="'Table ' + ${tableNumber != null ? tableNumber : '0'} + '번'">Table 0번</span>
+            <span class="table-info"
+                  th:text="'Table ' + ${tableNumber != null ? tableNumber : '0'} + '번'">Table 0번</span>
             <span class="party-badge">
                 <i data-lucide="users"></i>
                 <span th:text="(${partySize ?: 0}) + '명'">1명</span>
             </span>
         </div>
+
+        <!-- 이용 시간/주문 상태/장바구니 -->
         <div class="header-right">
             <div class="timer-badge" id="timer-badge">
                 <i data-lucide="clock"></i><span id="timer-text">--:--</span>
@@ -50,22 +66,27 @@
                 <span class="order-status-dot"></span>
                 <span id="order-status-text">새 주문</span>
             </div>
-            <div class="game-status-box hidden" id="game-status-box" role="button" tabindex="0" aria-label="게임 요청 상세 보기">
+            <div class="game-status-box hidden" id="game-status-box" role="button" tabindex="0"
+                 aria-label="게임 요청 상세 보기">
                 <span class="game-status-dot"></span>
                 <span id="game-status-text">게임 요청</span>
             </div>
             <button class="icon-btn cart" onclick="navigateCart()">
                 <i data-lucide="shopping-cart"></i>
                 <span class="btn-label">장바구니</span>
-                <span class="cart-badge" id="cart-badge" th:text="${cartCount ?: 0}" th:style="${(cartCount ?: 0) > 0 ? 'display:flex' : 'display:none'}">0</span>
+                <span class="cart-badge" id="cart-badge" th:text="${cartCount ?: 0}"
+                      th:style="${(cartCount ?: 0) > 0 ? 'display:flex' : 'display:none'}">0</span>
             </button>
         </div>
     </div>
+
+    <!-- 화면별 키오스크 콘텐츠 주입 -->
     <div class="content">
         <div th:replace="~{kiosk/menu :: menuContent}"></div>
     </div>
 </div>
 
+<!-- 직원 호출 서비스 모달 -->
 <div class="modal-overlay" id="serviceModal">
     <div class="modal-content">
         <h2 class="modal-title">서비스 요청</h2>
@@ -75,14 +96,17 @@
             <button class="service-btn" onclick="callService('게임 규칙 설명')"><strong>게임 규칙</strong></button>
             <button class="service-btn" onclick="callService('테이블 청소')"><strong>테이블 청소</strong></button>
         </div>
-        <button onclick="closeServiceModal()" style="margin-top:20px; border:none; background:none; cursor:pointer;">닫기</button>
+        <button onclick="closeServiceModal()" style="margin-top:20px; border:none; background:none; cursor:pointer;">
+            닫기
+        </button>
     </div>
 </div>
 
+<!-- 키오스크 공통 스크립트 -->
 <script th:inline="javascript">
     lucide.createIcons({attrs: {'stroke-width': 2.5}});
 
-    /* Thymeleaf 인라인 변수 안전하게 가져오기 */
+    /* 이용 시간 계산에 필요한 서버 값 주입 */
     const TABLE_NUMBER = [[${tableNumber}]];
     const SESSION_START_TIME = [[${sessionStartTime}]];
     const DURATION_MINUTES = [[${durationMinutes}]];

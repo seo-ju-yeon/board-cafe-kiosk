@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="ko" xmlns:th="http://www.thymeleaf.org">
 <head>
+    <!-- 장바구니 화면 head 설정 -->
     <meta charset="UTF-8">
     <title>장바구니 - Board Game Cafe</title>
     <script src="https://unpkg.com/lucide@latest"></script>
@@ -9,11 +10,13 @@
 </head>
 <body onclick="resetActivityTimer()">
 
+<!-- 장바구니 자동 초기화 안내 -->
 <div class="timer-banner">
     <i data-lucide="clock"></i>
     장바구니가 <span id="timer-display">05:00</span> 후 초기화됩니다
 </div>
 
+<!-- 장바구니 상단 정보 -->
 <div class="header">
     <button class="back-btn" onclick="history.back()">
         <i data-lucide="arrow-left"></i> 메뉴로 돌아가기
@@ -21,13 +24,14 @@
     <div class="table-info" th:text="'Table #' + ${tableNumber}">Table #5</div>
 </div>
 
-<!-- 진행 중인 주문 배지 -->
+<!-- 진행 중인 주문 상태 배지 -->
 <div id="active-orders-section" class="active-orders-section" style="display:none;"></div>
 
+<!-- JS에서 장바구니 상품 목록 렌더링 -->
 <div class="content" id="cart-content">
-    <!-- 동적 콘텐츠 -->
 </div>
 
+<!-- 주문 금액 및 주문 액션 -->
 <div class="footer">
     <div class="total-row">
         <span class="total-label">총 결제액</span>
@@ -39,18 +43,17 @@
     </div>
 </div>
 
-<!-- ========== 주문 확인 모달 ========== -->
+<!-- 주문 확인 모달 -->
 <div id="order-confirm-modal">
     <div class="modal-content">
         <h2>주문 확인</h2>
         <p class="subtitle">주문 내용을 확인하신 후 진행해주세요</p>
 
-        <!-- 주문 상품 리스트 -->
+        <!-- 주문 예정 상품 목록 -->
         <div class="modal-items-list" id="modal-items-list">
-            <!-- 동적으로 채워짐 -->
         </div>
 
-        <!-- 가격 정보 -->
+        <!-- 주문 금액 확인 -->
         <div class="price-section">
             <div class="price-row">
                 <span>총 결제액</span>
@@ -58,7 +61,7 @@
             </div>
         </div>
 
-        <!-- 버튼 -->
+        <!-- 주문 확정/취소 액션 -->
         <div class="modal-buttons">
             <button class="btn-confirm" id="confirm-btn" onclick="confirmOrder()">
                 <span id="confirm-btn-text">주문하기</span>
@@ -68,7 +71,7 @@
     </div>
 </div>
 
-<!-- 경고 모달 -->
+<!-- 장바구니 초기화 경고 모달 -->
 <div id="warning-modal">
     <div class="modal-box">
         <h2>계속 이용하시겠습니까?</h2>
@@ -77,6 +80,7 @@
     </div>
 </div>
 
+<!-- 장바구니 스크립트 -->
 <script th:src="@{/js/kiosk/cart.js}"></script>
 </body>
 </html>

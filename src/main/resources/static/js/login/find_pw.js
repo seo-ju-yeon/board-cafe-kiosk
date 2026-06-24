@@ -75,7 +75,7 @@ function hideFieldError(el) {
 function startTimer() {
     clearInterval(timerInterval);
     let remaining = 180;  // OtpStore 유효시간 3분과 동기화
-    authTimer.style.display = 'block';
+    authTimer.style.display = 'flex';
     authTimer.classList.remove('expiring');
     updateTimer(remaining);
 

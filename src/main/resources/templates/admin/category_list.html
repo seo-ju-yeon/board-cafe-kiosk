@@ -15,17 +15,17 @@
 <body>
 <th:block layout:fragment="content">
 
-    <!-- 헤더 -->
+    <!-- 페이지 헤더 -->
     <div class="header-flex">
         <h1 class="page-title">분류(카테고리) 관리</h1>
 
-        <!-- ADMIN/SUPER 전용 -->
+        <!-- ADMIN/SUPER 카테고리 등록 -->
         <button sec:authorize="hasAnyRole('ADMIN', 'SUPER')"
                 class="btn-add-product"
                 onclick="openAddModal()">+ 새 카테고리 추가
         </button>
 
-        <!-- STAFF 비활성 처리 -->
+        <!-- STAFF 카테고리 등록 제한 -->
         <button sec:authorize="hasRole('STAFF')"
                 class="btn-add-product"
                 style="opacity: 0.4; cursor: not-allowed;"
@@ -33,7 +33,7 @@
         </button>
     </div>
 
-    <!-- 상단 탭 네비게이션 -->
+    <!-- 상품 관리 탭 네비게이션 -->
     <div class="tab-container">
         <a href="/admin/product/game" class="tab-btn">게임 관리</a>
         <a href="/admin/product/menu?tab=food" class="tab-btn">음식 관리</a>
@@ -45,11 +45,11 @@
            th:classappend="${activePage == 'category'} ? ' active'">카테고리 관리</a>
     </div>
 
-    <!-- 성공/에러 플래시 메시지 → 토스트로 표시 -->
+    <!-- 서버 플래시 메시지 토스트 -->
     <div th:if="${successMsg}" class="toast success" id="successToast" th:text="${successMsg}"></div>
     <div th:if="${errorMsg}" class="toast error" id="errorToast" th:text="${errorMsg}"></div>
 
-    <!-- 카테고리 목록 테이블 -->
+    <!-- 카테고리 목록 -->
     <div class="list-card">
         <table class="cat-table">
             <thead>
@@ -62,12 +62,12 @@
             </thead>
             <tbody>
 
-            <!-- 빈 목록 -->
+            <!-- 카테고리 없음 상태 -->
             <tr th:if="${#lists.isEmpty(pageResponse.dtoList)}" class="empty-row">
                 <td colspan="4">등록된 카테고리가 없습니다.</td>
             </tr>
 
-            <!-- 카테고리 행 반복 -->
+            <!-- 카테고리 행 반복 렌더링 -->
             <tr th:each="cat : ${pageResponse.dtoList}">
                 <td>
                     <span class="status-badge"
@@ -84,12 +84,7 @@
                 <td>
                     <div class="action-group">
 
-                        <!-- 수정 버튼: ADMIN, SUPER -->
-                        <!--
-                            th:onclick 안에서 리터럴 치환(|...|)과 작은따옴표를 함께 쓰면
-                            Thymeleaf 파서가 속성 구분자로 오해 → TemplateInputException 발생.
-                            data-* 속성으로 값을 전달하고 JS에서 읽는 방식으로 수정.
-                        -->
+                        <!-- ADMIN/SUPER 카테고리 수정 -->
                         <button sec:authorize="hasAnyRole('ADMIN', 'SUPER')"
                                 type="button" class="btn-table btn-edit"
                                 th:attr="data-id=${cat.id}, data-name=${cat.name}, data-type=${cat.type}"
@@ -97,18 +92,14 @@
                             수정
                         </button>
 
-                        <!-- 수정 버튼: STAFF 비활성 -->
+                        <!-- STAFF 카테고리 수정 제한 -->
                         <button sec:authorize="hasRole('STAFF')"
                                 class="btn-table btn-edit"
                                 style="opacity: 0.4; cursor: not-allowed;"
                                 onclick="alert('관리자 권한이 필요합니다.'); return false;">수정
                         </button>
 
-                        <!-- 삭제 버튼: ADMIN, SUPER -->
-                        <!--
-                            productCount > 0 이면 form submit 막고 삭제불가 모달 표시
-                            productCount == 0 이면 confirm 후 form submit
-                        -->
+                        <!-- ADMIN/SUPER 카테고리 삭제 -->
                         <button sec:authorize="hasAnyRole('ADMIN', 'SUPER')"
                                 type="button" class="btn-table btn-delete"
                                 th:attr="data-id=${cat.id}, data-count=${cat.productCount}, data-name=${cat.name}"
@@ -116,13 +107,12 @@
                             삭제
                         </button>
 
-                        <!-- 삭제용 숨김 form (JS에서 submit)                  -->
-                        <!-- th:action 사용 시 Thymeleaf가 CSRF hidden input을 자동 삽입 -->
+                        <!-- 삭제 요청을 서버 폼 액션으로 전송 -->
                         <form th:id="|deleteForm_${cat.id}|"
                               th:action="@{/admin/category/delete/{id}(id=${cat.id})}"
                               method="post" style="display: none;"></form>
 
-                        <!-- 삭제 버튼: STAFF 비활성 -->
+                        <!-- STAFF 카테고리 삭제 제한 -->
                         <button sec:authorize="hasRole('STAFF')"
                                 class="btn-table btn-delete"
                                 style="opacity: 0.4; cursor: not-allowed;"
@@ -136,11 +126,13 @@
             </tbody>
         </table>
 
-        <!-- 페이징 -->
+        <!-- 페이지네이션 -->
         <div class="pagination">
             <a th:if="${pageResponse.prev}"
                th:href="@{/admin/category(page=${pageResponse.start - 1}, size=${pageResponse.size})}"
-               class="page-link">◀</a>
+               class="page-link" aria-label="이전 페이지">
+                <i data-lucide="chevron-left"></i>
+            </a>
 
             <a th:each="i : ${#numbers.sequence(pageResponse.start, pageResponse.end)}"
                th:href="@{/admin/category(page=${i}, size=${pageResponse.size})}"
@@ -150,16 +142,15 @@
 
             <a th:if="${pageResponse.next}"
                th:href="@{/admin/category(page=${pageResponse.end + 1}, size=${pageResponse.size})}"
-               class="page-link">▶</a>
+               class="page-link" aria-label="다음 페이지">
+                <i data-lucide="chevron-right"></i>
+            </a>
         </div>
 
     </div>
 
 
-    <!-- ════════════════════════════════════════════════
-         ■ 모달 1: 카테고리 등록
-         th:action 사용 → Thymeleaf가 CSRF hidden input 자동 삽입
-         ════════════════════════════════════════════════ -->
+    <!-- 카테고리 등록 모달 -->
     <div class="modal-overlay" id="addModal">
         <div class="modal-box">
             <div class="modal-title">새 카테고리 추가</div>
@@ -187,11 +178,7 @@
     </div>
 
 
-    <!-- ════════════════════════════════════════════════
-         ■ 모달 2: 카테고리 수정
-         th:action에 임시 경로 지정 → JS openEditModal()에서 실제 id로 덮어씀
-         th:action 사용 → Thymeleaf가 CSRF hidden input 자동 삽입
-         ════════════════════════════════════════════════ -->
+    <!-- 카테고리 수정 모달 -->
     <div class="modal-overlay" id="editModal">
         <div class="modal-box">
             <div class="modal-title">카테고리 수정</div>
@@ -219,9 +206,7 @@
     </div>
 
 
-    <!-- ════════════════════════════════════════════════
-         ■ 모달 3: 삭제 불가 알림 (연결 상품 존재)
-         ════════════════════════════════════════════════ -->
+    <!-- 연결 상품 존재 시 삭제 제한 알림 모달 -->
     <div class="modal-overlay" id="deleteBlockModal">
         <div class="modal-box alert-modal-box">
             <div class="alert-icon">
@@ -237,9 +222,7 @@
     </div>
 
 
-    <!-- ════════════════════════════════════════════════
-         ■ 모달 4: 서버 에러 알림 (FlashAttribute errorMsg)
-         ════════════════════════════════════════════════ -->
+    <!-- 서버 오류 알림 모달 -->
     <div class="modal-overlay" id="serverErrorModal"
          th:if="${errorMsg}">
         <div class="modal-box alert-modal-box">
@@ -257,7 +240,7 @@
 <th:block layout:fragment="scripts">
     <script th:inline="javascript">
 
-        /* ── 서버에서 errorMsg가 내려오면 에러 모달 자동 오픈 ── */
+        /* 서버 오류 모달 자동 표시 */
         const serverErrorMsg = /*[[${errorMsg}]]*/ null;
         if (serverErrorMsg) {
             document.getElementById('serverErrorModal').classList.add('show');

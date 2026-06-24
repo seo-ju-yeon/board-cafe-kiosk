@@ -45,6 +45,78 @@ h2 {
     font-size: 0.95rem;
 }
 
+/* 포트폴리오 시연 계정 영역 */
+.demo-container {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 12px;
+    margin-bottom: 20px;
+}
+
+.demo-label {
+    font-size: 12px;
+    font-weight: 600;
+    color: #64748b;
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.demo-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 6px;
+}
+
+.demo-btn {
+    all: unset;
+    cursor: pointer;
+    padding: 8px;
+    background: white;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    transition: all 0.2s ease;
+    text-align: left;
+}
+
+.demo-btn:hover {
+    border-color: #3b82f6;
+    background: #eff6ff;
+    transform: translateY(-1px);
+}
+
+.role-box {
+    display: block;
+    font-size: 10px;
+    font-weight: 700;
+    margin-bottom: 2px;
+}
+
+.acc-info {
+    display: block;
+    font-size: 11px;
+    color: #334155;
+    font-family: monospace;
+}
+
+.status-active {
+    color: #10b981;
+}
+
+.status-inactive {
+    color: #f43f5e;
+}
+
+.status-super {
+    color: #8b5cf6;
+}
+
+.demo-btn.full-width {
+    grid-column: span 2;
+}
+
 /* 입력 폼 */
 .input-group {
     text-align: left;

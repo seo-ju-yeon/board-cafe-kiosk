@@ -27,10 +27,20 @@ body {
 
 /* 안내 문구 */
 h2 {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
     color: #333;
     margin-bottom: 10px;
     text-align: center;
     font-size: 24px;
+}
+
+h2 i {
+    width: 24px;
+    height: 24px;
+    stroke-width: 2.3;
 }
 
 .subtitle {
@@ -123,6 +133,20 @@ input.error {
     border: 1px solid #f5c6cb;
     text-align: center;
     display: none;
+}
+
+.info-box {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+}
+
+.info-box i {
+    width: 18px;
+    height: 18px;
+    stroke-width: 2.2;
+    flex-shrink: 0;
+    margin-top: 1px;
 }
 
 /* 안내 박스 */

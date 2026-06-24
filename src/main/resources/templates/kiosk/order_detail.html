@@ -1,137 +1,150 @@
 <!DOCTYPE html>
 <html lang="ko" xmlns:th="http://www.thymeleaf.org">
 <head>
-  <meta charset="UTF-8">
-  <title>주문 상세 - Board Game Cafe</title>
-  <script src="https://unpkg.com/lucide@latest"></script>
-  <link rel="stylesheet" th:href="@{/css/kiosk/order_detail.css}">
+    <!-- 주문 상세 화면 head 설정 -->
+    <meta charset="UTF-8">
+    <title>주문 상세 - Board Game Cafe</title>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link rel="stylesheet" th:href="@{/css/kiosk/order_detail.css}">
 </head>
 <body>
 
+<!-- 주문 상태 실시간 안내 -->
 <div class="status-banner">
-  <i data-lucide="package-check"></i>
-  주문 상태가 실시간으로 업데이트됩니다
+    <i data-lucide="package-check"></i>
+    주문 상태가 실시간으로 업데이트됩니다
 </div>
 
+<!-- 주문/테이블 정보 헤더 -->
 <div class="header">
-  <button class="back-btn" onclick="goToMenu()">
-    <i data-lucide="arrow-left"></i>
-    메뉴로 돌아가기
-  </button>
-  <div class="header-info">
+    <button class="back-btn" onclick="goToMenu()">
+        <i data-lucide="arrow-left"></i>
+        메뉴로 돌아가기
+    </button>
+    <div class="header-info">
     <span class="order-badge">
       <i data-lucide="hash"></i>
       주문번호 <strong th:text="${orderId}">123</strong>
     </span>
-    <span class="order-badge">
+        <span class="order-badge">
       <i data-lucide="table-2"></i>
       테이블 <strong th:text="${tableNumber}">5</strong>
     </span>
-  </div>
+    </div>
 </div>
 
+<!-- 주문 상세 콘텐츠 -->
 <div class="content">
-  <div class="status-section" th:classappend="'status-' + ${order.status.toLowerCase()}">
-    <div class="status-top">
-      <div class="status-main">
-        <div class="status-icon" id="status-icon">
-          <i data-lucide="clock"></i>
+    <!-- 주문 진행 상태 -->
+    <div class="status-section" th:classappend="'status-' + ${order.status.toLowerCase()}">
+        <div class="status-top">
+            <div class="status-main">
+                <div class="status-icon" id="status-icon">
+                    <i data-lucide="clock"></i>
+                </div>
+                <div>
+                    <div class="status-text" id="status-text" th:text="${statusDisplay}">주문 확인중...</div>
+                    <div class="status-subtext" id="status-subtext">매장 준비 상황에 따라 변경될 수 있어요</div>
+                </div>
+            </div>
+            <div class="status-chip" id="status-chip">주문 완료</div>
         </div>
-        <div>
-          <div class="status-text" id="status-text" th:text="${statusDisplay}">주문 확인중...</div>
-          <div class="status-subtext" id="status-subtext">매장 준비 상황에 따라 변경될 수 있어요</div>
+
+        <div class="progress-bar">
+            <div class="progress-fill" id="progress-fill" style="width: 20%;"></div>
         </div>
-      </div>
-      <div class="status-chip" id="status-chip">주문 완료</div>
+        <div class="progress-labels" id="progress-labels">
+            <span>주문</span>
+            <span>확인</span>
+            <span>조리</span>
+            <span>서빙</span>
+            <span>완료</span>
+        </div>
     </div>
 
-    <div class="progress-bar">
-      <div class="progress-fill" id="progress-fill" style="width: 20%;"></div>
+    <!-- 주문 상품 목록 -->
+    <div class="card">
+        <div class="card-header">
+            <i data-lucide="shopping-bag"></i>
+            주문 내역
+        </div>
+        <div id="order-items"></div>
     </div>
-    <div class="progress-labels" id="progress-labels">
-      <span>주문</span>
-      <span>확인</span>
-      <span>조리</span>
-      <span>서빙</span>
-      <span>완료</span>
-    </div>
-  </div>
 
-  <div class="card">
-    <div class="card-header">
-      <i data-lucide="shopping-bag"></i>
-      주문 내역
+    <!-- 관리자용 주문 상태 제어 영역 -->
+    <div class="card" id="admin-controls" style="display: none;">
+        <div class="card-header">
+            <i data-lucide="sliders"></i>
+            주문 상태 관리
+        </div>
+        <div id="order-status-controls"></div>
     </div>
-    <div id="order-items"></div>
-  </div>
 
-  <div class="card" id="admin-controls" style="display: none;">
-    <div class="card-header">
-      <i data-lucide="sliders"></i>
-      주문 상태 관리
+    <!-- 주문 부가 정보 -->
+    <div class="card">
+        <div class="card-header">
+            <i data-lucide="info"></i>
+            주문 정보
+        </div>
+        <div class="info-row">
+            <div class="info-label">
+                <i data-lucide="table-2"></i>
+                테이블
+            </div>
+            <div class="info-value" th:text="'#' + ${tableNumber}">#5</div>
+        </div>
+        <div class="info-row">
+            <div class="info-label">
+                <i data-lucide="clock"></i>
+                주문 시간
+            </div>
+            <div class="info-value" id="order-time"></div>
+        </div>
+        <div class="info-row" th:if="${order.customerPhone != null}">
+            <div class="info-label">
+                <i data-lucide="phone"></i>
+                연락처
+            </div>
+            <div class="info-value" th:text="${order.customerPhone}"></div>
+        </div>
     </div>
-    <div id="order-status-controls"></div>
-  </div>
-
-  <div class="card">
-    <div class="card-header">
-      <i data-lucide="info"></i>
-      주문 정보
-    </div>
-    <div class="info-row">
-      <div class="info-label">
-        <i data-lucide="table-2"></i>
-        테이블
-      </div>
-      <div class="info-value" th:text="'#' + ${tableNumber}">#5</div>
-    </div>
-    <div class="info-row">
-      <div class="info-label">
-        <i data-lucide="clock"></i>
-        주문 시간
-      </div>
-      <div class="info-value" id="order-time"></div>
-    </div>
-    <div class="info-row" th:if="${order.customerPhone != null}">
-      <div class="info-label">
-        <i data-lucide="phone"></i>
-        연락처
-      </div>
-      <div class="info-value" th:text="${order.customerPhone}"></div>
-    </div>
-  </div>
 </div>
 
+<!-- 주문 금액 및 이동 액션 -->
 <div class="footer">
-  <div class="subtotal-row">
-    <span>상품 소계</span>
-    <span id="subtotal" th:text="'₩' + ${#numbers.formatInteger(order.totalAmount, 0)}">₩15,000</span>
-  </div>
-  <div class="total-row">
-    <span class="total-label">결제액</span>
-    <span class="total-amount" id="total" th:text="'₩' + ${#numbers.formatInteger(order.totalAmount, 0)}">₩15,000</span>
-  </div>
-  <div class="button-group">
-    <button class="btn btn-menu" onclick="goToMenu()">
-      <i data-lucide="utensils"></i>
-      메뉴로 돌아가기
-    </button>
-    <button class="btn btn-cancel" id="cancel-order-btn" onclick="cancelOrder()" style="display:none;">
-      <i data-lucide="x-circle"></i>
-      주문 취소
-    </button>
-    <button class="btn btn-back" onclick="goToCart()">
-      <i data-lucide="shopping-cart"></i>
-      장바구니
-    </button>
-  </div>
+    <div class="subtotal-row">
+        <span>상품 소계</span>
+        <span id="subtotal" th:text="'₩' + ${#numbers.formatInteger(order.totalAmount, 0)}">₩15,000</span>
+    </div>
+    <div class="total-row">
+        <span class="total-label">결제액</span>
+        <span class="total-amount" id="total"
+              th:text="'₩' + ${#numbers.formatInteger(order.totalAmount, 0)}">₩15,000</span>
+    </div>
+    <div class="button-group">
+        <button class="btn btn-menu" onclick="goToMenu()">
+            <i data-lucide="utensils"></i>
+            메뉴로 돌아가기
+        </button>
+        <button class="btn btn-cancel" id="cancel-order-btn" onclick="cancelOrder()" style="display:none;">
+            <i data-lucide="x-circle"></i>
+            주문 취소
+        </button>
+        <button class="btn btn-back" onclick="goToCart()">
+            <i data-lucide="shopping-cart"></i>
+            장바구니
+        </button>
+    </div>
 </div>
 
+<!-- 주문 상세 렌더링에 필요한 서버 값 -->
 <script th:inline="javascript">
-  const orderId = /*[[${orderId}]]*/ 1;
-  const tableNumber = /*[[${tableNumber}]]*/ 1;
-  const orderData = /*[[${order}]]*/ {};
+    const orderId = /*[[${orderId}]]*/ 1;
+    const tableNumber = /*[[${tableNumber}]]*/ 1;
+    const orderData = /*[[${order}]]*/ {};
 </script>
+
+<!-- 주문 상세 스크립트 -->
 <script th:src="@{/js/kiosk/order_detail.js}"></script>
 </body>
 </html>

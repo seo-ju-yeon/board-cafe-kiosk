@@ -14,27 +14,24 @@
 <body>
 <th:block layout:fragment="content">
 
+    <!-- 페이지 헤더 -->
     <div class="header-flex">
         <h1 class="page-title"
             th:text="${menu != null and menu.id != 0} ? '메뉴 수정' : '새 메뉴 등록'"></h1>
     </div>
 
+    <!-- 메뉴 등록/수정 폼 -->
     <div class="form-card">
-        <!--
-            등록: POST /admin/product/menu/add
-            수정: POST /admin/product/menu/edit/{id}
-            tab 파라미터로 완료 후 돌아갈 탭 결정
-        -->
         <form th:action="${menu != null and menu.id != 0}
                           ? @{/admin/product/menu/edit/{id}(id=${menu.id})}
                           : @{/admin/product/menu/add}"
               method="post"
               enctype="multipart/form-data">
 
-            <!-- 돌아갈 탭 유지 -->
+            <!-- 완료 후 복귀할 메뉴 탭 유지 -->
             <input type="hidden" name="tab" th:value="${activeTab}">
 
-            <!-- 카테고리 -->
+            <!-- 메뉴 카테고리 선택 -->
             <div class="form-group">
                 <label class="form-label" for="categoryId">카테고리 <span>*</span></label>
                 <select id="categoryId" name="categoryId" class="form-control">
@@ -47,7 +44,7 @@
                 </select>
             </div>
 
-            <!-- 메뉴명 -->
+            <!-- 메뉴 기본 정보 -->
             <div class="form-group">
                 <label class="form-label" for="name">메뉴명 <span>*</span></label>
                 <input type="text" id="name" name="name" class="form-control"
@@ -55,7 +52,7 @@
                        th:value="${menu != null} ? ${menu.name} : ''" required>
             </div>
 
-            <!-- 가격 -->
+            <!-- 메뉴 가격 -->
             <div class="form-group">
                 <label class="form-label" for="price">가격 (원) <span>*</span></label>
                 <input type="number" id="price" name="price" class="form-control"
@@ -63,7 +60,7 @@
                        th:value="${menu != null} ? ${menu.price} : ''" required>
             </div>
 
-            <!-- 설명 -->
+            <!-- 메뉴 설명 -->
             <div class="form-group">
                 <label class="form-label" for="description">설명</label>
                 <textarea id="description" name="description" class="form-control"
@@ -71,37 +68,33 @@
                           th:text="${menu != null} ? ${menu.description} : ''"></textarea>
             </div>
 
-            <!-- 이미지 업로드 -->
+            <!-- 메뉴 이미지 업로드 -->
             <div class="form-group">
                 <label class="form-label">이미지</label>
                 <div class="image-preview-box">
-                    <!-- 기존 이미지 (수정 시) -->
+                    <!-- 기존 이미지 미리보기 -->
                     <img id="previewImg"
                          th:src="${menu != null and menu.imageUrl != null} ? ${menu.imageUrl} : ''"
                          th:style="${menu != null and menu.imageUrl != null} ? 'display:block' : 'display:none'"
                          alt="미리보기">
                     <div class="image-placeholder" id="imgPlaceholder"
                          th:style="${menu != null and menu.imageUrl != null} ? 'display:none' : ''">
-                        📷<br>이미지를 선택하면 미리보기가 표시됩니다
+                        <i data-lucide="image"></i>
+                        <span>이미지를 선택하면 미리보기가 표시됩니다</span>
                     </div>
                 </div>
                 <input type="file" id="imageFile" name="imageFile" class="form-control"
                        accept="image/*" onchange="previewImage(event)">
-                <!-- 수정 시 기존 이미지 URL 유지 -->
+                <!-- 기존 이미지 URL 유지 -->
                 <input type="hidden" name="imageUrl"
                        th:value="${menu != null} ? ${menu.imageUrl} : ''">
             </div>
 
-            <!-- 판매 가능 여부 -->
+            <!-- 메뉴 판매 상태 -->
             <div class="form-group">
                 <label class="form-label">판매 상태</label>
                 <div class="form-check-group">
-                    <!--
-                        Lombok boolean 필드 'isAvailable'의 setter는 setAvailable()로 생성되므로
-                        Spring MVC가 바인딩하는 파라미터명은 "available" 입니다.
-                        체크박스(name=isAvailable) 대신 hidden input(name=available)을
-                        JS로 직접 제어하여 정확한 파라미터명으로 전송합니다.
-                    -->
+                    <!-- 판매 상태 값을 available 파라미터로 전송 -->
                     <input type="hidden" id="availableValue" name="available"
                            th:value="${menu == null or menu.available} ? 'true' : 'false'">
                     <input type="checkbox" id="isAvailableCheck"
@@ -111,6 +104,7 @@
                 </div>
             </div>
 
+            <!-- 폼 액션 -->
             <div class="btn-group">
                 <button type="submit" class="btn-submit"
                         th:text="${menu != null and menu.id != 0} ? '수정 완료' : '등록하기'"></button>
@@ -121,6 +115,7 @@
 
 </th:block>
 
+<!-- 메뉴 등록/수정 스크립트 -->
 <th:block layout:fragment="scripts">
     <script th:src="@{/js/admin/product_menu_form.js}"></script>
 </th:block>

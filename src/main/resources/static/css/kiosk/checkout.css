@@ -46,11 +46,21 @@ body {
 
 /* 페이지 제목 */
 .page-title {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
     font-size: 2rem;
     margin: 0 0 24px 0;
     color: #111;
     text-align: center;
     font-weight: 700;
+}
+
+.page-title i {
+    width: 30px;
+    height: 30px;
+    stroke-width: 2.3;
 }
 
 /* 정산 카드 */
@@ -235,11 +245,19 @@ body {
 }
 
 .point-applied-msg {
+    align-items: center;
+    gap: 6px;
     margin-top: 10px;
     font-size: 0.9rem;
     color: #e65100;
     font-weight: 600;
     display: none;
+}
+
+.point-applied-msg i {
+    width: 16px;
+    height: 16px;
+    stroke-width: 2.4;
 }
 
 .no-point-msg {

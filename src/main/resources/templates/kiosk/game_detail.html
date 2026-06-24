@@ -1,50 +1,64 @@
 <!DOCTYPE html>
 <html lang="ko" xmlns:th="http://www.thymeleaf.org">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>게임 요청 상세</title>
-  <script src="https://unpkg.com/lucide@latest"></script>
-  <link rel="stylesheet" th:href="@{/css/kiosk/game_detail.css}">
+    <!-- 게임 요청 상세 화면 head 설정 -->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>게임 요청 상세</title>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link rel="stylesheet" th:href="@{/css/kiosk/game_detail.css}">
 </head>
 <body>
+<!-- 게임 요청 상세 화면 -->
 <div class="wrap">
-  <div class="header">
-    <button class="back-btn" onclick="goToMenu()"><i data-lucide="arrow-left"></i>메뉴로 돌아가기</button>
-    <div class="badge-row">
-      <span class="badge">주문번호 <strong th:text="${orderId}">0</strong></span>
-      <span class="badge">테이블 <strong th:text="${tableNumber}">0</strong></span>
-    </div>
-  </div>
-
-  <div class="layout">
-    <div class="list-card">
-      <div class="list-head">요청 게임 목록</div>
-      <div class="game-list" id="game-list"></div>
-    </div>
-
-    <div class="detail-card">
-      <div class="detail-head">게임 상세</div>
-      <div class="detail-body">
-        <img class="game-image" id="game-image" alt="게임 이미지">
-        <div class="meta-grid">
-          <div class="meta"><div class="k">가능 인원</div><div class="v" id="players-meta">-</div></div>
-          <div class="meta"><div class="k">평균 이용 시간</div><div class="v" id="time-meta">-</div></div>
+    <!-- 주문/테이블 정보 헤더 -->
+    <div class="header">
+        <button class="back-btn" onclick="goToMenu()"><i data-lucide="arrow-left"></i>메뉴로 돌아가기</button>
+        <div class="badge-row">
+            <span class="badge">주문번호 <strong th:text="${orderId}">0</strong></span>
+            <span class="badge">테이블 <strong th:text="${tableNumber}">0</strong></span>
         </div>
-        <div class="desc" id="desc-meta">설명이 등록되지 않았습니다.</div>
-      </div>
     </div>
-  </div>
+
+    <div class="layout">
+        <!-- 요청된 게임 목록 -->
+        <div class="list-card">
+            <div class="list-head">요청 게임 목록</div>
+            <div class="game-list" id="game-list"></div>
+        </div>
+
+        <!-- 선택한 게임 상세 정보 -->
+        <div class="detail-card">
+            <div class="detail-head">게임 상세</div>
+            <div class="detail-body">
+                <img class="game-image" id="game-image" alt="게임 이미지">
+                <div class="meta-grid">
+                    <div class="meta">
+                        <div class="k">가능 인원</div>
+                        <div class="v" id="players-meta">-</div>
+                    </div>
+                    <div class="meta">
+                        <div class="k">평균 이용 시간</div>
+                        <div class="v" id="time-meta">-</div>
+                    </div>
+                </div>
+                <div class="desc" id="desc-meta">설명이 등록되지 않았습니다.</div>
+            </div>
+        </div>
+    </div>
 </div>
 
+<!-- 게임 상세 렌더링에 필요한 서버 상태 -->
 <script th:inline="javascript">
-  window.gameDetailState = {
-    tableNumber: /*[[${tableNumber}]]*/ 0,
-    orderId: /*[[${orderId}]]*/ 0,
-    order: /*[[${order}]]*/ {},
-    requestedGames: /*[[${requestedGames}]]*/ []
-  };
+    window.gameDetailState = {
+        tableNumber: /*[[${tableNumber}]]*/ 0,
+        orderId: /*[[${orderId}]]*/ 0,
+        order: /*[[${order}]]*/ {},
+        requestedGames: /*[[${requestedGames}]]*/ []
+    };
 </script>
+
+<!-- 게임 요청 상세 스크립트 -->
 <script th:src="@{/js/kiosk/game_detail.js}"></script>
 </body>
 </html>

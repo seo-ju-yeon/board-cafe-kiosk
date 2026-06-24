@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="ko" xmlns:th="http://www.thymeleaf.org">
 <head>
+    <!-- 비밀번호 찾기 화면 head 설정 -->
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>비밀번호 찾기</title>
@@ -8,6 +9,7 @@
     <link rel="stylesheet" th:href="@{/css/login/find_pw.css}">
 </head>
 <body>
+<!-- 비밀번호 찾기 카드 -->
 <div class="container">
     <div class="icon-box">
         <i data-lucide="key-round" style="width:26px;height:26px;"></i>
@@ -15,7 +17,7 @@
     <h2>비밀번호 찾기</h2>
     <p class="subtitle">아이디와 이메일로 본인을 인증해 주세요</p>
 
-    <!-- 단계 표시 -->
+    <!-- 비밀번호 찾기 진행 단계 -->
     <div class="steps">
         <div class="step">
             <div class="step-circle active" id="circle1">1</div>
@@ -33,10 +35,10 @@
         </div>
     </div>
 
-    <!-- 전역 메시지 -->
+    <!-- 검증 결과 메시지 -->
     <div id="globalMsg"></div>
 
-    <!-- STEP 1: 아이디 입력 -->
+    <!-- 아이디 확인 단계 -->
     <div class="panel active" id="step1">
         <div class="form-group">
             <label for="inputId">아이디</label>
@@ -44,10 +46,13 @@
             <div class="field-error" id="idError"></div>
         </div>
         <button class="btn btn-primary btn-full" id="step1Btn">다음</button>
-        <span class="back-link" id="backToLoginBtn">← 로그인으로 돌아가기</span>
+        <span class="back-link" id="backToLoginBtn">
+            <i data-lucide="arrow-left"></i>
+            로그인으로 돌아가기
+        </span>
     </div>
 
-    <!-- STEP 2: 이메일 인증 + OTP -->
+    <!-- 이메일 인증 및 OTP 확인 단계 -->
     <div class="panel" id="step2">
         <div class="form-group">
             <label>아이디</label>
@@ -61,7 +66,10 @@
             </div>
             <div class="field-hint">데이터베이스에 등록된 이메일과 일치해야 합니다</div>
             <div class="field-error" id="emailError"></div>
-            <div class="timer" id="authTimer">⏱ 남은 시간: <span id="authTimeLeft">03:00</span></div>
+            <div class="timer" id="authTimer">
+                <i data-lucide="clock"></i>
+                남은 시간: <span id="authTimeLeft">03:00</span>
+            </div>
         </div>
 
         <div id="otpGroup" style="display:none;">
@@ -76,10 +84,13 @@
             </div>
         </div>
 
-        <span class="back-link" id="backToStep1Btn">← 아이디 다시 입력</span>
+        <span class="back-link" id="backToStep1Btn">
+            <i data-lucide="arrow-left"></i>
+            아이디 다시 입력
+        </span>
     </div>
 
-    <!-- STEP 3: 완료 -->
+    <!-- 임시 비밀번호 발송 완료 단계 -->
     <div class="panel" id="step3">
         <div class="complete-box success">
             인증이 완료되었습니다.<br>
@@ -93,6 +104,7 @@
 </div>
 
 
+<!-- 비밀번호 찾기 스크립트 -->
 <script th:src="@{/js/login/find_pw.js}"></script>
 </body>
 </html>

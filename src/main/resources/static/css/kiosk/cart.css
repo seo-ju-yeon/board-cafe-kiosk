@@ -652,6 +652,12 @@ body {
     border-color: #1e7e34;
 }
 
+.step-dot i {
+    width: 11px;
+    height: 11px;
+    stroke-width: 3;
+}
+
 .step-label {
     font-size: 0.65rem;
     color: #666;

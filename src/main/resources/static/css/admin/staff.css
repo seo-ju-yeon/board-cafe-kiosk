@@ -102,6 +102,19 @@ tr.is-disabled {
     opacity: 0.6;
 }
 
+.role-label {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.role-label i {
+    width: 16px;
+    height: 16px;
+    stroke-width: 2.2;
+    color: var(--primary-blue);
+}
+
 /* 버튼 */
 .btn-primary {
     padding: 10px 20px;

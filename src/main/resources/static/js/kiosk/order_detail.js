@@ -87,7 +87,7 @@ function pollOrderStatus() {
                     if (newStatus !== currentStatus) {
                         currentStatus = newStatus;
                         updateStatusDisplay();
-                        showToast(`✓ 상태 변경: ${getStatusText(newStatus)}`);
+                        showToast(`상태 변경: ${getStatusText(newStatus)}`);
 
                         if (newStatus === 'COMPLETED' || newStatus === 'CANCELLED') {
                             clearInterval(pollInterval);
@@ -266,9 +266,9 @@ async function changeOrderStatus(newStatus) {
             currentStatus = newStatus;
             updateStatusDisplay();
             initAdminControls();
-            showToast(`✓ 상태 변경: ${getStatusText(newStatus)}`);
+            showToast(`상태 변경: ${getStatusText(newStatus)}`);
         } else {
-            showToast(`✗ 상태 변경 실패: ${data.message}`);
+            showToast(`상태 변경 실패: ${data.message}`);
         }
     } catch (error) {
         console.error('상태 변경 오류:', error);

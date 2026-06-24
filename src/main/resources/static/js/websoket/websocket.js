@@ -24,10 +24,10 @@ function connectWebSocket() {
     stompClient = Stomp.over(socket);
 
     stompClient.connect({}, function (frame) {
-        // console.log('✅ WebSocket 연결됨');
+        // console.log('WebSocket 연결됨');
         subscribeToChannels();
     }, function (error) {
-        console.error('❌ WebSocket 연결 실패:', error);
+        console.error('WebSocket 연결 실패:', error);
         setTimeout(connectWebSocket, 3000);
     });
 }
@@ -40,19 +40,19 @@ function subscribeToChannels() {
     // 신규 일반 주문 알림 수신
     stompClient.subscribe('/topic/new-orders', function (message) {
         const order = JSON.parse(message.body);
-        // console.log('🚨 신규 일반 주문:', order);
+        // console.log('신규 일반 주문:', order);
         onNewOrder(order);
     });
 
     // 신규 게임 요청 알림 수신
     stompClient.subscribe('/topic/new-game-orders', function (message) {
         const order = JSON.parse(message.body);
-        // console.log('🎲 신규 게임 요청:', order);
+        // console.log('신규 게임 요청:', order);
         onNewGameOrder(order);
     });
 
     commonChannelSubscribed = true;
-    // console.log('✅ 채널 구독 완료');
+    // console.log('채널 구독 완료');
 }
 
 /* 선택 테이블 주문 채널 구독 */
@@ -68,13 +68,13 @@ function subscribeToTableOrders(tableId) {
 
     tableOrderSubscription = stompClient.subscribe(`/topic/orders/${tableId}`, function (message) {
         const orders = JSON.parse(message.body);
-        // console.log(`📨 테이블 ${tableId} 주문:`, orders);
+        // console.log(`테이블 ${tableId} 주문:`, orders);
         onOrdersUpdated(orders, tableId);
     });
 
     // 구독 직후 초기 데이터 요청
     stompClient.send(`/app/subscribe/${tableId}`, {}, '');
-    // console.log(`✅ 테이블 ${tableId} 구독`);
+    // console.log(`테이블 ${tableId} 구독`);
 }
 
 /* 선택 테이블 주문 구독 해제 */
@@ -82,7 +82,7 @@ function unsubscribeFromOrders() {
     if (tableOrderSubscription) {
         try {
             tableOrderSubscription.unsubscribe();
-            // console.log('📴 주문 구독 해제');
+            // console.log('주문 구독 해제');
         } catch (e) {
             console.warn('주문 구독 해제 실패:', e);
         } finally {
@@ -119,7 +119,7 @@ function showNewOrderNotificationModal(order) {
     const modal = document.getElementById('newOrderNotificationModal');
     if (!modal) {
         // 알림 모달이 없는 대시보드 템플릿 대응
-        console.warn('⚠️ newOrderNotificationModal 없음 - 모달 표시 생략');
+        console.warn('newOrderNotificationModal 없음 - 모달 표시 생략');
         return;
     }
 
@@ -173,7 +173,7 @@ function showNewOrderNotificationModal(order) {
         // console.log('음성 알림 불가:', e);
     }
 
-    // console.log('✅ 신규 주문 알림 모달 표시');
+    // console.log('신규 주문 알림 모달 표시');
 }
 
 /* 신규 주문 알림 모달 닫기 */
@@ -194,7 +194,7 @@ function closeNewOrderNotification() {
             });
         }, 300);
     }
-    // console.log('✅ 신규 주문 알림 모달 닫음');
+    // console.log('신규 주문 알림 모달 닫음');
 }
 
 /* 신규 주문 알림음 재생 */
@@ -228,9 +228,9 @@ function playNotificationSound() {
             osc2.stop(now2 + 0.2);
         }, 250);
 
-        // console.log('🔊 사운드 알림 재생');
+        // console.log('사운드 알림 재생');
     } catch (e) {
-        // console.log('⚠️ 사운드 알림 불가:', e.message);
+        // console.log('사운드 알림 불가:', e.message);
     }
 }
 
@@ -267,7 +267,7 @@ async function updateOrderStatusViaApi(orderId, nextStatus) {
     if (!confirm(confirmMsg)) return;
 
     try {
-        // console.log('📝 주문 상태 변경 요청:', { orderId, nextStatus });
+        // console.log('주문 상태 변경 요청:', { orderId, nextStatus });
 
         // 버튼에서 요청한 상태를 그대로 서버에 전달
         const statusToSend = nextStatus;
@@ -293,15 +293,15 @@ async function updateOrderStatusViaApi(orderId, nextStatus) {
 
         // 동시성 충돌 시 최신 상태 재조회 후 안내
         if (typeof errorMessage === 'string' && errorMessage.includes('허용되지 않는 상태 전이')) {
-            console.warn('⚠️ 상태 전이 충돌 감지 - 최신 상태 재조회', {orderId, statusToSend, errorMessage});
+            console.warn('상태 전이 충돌 감지 - 최신 상태 재조회', {orderId, statusToSend, errorMessage});
             if (typeof fetchActiveOrders === 'function') await fetchActiveOrders();
             alert('다른 화면에서 먼저 상태가 변경되었습니다. 최신 상태로 갱신했습니다.');
             return;
         }
-        console.error('❌ 상태 변경 실패:', response.status, errorData);
-        alert("❌ " + errorMessage);
+        console.error('상태 변경 실패:', response.status, errorData);
+        alert(errorMessage);
     } catch (err) {
-        console.error('❌ updateOrderStatus 에러:', err);
+        console.error('updateOrderStatus 에러:', err);
         alert("서버와 통신 중 오류가 발생했습니다: " + err.message);
     }
 }

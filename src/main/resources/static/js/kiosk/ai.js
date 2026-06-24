@@ -36,12 +36,51 @@ const spinner = document.getElementById('spinner');
 const countdownWrap = document.getElementById('countdownWrap');
 const countdownBar = document.getElementById('countdownBar');
 
+/* Lucide 아이콘 렌더링 */
+function renderIcons() {
+    if (window.lucide) {
+        lucide.createIcons();
+    }
+}
+
+/* 마이크 버튼 아이콘 표시 */
+function setMicIcon(iconName) {
+    micBtn.innerHTML = `<i data-lucide="${iconName}"></i>`;
+    renderIcons();
+}
+
+/* STT 상태 메시지 표시 */
+function setSttMessage(iconName, text, hintText = '') {
+    sttDisplay.textContent = '';
+
+    const line = document.createElement('span');
+    line.className = 'icon-line';
+
+    const icon = document.createElement('i');
+    icon.setAttribute('data-lucide', iconName);
+    line.appendChild(icon);
+    line.appendChild(document.createTextNode(text));
+    sttDisplay.appendChild(line);
+
+    if (hintText) {
+        sttDisplay.appendChild(document.createElement('br'));
+        const hint = document.createElement('small');
+        hint.style.color = '#0288D1';
+        hint.style.fontWeight = '700';
+        hint.textContent = hintText;
+        sttDisplay.appendChild(hint);
+    }
+
+    renderIcons();
+}
+
 /* 초기화 */
 document.addEventListener('DOMContentLoaded', () => {
+    renderIcons();
     audioPlayer.addEventListener('ended', () => {
         isSpeaking = false;
         stopAnimation();
-        sttDisplay.innerText = '🎤 마이크 버튼을 눌러 다시 질문해보세요.';
+        setSttMessage('mic', '마이크 버튼을 눌러 다시 질문해보세요.');
     });
     renderVirtualKeyboard();
 });
@@ -68,9 +107,9 @@ async function startListening() {
 
         setListeningState(true);
 
-        sttDisplay.innerHTML = '🎙️ 듣고 있어요...<br><small style="color:#0288D1; font-weight:700;">다 말씀하신 후 마이크 버튼을 한 번 더 눌러주세요!</small>';
+        setSttMessage('audio-lines', '듣고 있어요...', '다 말씀하신 후 마이크 버튼을 한 번 더 눌러주세요!');
 
-        micBtn.innerText = '⏹️';
+        setMicIcon('square');
         micBtn.style.background = '#424242';
         micBtn.style.borderColor = '#212121';
         micBtn.style.boxShadow = '0 8px 0 #111';
@@ -89,7 +128,7 @@ async function startListening() {
         sttDisplay.innerText = '마이크를 사용할 수 없습니다.';
         isListening = false;
 
-        micBtn.innerText = '🎤';
+        setMicIcon('mic');
         micBtn.style.background = '#FF5252';
         micBtn.style.borderColor = '#fff';
         micBtn.style.boxShadow = '0 8px 0 #C62828';
@@ -103,7 +142,7 @@ function stopRecording() {
 
     countdownWrap.classList.remove('active');
 
-    micBtn.innerText = '🎤';
+    setMicIcon('mic');
     micBtn.style.background = '#FF5252';
     micBtn.style.borderColor = '#fff';
     micBtn.style.boxShadow = '0 8px 0 #C62828';
@@ -145,7 +184,7 @@ async function onRecordingStop() {
         const sttText = sttEncoded ? decodeBase64Utf8(sttEncoded) : '';
         const answerText = answerEncoded ? decodeBase64Utf8(answerEncoded) : '';
 
-        if (sttText) sttDisplay.innerText = `🗣️ "${sttText}"`;
+        if (sttText) setSttMessage('message-circle', `"${sttText}"`);
         if (answerText) showAnswerCard(answerText);
 
         // 응답 Body에 포함된 TTS 결과 MP3 재생

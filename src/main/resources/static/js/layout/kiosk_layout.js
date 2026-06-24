@@ -196,7 +196,7 @@ function startStaffMacroWatcher() {
 
             for (const msg of messages) {
                 if (msg?.content) {
-                    showToast('📨 ' + msg.content, 4000);
+                    showToast(msg.content, 4000);
                 }
                 if (msg?.id) {
                     await fetch(`/kiosk/messages/${msg.id}/read`, {method: 'PATCH'});

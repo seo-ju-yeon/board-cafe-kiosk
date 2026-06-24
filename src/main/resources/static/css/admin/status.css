@@ -22,10 +22,19 @@
 }
 
 .summary-label {
+    display: flex;
+    align-items: center;
+    gap: 6px;
     font-size: 12px;
     color: #888;
     margin-bottom: 8px;
     font-weight: 500;
+}
+
+.summary-label i {
+    width: 14px;
+    height: 14px;
+    stroke-width: 2.2;
 }
 
 .summary-value {
@@ -131,6 +140,9 @@
 
 /* 동기화 버튼 */
 .sync-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
     padding: 8px 15px;
     border-radius: 8px;
     border: 1px solid #007bff;
@@ -139,6 +151,12 @@
     cursor: pointer;
     font-weight: 600;
     font-size: 13px;
+}
+
+.sync-btn i {
+    width: 14px;
+    height: 14px;
+    stroke-width: 2.4;
 }
 
 .sync-btn:hover {

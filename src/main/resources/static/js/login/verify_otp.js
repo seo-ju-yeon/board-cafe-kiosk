@@ -1,3 +1,12 @@
+lucide.createIcons();
+
+/* 시연용 이메일 정보 입력 */
+function fillEmail(emailAddr) {
+    const emailInput = document.getElementById('email');
+    emailInput.value = emailAddr;
+    emailInput.focus();
+}
+
 /* DOM 참조 */
 const emailInput = document.getElementById('email');
 const emailError = document.getElementById('emailError');
