@@ -1,36 +1,20 @@
 CREATE DATABASE IF NOT EXISTS `board_cafe_kiosk_2603`;
 USE `board_cafe_kiosk_2603`;
 
---  보드게임 카페 키오스크 시스템 — 최종 스키마
---  테이블 목록 (총 22개)
---  ┌─────┬─────────────────────┬────────────────────────────────────────────────┐
---  │  #  │ 테이블명              │ 역할 (비고)                                     │
---  ├─────┼─────────────────────┼────────────────────────────────────────────────┤
---  │  1  │ manager             │ 관리자·직원 계정 (ADMIN / STAFF)                  │
---  │  2  │ cafe_table          │ 물리적 테이블 (UUID access_token 추가)            │
---  │  3  │ customer            │ 전화번호 등록 고객 (포인트 대상)                    │
---  │  4  │ category            │ 메뉴·게임·인원(GUEST) 공통 카테고리                │
---  │  5  │ cafe_package        │ 패키지 요금 정책                                 │
---  │  6  │ table_session       │ 테이블 이용 히스토리 및 세션 관리 (핵심)             │
---  │  7  │ menu                │ 음식·음료 및 추가인원 상품                         │
---  │  8  │ orders              │ 주문 헤더 (session_id 외래키 추가)                │
---  │  9  │ order_item          │ 주문 상세 항목                                   │
---  │ 10  │ game                │ 보드게임 종목                                    │
---  │ 11  │ game_item           │ 보드게임 실물 재고 (박스 단위)                      │
---  │ 12  │ cart                │ 테이블별 장바구니 헤더                             │
---  │ 13  │ cart_item           │ 장바구니 담긴 메뉴 항목                            │
---  │ 14  │ game_history        │ 게임 대여 이력 (session_id 기반으로 변경)           │
---  │ 15  │ payment             │ 결제 헤더 (세션 단위 정산으로 변경)                  │
---  │ 16  │ point               │ 전화번호 기반 포인트 계좌                          │
---  │ 17  │ point_history       │ 포인트 적립·사용 이력                              │
---  │ 18  │ macro_message       │ 1클릭 매크로 메시지                               │
---  │ 19  │ table_message       │ 통합 메시지 로그                                  │
---  │ 20  │ item_sales_history  │ 일일 상품별 판매 통계                             │
---  │ 21  │ daily_sales_summary │ 매장 전체 일별 매출 요약                           │
---  │ 22  │ persistent_logins   │ Remember-Me Persistent 토큰 저장소               │
---  └─────┴─────────────────────┴────────────────────────────────────────────────┘
+/*
+  Board Wave MariaDB 초기화 스크립트
 
--- 1. manager
+  로컬 실행과 포트폴리오 시연을 위해 데이터베이스, 테이블, 접속 계정을 생성한다.
+  시연용 접속 계정은 실행 환경 재현을 위해 유지하며, 운영 환경에서는 별도 설정으로 분리한다.
+*/
+
+-- =====================================================
+-- 관리자 / 인증
+-- =====================================================
+
+-- manager
+-- 관리자와 직원 계정을 저장한다.
+-- 관리자 로그인, 권한 구분, 이메일/OTP 인증 흐름에서 사용한다.
 CREATE TABLE `manager`
 (
     `id`         INT                    NOT NULL AUTO_INCREMENT COMMENT '관리자/직원 고유 번호 (PK)',
@@ -46,8 +30,9 @@ CREATE TABLE `manager`
 ) ENGINE = InnoDB
   DEFAULT CHARSET = utf8mb4 COMMENT ='관리자·직원 계정';
 
--- 2. cafe_table
--- 수정사항: 로그인 유지를 위한 access_token(UUID) 및 현재 세션 추적용 컬럼 추가
+-- cafe_table
+-- 키오스크 로그인을 위한 테이블 계정 정보를 저장한다.
+-- 테이블 상태와 현재 이용 세션을 함께 관리한다.
 CREATE TABLE `cafe_table`
 (
     `id`                 INT                                  NOT NULL AUTO_INCREMENT PRIMARY KEY COMMENT '카페 내 테이블(물리) 고유 번호',
@@ -59,7 +44,9 @@ CREATE TABLE `cafe_table`
 ) ENGINE = InnoDB
   DEFAULT CHARSET = utf8mb4 COMMENT ='카페 물리 테이블 정보';
 
--- 3. customer
+-- customer
+-- 전화번호 기반 고객 정보를 저장한다.
+-- 포인트 적립과 사용 흐름에서 고객 식별 값으로 사용한다.
 CREATE TABLE `customer`
 (
     `id`         INT         NOT NULL AUTO_INCREMENT PRIMARY KEY COMMENT '고객 고유 식별 번호',
@@ -69,8 +56,13 @@ CREATE TABLE `customer`
 ) ENGINE = InnoDB
   DEFAULT CHARSET = utf8mb4 COMMENT ='전화번호 등록 고객 정보';
 
--- 4. category
--- 수정사항: 인원 추가 관리를 위한 GUEST 타입 확장
+-- =====================================================
+-- 상품 / 카테고리 / 보드게임 재고
+-- =====================================================
+
+-- category
+-- 메뉴, 보드게임, 추가 인원 상품을 분류한다.
+-- 관리자 상품 관리와 키오스크 상품 노출 기준으로 사용한다.
 CREATE TABLE `category`
 (
     `id`   INT                                  NOT NULL AUTO_INCREMENT PRIMARY KEY COMMENT '카테고리 고유 번호',
@@ -79,7 +71,9 @@ CREATE TABLE `category`
 ) ENGINE = InnoDB
   DEFAULT CHARSET = utf8mb4 COMMENT ='메뉴·게임·인원 공통 대분류';
 
--- 5. cafe_package (순서 조정: session 참조용)
+-- cafe_package
+-- 키오스크 이용 요금 정책을 저장한다.
+-- 테이블 세션 생성 시 선택한 패키지와 정산 기준으로 사용한다.
 CREATE TABLE `cafe_package`
 (
     `id`                  INT                    NOT NULL AUTO_INCREMENT PRIMARY KEY COMMENT '요금제 고유 번호',
@@ -93,8 +87,13 @@ CREATE TABLE `cafe_package`
 ) ENGINE = InnoDB
   DEFAULT CHARSET = utf8mb4 COMMENT ='패키지 요금 정책';
 
--- 6. table_session
--- 추가이유: 요구하신 '테이블 이용 이력 히스토리' 및 세션 로그인 유지를 위한 핵심 테이블
+-- =====================================================
+-- 키오스크 이용 세션 / 주문
+-- =====================================================
+
+-- table_session
+-- 테이블 이용 시작부터 정산까지의 방문 세션을 저장한다.
+-- 주문, 게임 대여, 결제 흐름을 하나의 이용 단위로 묶는다.
 CREATE TABLE `table_session`
 (
     `id`                BIGINT    NOT NULL AUTO_INCREMENT PRIMARY KEY,
@@ -110,8 +109,9 @@ CREATE TABLE `table_session`
 ) ENGINE = InnoDB
   DEFAULT CHARSET = utf8mb4 COMMENT ='테이블 이용 세션 및 방문 히스토리';
 
--- 7. menu
--- 수정사항: 추가 인원(GUEST) 상품이 이 테이블에 등록됨
+-- menu
+-- 키오스크에서 선택 가능한 판매 상품을 저장한다.
+-- 음식, 음료, 보드게임 메뉴, 추가 인원 상품을 함께 관리한다.
 CREATE TABLE `menu`
 (
     `id`           INT          NOT NULL AUTO_INCREMENT PRIMARY KEY COMMENT '메뉴 고유 식별 번호',
@@ -127,8 +127,9 @@ CREATE TABLE `menu`
 ) ENGINE = InnoDB
   DEFAULT CHARSET = utf8mb4 COMMENT ='판매 메뉴 및 인원추가 상품';
 
--- 8. orders
--- 수정사항: session_id를 추가하여 '어느 방문 건'의 주문인지 명확히 식별
+-- orders
+-- 테이블 세션에서 발생한 주문의 기본 정보를 저장한다.
+-- 주문 상태와 결제 흐름을 연결하는 기준 테이블이다.
 CREATE TABLE `orders`
 (
     `id`             INT                                                                              NOT NULL AUTO_INCREMENT PRIMARY KEY COMMENT '주문 고유 번호',
@@ -143,7 +144,9 @@ CREATE TABLE `orders`
 ) ENGINE = InnoDB
   DEFAULT CHARSET = utf8mb4 COMMENT ='주문 헤더';
 
--- 9. order_item
+-- order_item
+-- 주문에 포함된 개별 상품 정보를 저장한다.
+-- 주문 당시의 메뉴명, 가격, 수량을 보관한다.
 CREATE TABLE `order_item`
 (
     `id`        INT          NOT NULL AUTO_INCREMENT PRIMARY KEY COMMENT '주문 상세 고유 번호',
@@ -156,7 +159,9 @@ CREATE TABLE `order_item`
 ) ENGINE = InnoDB
   DEFAULT CHARSET = utf8mb4 COMMENT ='주문 상세 항목';
 
--- 10. game
+-- game
+-- 보드게임 종목 정보를 저장한다.
+-- 플레이 인원, 예상 시간, 활성 상태를 관리한다.
 CREATE TABLE `game`
 (
     `id`          INT          NOT NULL AUTO_INCREMENT PRIMARY KEY COMMENT '게임 고유 식별 번호',
@@ -171,7 +176,9 @@ CREATE TABLE `game`
 ) ENGINE = InnoDB
   DEFAULT CHARSET = utf8mb4 COMMENT ='보드게임 종목';
 
--- 11. game_item
+-- game_item
+-- 보드게임의 실물 재고를 박스 단위로 관리한다.
+-- NORMAL, RENTED, DAMAGED, LOST 상태로 대여 가능 여부를 구분한다.
 CREATE TABLE `game_item`
 (
     `id`            INT                                       NOT NULL AUTO_INCREMENT PRIMARY KEY COMMENT '실물 개체 고유 번호',
@@ -182,7 +189,9 @@ CREATE TABLE `game_item`
 ) ENGINE = InnoDB
   DEFAULT CHARSET = utf8mb4 COMMENT ='보드게임 실물 재고(박스 단위)';
 
--- 12. cart
+-- cart
+-- 테이블별 장바구니 기본 정보를 저장한다.
+-- 키오스크 주문 전 선택 상품을 임시로 묶는 기준 테이블이다.
 CREATE TABLE `cart`
 (
     `id`         INT       NOT NULL AUTO_INCREMENT PRIMARY KEY COMMENT '장바구니 고유 번호',
@@ -192,7 +201,8 @@ CREATE TABLE `cart`
 ) ENGINE = InnoDB
   DEFAULT CHARSET = utf8mb4 COMMENT ='테이블별 장바구니 헤더';
 
--- 13. cart_item
+-- cart_item
+-- 장바구니에 담긴 개별 상품과 수량을 저장한다.
 CREATE TABLE `cart_item`
 (
     `id`       INT NOT NULL AUTO_INCREMENT PRIMARY KEY COMMENT '장바구니 항목 고유 번호',
@@ -205,8 +215,9 @@ CREATE TABLE `cart_item`
 ) ENGINE = InnoDB
   DEFAULT CHARSET = utf8mb4 COMMENT ='장바구니 담긴 메뉴 항목';
 
--- 14. game_history
--- 수정사항: table_id 대신 session_id를 사용하여 히스토리 추적성 강화
+-- game_history
+-- 테이블 세션별 보드게임 대여와 반납 이력을 저장한다.
+-- 반납 시 정상, 파손, 분실 상태를 기록한다.
 CREATE TABLE `game_history`
 (
     `id`           BIGINT                                       NOT NULL AUTO_INCREMENT PRIMARY KEY COMMENT '대여 이력 고유 번호',
@@ -220,7 +231,13 @@ CREATE TABLE `game_history`
 ) ENGINE = InnoDB
   DEFAULT CHARSET = utf8mb4 COMMENT ='게임 대여 이력 (session_id 기반으로 변경)';
 
--- 15. payment (토스페이먼츠 결제 정보 통합)
+-- =====================================================
+-- 결제 / 포인트
+-- =====================================================
+
+-- payment
+-- 테이블 세션 단위의 최종 결제 정보를 저장한다.
+-- Toss Payments 승인 정보와 정산 금액을 함께 보관한다.
 CREATE TABLE `payment`
 (
     `id`            INT                   NOT NULL AUTO_INCREMENT PRIMARY KEY COMMENT '결제 고유 번호',
@@ -242,7 +259,8 @@ CREATE TABLE `payment`
   COLLATE = utf8mb4_unicode_ci
     COMMENT ='결제 헤더(session 단위 정산)';
 
--- 16. point
+-- point
+-- 전화번호 기준 포인트 잔액을 저장한다.
 CREATE TABLE `point`
 (
     `id`         INT         NOT NULL AUTO_INCREMENT PRIMARY KEY COMMENT '포인트 계정 ID',
@@ -252,7 +270,9 @@ CREATE TABLE `point`
 ) ENGINE = InnoDB
   DEFAULT CHARSET = utf8mb4 COMMENT ='전화번호 기반 포인트 계좌';
 
--- 17. point_history
+-- point_history
+-- 포인트 적립과 사용 이력을 저장한다.
+-- 주문과 연결해 포인트 변동 내역을 추적한다.
 CREATE TABLE `point_history`
 (
     `id`            BIGINT              NOT NULL AUTO_INCREMENT PRIMARY KEY COMMENT '이력 고유 ID',
@@ -267,7 +287,12 @@ CREATE TABLE `point_history`
 ) ENGINE = InnoDB
   DEFAULT CHARSET = utf8mb4 COMMENT ='포인트 적립/사용';
 
--- 18. macro_message
+-- =====================================================
+-- 메시지 / 통계
+-- =====================================================
+
+-- macro_message
+-- 직원과 테이블 간 자주 쓰는 안내 문구를 저장한다.
 CREATE TABLE `macro_message`
 (
     `id`           INT                                      NOT NULL AUTO_INCREMENT PRIMARY KEY COMMENT '메세지 고유 번호',
@@ -277,7 +302,8 @@ CREATE TABLE `macro_message`
 ) ENGINE = InnoDB
   DEFAULT CHARSET = utf8mb4 COMMENT ='1클릭 매크로 메세지';
 
--- 19. table_message
+-- table_message
+-- 직원과 키오스크 사이에 오간 메시지 이력을 저장한다.
 CREATE TABLE `table_message`
 (
     `id`         BIGINT       NOT NULL AUTO_INCREMENT PRIMARY KEY COMMENT '메세지 로그 고유 번호',
@@ -292,7 +318,9 @@ CREATE TABLE `table_message`
 ) ENGINE = InnoDB
   DEFAULT CHARSET = utf8mb4 COMMENT ='통합 메세지 로그';
 
--- 20. item_sales_history
+-- item_sales_history
+-- 날짜별 상품 판매 수량과 금액을 저장한다.
+-- 관리자 통계 화면에서 상품별 매출 확인에 사용한다.
 CREATE TABLE `item_sales_history`
 (
     `id`           INT                                     NOT NULL AUTO_INCREMENT PRIMARY KEY COMMENT '통계 레코드 고유 번호',
@@ -305,7 +333,9 @@ CREATE TABLE `item_sales_history`
 ) ENGINE = InnoDB
   DEFAULT CHARSET = utf8mb4 COMMENT ='일일 상품별 판매 통계';
 
--- 21. daily_sales_summary
+-- daily_sales_summary
+-- 매장 전체의 일별 매출, 주문 수, 방문 수를 저장한다.
+-- 대시보드와 통계 화면의 요약 데이터로 사용한다.
 CREATE TABLE `daily_sales_summary`
 (
     `id`             BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY COMMENT '통계 일련 번호',
@@ -317,7 +347,13 @@ CREATE TABLE `daily_sales_summary`
 ) ENGINE = InnoDB
   DEFAULT CHARSET = utf8mb4 COMMENT =' 매장 전체 일별 매출 요약 ';
 
--- 22. persistent_logins
+-- =====================================================
+-- 자동 로그인 / 접속 계정
+-- =====================================================
+
+-- persistent_logins
+-- Spring Security Remember-Me 토큰을 저장한다.
+-- 키오스크 자동 로그인 유지에 사용한다.
 CREATE TABLE persistent_logins
 (
     series    VARCHAR(64) NOT NULL,
@@ -329,8 +365,8 @@ CREATE TABLE persistent_logins
   DEFAULT CHARSET = utf8mb4
     COMMENT = 'Spring Security Remember-Me Persistent 토큰 저장소. 관리자 전체 리셋 시 전체 삭제됨.';
 
--- 사용자 생성 및 권한
---
+-- 로컬 실행 및 시연용 애플리케이션 DB 접속 계정
+-- 운영 환경에서는 별도 설정으로 분리한다.
 CREATE USER IF NOT EXISTS `admin`@`%` IDENTIFIED BY '0331';
 GRANT ALL PRIVILEGES ON `board_cafe_kiosk_2603`.* TO `admin`@`%`;
 FLUSH PRIVILEGES;
