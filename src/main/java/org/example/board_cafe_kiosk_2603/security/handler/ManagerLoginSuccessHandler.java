@@ -13,14 +13,31 @@ import org.springframework.stereotype.Component;
 
 import java.io.IOException;
 
+/**
+ * 관리자 로그인 1차 인증 성공 후 2차 인증 단계로 분기하는 성공 핸들러입니다.
+ *
+ * <p>Spring Security의 기본 로그인 처리는 1차 인증 성공 시 즉시 인증 상태를 세션에 저장합니다.
+ * 이 프로젝트에서는 이메일 확인 또는 OTP 인증을 추가로 통과해야 관리자 화면에 접근할 수 있으므로,
+ * 로그인 성공 직후 {@code PRE_AUTH_USER}만 세션에 보관하고 {@code SecurityContext}는 제거합니다.</p>
+ *
+ * <p>2차 인증이 완료되면 {@code LoginController}에서 인증 객체를 다시 생성하여
+ * 세션에 저장함으로써 최종 로그인을 완료합니다.</p>
+ */
 @Log4j2
 @Component  //SecurityConfig에서 생성자 주입을 받기 위해 빈 등록
 public class ManagerLoginSuccessHandler implements AuthenticationSuccessHandler {
-    // instanceof 분기가 생기는 순간 단일 책임 원칙(SRP) 위반되므로,
-    // Kiosk, Admin - LoginSuccessHandler 2EA의 파일로 관리
-
-    // 목적 - ROLE 기반 2차 인증 분기
-
+    /**
+     * 관리자 권한에 따라 OTP 또는 이메일 확인 화면으로 이동시킵니다.
+     *
+     * <p>{@code ADMIN}, {@code SUPER} 권한은 OTP 인증으로 이동하고,
+     * {@code STAFF} 권한은 이메일 확인 단계로 이동합니다.</p>
+     *
+     * @param request 로그인 요청
+     * @param response 리다이렉트 응답
+     * @param authentication 1차 인증에 성공한 사용자 인증 정보
+     * @throws IOException 리다이렉트 처리 중 입출력 예외가 발생한 경우
+     * @throws ServletException 서블릿 처리 중 예외가 발생한 경우
+     */
     @Override
     public void onAuthenticationSuccess(HttpServletRequest request,
                                         HttpServletResponse response,

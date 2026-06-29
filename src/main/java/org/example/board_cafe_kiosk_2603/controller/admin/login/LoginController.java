@@ -11,6 +11,7 @@ import org.example.board_cafe_kiosk_2603.security.ManagerUserDetailsService;
 import org.example.board_cafe_kiosk_2603.security.dto.ManagerDTO;
 import org.example.board_cafe_kiosk_2603.service.admin.sms.MailSenderService;
 import org.springframework.http.ResponseEntity;
+import org.springframework.mail.MailException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -135,10 +136,10 @@ public class LoginController {
             mailSenderService.sendMailForAlarm(dbEmail, code);
             log.info("--- [sendOtp] OTP 발송 완료 | 이메일: {} ---", dbEmail);
             return ResponseEntity.ok("OTP가 발송되었습니다.");
-        } catch (MessagingException | UnsupportedEncodingException e) {
+        } catch (MessagingException | UnsupportedEncodingException | MailException e) {
             // 메일 서버 오류 발생
             log.error("--- [sendOtp] 메일 발송 실패 | 이메일: {}, 원인: {} ---", dbEmail, e.getMessage());
-            return ResponseEntity.status(500).body("메일 발송에 실패했습니다. 잠시 후 다시 시도해 주세요.");
+            return ResponseEntity.status(500).body("메일 발송에 실패했습니다.");
         }
     }
 

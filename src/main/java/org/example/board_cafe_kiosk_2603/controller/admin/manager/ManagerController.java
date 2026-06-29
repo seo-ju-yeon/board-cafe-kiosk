@@ -128,7 +128,7 @@ public class ManagerController {
             return ResponseEntity.ok("OTP 발송 완료");
         } catch (Exception e) {
             log.error("--- [OTP 메일 전송 실패] 에러: {} ---", e.getMessage());
-            return ResponseEntity.status(500).body("메일 발송 실패");
+            return ResponseEntity.status(500).body("메일 발송에 실패했습니다.");
         }
     }
 

@@ -7,6 +7,14 @@ import java.time.LocalDateTime;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+/**
+ * 이메일 인증과 관리자 2차 인증에 사용하는 OTP 임시 저장소입니다.
+ *
+ * <p>OTP는 이메일을 키로 메모리에 저장하며, 3분이 지나면 검증에 실패하도록 만료 시간을 함께 관리합니다.
+ * 검증에 성공한 OTP는 재사용할 수 없도록 즉시 삭제합니다.</p>
+ *
+ * <p>여러 사용자의 인증 요청이 동시에 들어올 수 있으므로 내부 저장소는 {@link ConcurrentHashMap}을 사용합니다.</p>
+ */
 @Log4j2
 @Component
 public class OtpStore {
@@ -19,13 +27,26 @@ public class OtpStore {
     // ConcurrentHashMap을 사용하여 여러 사용자가 동시에 접근해도 안전함.
     private final Map<String, OtpEntry> store = new ConcurrentHashMap<>();
 
-    /* OTP 저장 (3분 유효) */
+    /**
+     * 이메일에 발급된 OTP를 3분 유효 시간과 함께 저장합니다.
+     *
+     * @param email OTP를 발급받은 이메일
+     * @param code 발급된 OTP 코드
+     */
     public void save(String email, String code) {
         log.info("--- [OTP 생성] Email: {}, ExpiredAt: {} ---", email, LocalDateTime.now().plusMinutes(3));
         store.put(email, new OtpEntry(code, LocalDateTime.now().plusMinutes(3)));
     }
 
-    /* OTP 검증 —> 일치 + 만료 여부 확인 후 즉시 삭제 (1회용) */
+    /**
+     * 입력된 OTP가 저장된 값과 일치하고 만료되지 않았는지 검증합니다.
+     *
+     * <p>만료되었거나 검증에 성공한 OTP는 저장소에서 제거하여 재사용을 막습니다.</p>
+     *
+     * @param email OTP를 발급받은 이메일
+     * @param code 사용자가 입력한 OTP 코드
+     * @return OTP가 유효하면 true, 발급 기록이 없거나 만료/불일치하면 false
+     */
     public boolean verify(String email, String code) {
         OtpEntry entry = store.get(email);
 

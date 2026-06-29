@@ -143,7 +143,7 @@ public class SecurityConfig {
                     log.info("  [kioskChain] exceptionHandling 설정: 403 → Handler403");
                     config.accessDeniedHandler(accessDeniedHandler());
                 })
-                // 개발단계, csrf 비활성화
+                // 키오스크 전용 화면은 테이블 세션 기반 흐름이므로 CSRF 검사를 비활성화
                 .csrf(AbstractHttpConfigurer::disable);
 
         log.info("--- [SecurityConfig] Kiosk Security Chain 구성 완료 ---");
@@ -210,7 +210,7 @@ public class SecurityConfig {
                 })
                 .userDetailsService(managerUserDetailsService)
                 .formLogin(config -> {
-                    log.info("  [adminChain] formLogin 설정: loginPage=/common/login, processUrl=/admin/login-process");
+                    log.info("  [adminChain] formLogin 설정: loginPage=/admin/login, processUrl=/admin/login-process");
                     config
                             .loginPage("/admin/login")
                             .loginProcessingUrl("/admin/login-process")
@@ -239,9 +239,7 @@ public class SecurityConfig {
                                 response.sendRedirect("/admin/login");
                             });
                 })
-                // 개발단계, csrf 비활성화
-//                .csrf(AbstractHttpConfigurer::disable);
-                // WebSocket은 CSRF 보호 불필요
+                // WebSocket 및 fetch 기반 일부 AJAX 엔드포인트는 CSRF 예외로 분리
                 .csrf(csrf -> csrf
                         // WebSocket
                         .ignoringRequestMatchers("/ws/**", "/app/**")

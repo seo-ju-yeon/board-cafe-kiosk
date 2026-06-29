@@ -11,6 +11,7 @@ import org.example.board_cafe_kiosk_2603.mapper.admin.manager.ManagerMapper;
 import org.example.board_cafe_kiosk_2603.service.admin.manager.ManagerService;
 import org.example.board_cafe_kiosk_2603.service.admin.sms.MailSenderService;
 import org.springframework.http.ResponseEntity;
+import org.springframework.mail.MailException;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
@@ -108,9 +109,9 @@ public class ForgotPasswordController {
             mailSenderService.sendMailForAlarm(dbEmail, code);
             log.info("--- [forgot/send-otp] OTP 발송 완료 | 이메일: {} ---", dbEmail);
             return ResponseEntity.ok("인증번호가 발송되었습니다.");
-        } catch (MessagingException | UnsupportedEncodingException e) {
+        } catch (MessagingException | UnsupportedEncodingException | MailException e) {
             log.error("--- [forgot/send-otp] 메일 발송 실패 | 원인: {} ---", e.getMessage());
-            return ResponseEntity.status(500).body("메일 발송에 실패했습니다. 잠시 후 다시 시도해 주세요.");
+            return ResponseEntity.status(500).body("메일 발송에 실패했습니다.");
         }
     }
 
@@ -160,9 +161,9 @@ public class ForgotPasswordController {
                 // 발급된 임시 비밀번호를 이메일로 다시 발송
                 mailSenderService.sendTempPassword(dbEmail, tempPassword);
                 log.info("--- [forgot/verify-otp] 임시 비밀번호 발송 완료 | loginId: {} ---", loginId);
-            } catch (MessagingException | UnsupportedEncodingException e) {
+            } catch (MessagingException | UnsupportedEncodingException | MailException e) {
                 log.error("--- [forgot/verify-otp] 임시 비밀번호 메일 발송 실패 | 원인: {} ---", e.getMessage());
-                return ResponseEntity.status(500).body("임시 비밀번호 발송에 실패했습니다. 잠시 후 다시 시도해 주세요.");
+                return ResponseEntity.status(500).body("메일 발송에 실패했습니다.");
             }
         }
 
