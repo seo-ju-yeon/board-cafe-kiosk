@@ -49,12 +49,18 @@ public class CafeTableServiceImpl implements CafeTableService {
         ).collect(Collectors.toList());
     }
 
+    /**
+     * 테이블 상태 전이에 따라 방문 세션의 생성, 마감, 정리를 함께 처리합니다.
+     *
+     * <p>{@code OCCUPIED} 전환 시에는 새 방문 세션을 생성하여 테이블과 연결하고,
+     * {@code CLEANING} 전환 시에는 결제 완료 여부를 확인한 뒤 세션을 마감합니다.
+     * {@code EMPTY} 전환 시에는 남아 있는 게임 대여 상태와 알림 상태를 정리합니다.</p>
+     *
+     * @param id 상태를 변경할 테이블 ID
+     * @param status 변경할 테이블 상태
+     */
     @Override
     public void changeTableStatus(Integer id, String status) {
-        /**
-         * [핵심] 테이블 상태 전이에 따른 세션(방문 이력) 생명주기 관리
-         * 상세 설명: 단순 텍스트 변경이 아닌, OCCUPIED 시 세션을 생성(매핑)하고 CLEANING 시 세션을 마감(해제)함
-         */
         log.info("테이블 ID: {} 상태 변경 프로세스 시작 -> {}", id, status);
 
         // 토큰 체크 로직: 입실(OCCUPIED) 시도 시 토큰이 없으면 예외 던짐
@@ -72,14 +78,13 @@ public class CafeTableServiceImpl implements CafeTableService {
                 /* 주 설명: [입실] 신규 방문 세션 생성 및 테이블 포인터 연결 */
                 CafeTableSession newSession = CafeTableSession.builder()
                         .tableId(id)
-                        .packageId(1) // 임시: 향후 프론트에서 전달받은 패키지 ID 적용
-                        .initialGuestCnt(1) // 임시: 향후 프론트에서 전달받은 인원 수 적용
+                        .packageId(1) // 기본 패키지 ID
+                        .initialGuestCnt(1) // 기본 입장 인원 수
                         .build();
 
                 cafeTableMapper.insertNewSession(newSession);
                 Long newSessionId = newSession.getId(); // DB에서 생성된 PK 획득
 
-                //
                 cafeTableMapper.updateTableStatusAndSession(id, "OCCUPIED", newSessionId);
                 log.info("성공: 세션 {}번 생성 및 테이블 매핑 완료", newSessionId);
                 break;
@@ -157,12 +162,11 @@ public class CafeTableServiceImpl implements CafeTableService {
         return newToken;
     }
 
+    /**
+     * 영업일 변경 시 활성 세션, 테이블 상태, 미확인 메시지를 일괄 초기화합니다.
+     */
     @Override
     public void resetAllTablesForNewDay() {
-        /** * [핵심] 자정 전체 초기화 로직 (트랜잭션 보장)
-         * 1. table_session의 모든 활성 세션을 일괄 마감 (is_active = FALSE)
-         * 2. cafe_table의 모든 상태를 'EMPTY'로 변경하고 세션 포인터(current_session_id)를 NULL로 해제
-         */
         log.info("--- 자정 데이터 리셋 프로세스 시작 ---");
 
         // 1. 활성 세션 일괄 종료
@@ -184,7 +188,8 @@ public class CafeTableServiceImpl implements CafeTableService {
     /**
      * [실시간 주문 상세 내역 조회]
      * 대시보드 모달창에 표시할 특정 테이블의 현재 주문 항목 리스트를 가져옵니다.
-     * * @param tableId 조회 대상 테이블의 고유 식별 번호 (PK)
+     *
+     * @param tableId 조회 대상 테이블의 고유 식별 번호
      * @return OrderItemDTO 리스트 (진행 중인 주문이 없거나 빈 테이블일 경우 빈 리스트 반환)
      */
     @Override
@@ -208,13 +213,8 @@ public class CafeTableServiceImpl implements CafeTableService {
             return new ArrayList<>();
         }
 
-        // 3. [데이터 추출] MyBatis Mapper를 통해 실제 DB에서 주문 항목들을 가져옵니다.
-        /**
-         * SQL 필터링 기준 (Mapper.xml 내부 로직):
-         * - session_id가 일치해야 함
-         * - 주문 상태(status)가 'PAID'(결제완료) 또는 'CANCELLED'(주소)가 아닌 것만 포함
-         * - 최신 주문이 위로 오도록 ordered_at 기준 정렬
-         */
+        // 3. [데이터 추출] Mapper.xml 기준으로 세션 ID가 일치하고,
+        // 결제 완료 또는 취소 상태가 아닌 주문 항목만 조회합니다.
         List<OrderItemDTO> activeItems = cafeTableMapper.selectActiveOrderItems(sessionId);
 
         log.info("조회 완료 - 테이블 {}번(세션 {}), 진행 중인 주문 항목: {}건",
