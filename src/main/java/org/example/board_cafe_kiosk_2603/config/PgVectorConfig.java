@@ -4,8 +4,10 @@ import org.springframework.ai.embedding.EmbeddingModel;
 import org.springframework.ai.vectorstore.VectorStore;
 import org.springframework.ai.vectorstore.pgvector.PgVectorStore;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.jdbc.DataSourceProperties;
 import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.boot.sql.init.dependency.DependsOnDatabaseInitialization;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -45,15 +47,19 @@ public class PgVectorConfig {
     }
 
     @Bean
-    public VectorStore vectorStore(@Qualifier("pgVectorJdbcTemplate") JdbcTemplate pgVectorJdbcTemplate, EmbeddingModel embeddingModel) {
+    @DependsOnDatabaseInitialization
+    public VectorStore vectorStore(@Qualifier("pgVectorJdbcTemplate") JdbcTemplate pgVectorJdbcTemplate,
+                                   EmbeddingModel embeddingModel,
+                                   @Value("${app.database.migrations.enabled:false}") boolean migrationsEnabled) {
         /* 벡터 스토어 빈 생성 -> pgVectorJdbcTemplate과 임베딩 모델을 사용하여 PgVectorStore 생성 */
         // dimensions : 임베딩 벡터의 차원 수 (OpenAI text-embedding-3-small 기준 1536)
         // distanceType : 벡터 간 유사도 계산 방식 (코사인 거리)
-        // initializeSchema : true로 설정하면 테이블과 인덱스를 자동으로 생성
+        // Compose에서는 Flyway가 스키마를 관리한다. 기존 수동 설치 환경은 종전 동작을 유지한다.
         return PgVectorStore.builder(pgVectorJdbcTemplate, embeddingModel)
                 .dimensions(1536)  // OpenAI text-embedding-3-small 기준
                 .distanceType(PgVectorStore.PgDistanceType.COSINE_DISTANCE)
-                .initializeSchema(true)  // 테이블, 인덱스 자동 생성
+                .initializeSchema(!migrationsEnabled)
+                .vectorTableValidationsEnabled(migrationsEnabled)
                 .build();
     }
 }
