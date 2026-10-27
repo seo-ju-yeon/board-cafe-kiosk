@@ -98,7 +98,7 @@ Board Wave는 고객이 사용하는 키오스크와 매장 관리 화면으로 
 - 상품 관리 영역은 Service Interface와 구현체를 분리했고, 일부 다른 영역은 Service 클래스를 직접 사용합니다.
 - 업로드 이미지는 `my.upload.path`로 지정한 로컬 경로에 UUID 파일명으로 저장합니다.
 - OpenAI, Toss Payments와 SMTP 비밀값은 `.env`의 환경 변수로 주입합니다.
-- MariaDB의 `admin` 계정과 비밀번호 `0331`은 로컬 실행·시연용 SQL에 포함되어 있으므로 외부 환경에서 그대로 사용하지 않아야 합니다.
+- Compose DB 계정은 Git에서 제외되는 `.env.compose`로 관리하고, Flyway가 스키마와 기준정보 변경 이력을 관리합니다.
 
 ## 5. 프로젝트 구조
 
@@ -140,6 +140,11 @@ src/main/resources
 
 ### 6.2 환경 변수 파일 준비
 
+DB를 Docker Compose로 실행하려면 [DB 인프라 실행 안내](docker/README.md)를 먼저 따른다.
+Compose는 MariaDB·PostgreSQL/pgvector만 실행하며, Spring Boot는 IntelliJ에서 `compose` 프로필로 실행하는 구성이다.
+Compose가 빈 DB와 계정을 생성하고, 앱의 `compose` 프로필이 Flyway로 테이블·기준정보를 설치한다.
+설치 SQL을 수동으로 실행할 필요는 없다. [Flyway 설치 안내](docs/flyway.md)에 초기화 순서와 다음 RAG 검증 단계를 정리했다.
+
 이 프로젝트는 `application.properties`에서 로컬 `.env` 파일을 읽습니다.
 
 ```properties
@@ -152,22 +157,18 @@ spring.config.import=optional:file:.env[.properties]
 .env
 .env.*
 !.env.example
+!.env.compose.example
 ```
 
 처음 실행할 때는 `.env.example`을 참고해 프로젝트 루트에 `.env`를 만들고 값을 채웁니다.
 
-필수 실행 값:
+Compose의 DB 값은 `.env.compose.example`을 참고해 `.env.compose`에 설정한다. 기존 `.env.example`의 DB URL·계정은 `compose` 프로필을 쓰지 않을 때의 기존 연결 설정이다.
+
+앱의 `.env`에서 AI 기능에 필요한 값:
 
 ```properties
-MARIADB_URL=jdbc:mariadb://localhost:3306/board_cafe_kiosk_2603
-MARIADB_USERNAME=admin
-MARIADB_PASSWORD=0331
-
-PGVECTOR_URL=jdbc:postgresql://localhost:5432/board_cafe_kiosk_2603
-PGVECTOR_USERNAME=your-postgres-username
-PGVECTOR_PASSWORD=your-postgres-password
-
 OPENAI_API_KEY=your-openai-api-key
+RAG_REINDEX_ON_STARTUP=true
 ```
 
 선택 기능 값:
@@ -188,53 +189,34 @@ PORTFOLIO_SUPER_KEY_TEMP_PASSWD=your-demo-temp-password
 
 ### 6.3 MariaDB 초기화
 
-`src/main/resources/sql/MariaDB/01_init.sql`에는 데이터베이스, 테이블, 애플리케이션용 MariaDB 계정 생성 구문이 포함되어 있습니다.
+`compose` 프로필의 Flyway가 아래 파일을 순서대로 실행합니다.
 
-계정 생성과 권한 부여는 MariaDB root 또는 관리자 권한 계정으로 먼저 실행해야 합니다.
+1. `src/main/resources/db/migration/mariadb/V1__create_schema.sql`: 업무 테이블과 Spring Batch 테이블·시퀀스.
+2. `src/main/resources/db/migration/mariadb/V2__insert_reference_data.sql`: 게임 6종, 정상 재고 12개, 일반 메뉴, 로그인 계정, 테이블, 요금제와 안내 문구.
 
-```sql
-CREATE DATABASE IF NOT EXISTS `board_cafe_kiosk_2603`;
-
-CREATE USER IF NOT EXISTS `admin`@`%` IDENTIFIED BY '0331';
-GRANT ALL PRIVILEGES ON `board_cafe_kiosk_2603`.* TO `admin`@`%`;
-FLUSH PRIVILEGES;
-```
-
-이미 `admin` 계정이 있는데 비밀번호가 다르다면 아래처럼 재설정합니다.
-
-```sql
-ALTER USER `admin`@`%` IDENTIFIED BY '0331';
-GRANT ALL PRIVILEGES ON `board_cafe_kiosk_2603`.* TO `admin`@`%`;
-FLUSH PRIVILEGES;
-```
-
-그 다음 아래 순서로 SQL을 적용합니다.
-
-1. `src/main/resources/sql/MariaDB/01_init.sql`
-2. `src/main/resources/sql/MariaDB/02_dummy.sql`
-
-`02_dummy.sql`은 포트폴리오 시연을 위한 초기 데이터가 포함되어 있습니다.
+임의의 고객·방문·주문·결제·대여 이력·매출 통계는 생성하지 않습니다. 설치 직후 실제 매장 이용을 시작하기 전에
+`src/main/resources/sql/MariaDB/03_validate_reference_data.sql`의 15개 검사 결과가 모두 `PASS`인지 확인합니다.
+게임 정보의 출처와 시연 질문은 [초기 데이터 안내](src/main/resources/sql/README.md)에 있습니다.
 
 ### 6.4 PostgreSQL/pgvector 초기화
 
-PostgreSQL은 AI 안내 기능의 벡터 저장소로 사용합니다.
-
-```text
-src/main/resources/sql/PostgresSQL/01_init.sql
-```
-
-PostgreSQL 데이터베이스 이름은 기본적으로 MariaDB와 동일하게 `board_cafe_kiosk_2603`을 사용합니다.
+`src/main/resources/db/migration/pgvector/V1__create_vector_schema.sql`이 pgvector 등 확장과 1536차원 벡터 테이블·인덱스를 생성합니다.
+DB 이름은 MariaDB와 동일한 `board_cafe_kiosk_2603`이고, 이력 테이블은 각 DB에서 독립적으로 관리합니다.
+앱 시작 시 마이그레이션이 끝난 뒤 게임 임베딩을 수행합니다. 실제 AI API 키와 네트워크가 필요하며, 완료 로그와 문서 6건을 확인해야 합니다.
 
 ### 6.5 애플리케이션 실행
 
+Docker Desktop을 켠 뒤 실행합니다. IntelliJ에서는 Active profiles에 `compose`를 지정합니다.
+
 ```bash
-./gradlew bootRun
+docker compose --env-file .env.compose up -d --wait
+./gradlew bootRun --args='--spring.profiles.active=compose'
 ```
 
 Windows:
 
 ```powershell
-.\gradlew.bat bootRun
+.\gradlew.bat bootRun --args="--spring.profiles.active=compose"
 ```
 
 실행 후 기본 접속 주소:
