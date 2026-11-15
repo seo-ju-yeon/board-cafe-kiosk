@@ -1,332 +1,162 @@
 # Board Wave
 
-## 1. 프로젝트 개요
+보드게임 카페의 키오스크 주문과 매장 운영을 하나의 웹 시스템으로 관리하는 팀 프로젝트입니다.
+고객은 테이블에서 메뉴와 게임을 주문하고, 관리자는 주문·상품·게임 재고·통계를 확인합니다.
 
-- 기간: 2026.03 ~ 2026.04
-- 인원: 4명
-- 구분: 코리아IT아카데미 대구 응용 SW 엔지니어링 과정 팀 프로젝트
-- 목표: 보드게임 카페의 키오스크 주문, 테이블 세션, 결제, 게임 재고, 관리자 운영 기능을 하나의 웹 시스템으로 관리
-- 담당 역할:
-  - 키오스크·관리자 로그인 구현
-  - 관리자 이메일·OTP 추가 인증과 인증 상태 전환 구현
-  - 상품·카테고리·게임 및 실물 재고 등록·관리
-  - 게임 등록·수정 시 키오스크 메뉴 데이터 생성·수정
-  - STT, RAG, LLM, TTS를 포함한 AI 게임 안내 백엔드 구현
-  - 마이크 녹음, 텍스트 보정, 가상 키보드를 포함한 AI 안내 화면 구현
+| 항목 | 내용 |
+| --- | --- |
+| 팀 프로젝트 기간 | 2026.03 ~ 2026.04 |
+| 참여 인원 | 4명 |
+| 개발 과정 | 코리아IT아카데미 대구 응용 SW 엔지니어링 과정 |
+| 본인 담당 | 로그인·추가 인증, 상품·게임 재고 관리, AI 게임 안내 |
+| 프로젝트 종료 후 개인 개선 | Docker Compose 실행 환경, Flyway DB 변경 이력 관리, 문서 정리 |
 
-Board Wave는 보드게임 카페에서 고객이 키오스크로 패키지 선택, 메뉴 주문, 포인트 사용, 결제를 진행하고, 관리자가 대시보드에서 테이블 상태, 주문, 상품, 게임 재고, 통계를 관리할 수 있도록 만든 팀 프로젝트입니다.
+개발 중 로컬과 학원 시연 환경에서 기능을 확인했습니다. 실제 배포와 별도 성능 측정은 진행하지 않았습니다.
 
-포트폴리오 제출 목적상 이 README는 구현 내용을 과장하지 않고, 직접 설명 가능한 담당 기능과 로컬 실행 조건을 중심으로 정리했습니다.
+## 주요 기능과 담당 범위
 
-로컬 개발 환경에서 기능 동작을 확인했으며, 실제 배포와 별도 성능 측정은 진행하지 않았습니다. 정식 PR과 코드 리뷰 대신 기능 브랜치에서 작업한 뒤 담당자와 실행 결과를 확인하며 `dev`, `main` 브랜치로 병합했습니다.
+프로젝트 전체에는 키오스크 주문·결제·포인트, 테이블 이용 관리, 상품·재고 관리, 통계, WebSocket 알림, AI 게임 안내가 포함됩니다.
+그중 제가 맡은 부분은 다음과 같습니다.
 
-## 2. 기술 스택
+| 담당 영역 | 구현한 내용 |
+| --- | --- |
+| 로그인 | 테이블 번호 기반 키오스크 로그인과 관리자 계정 로그인을 분리 |
+| 추가 인증 | `STAFF`는 등록된 이메일 주소와 입력값 비교, `ADMIN`·`SUPER`는 이메일로 발송한 OTP 확인 |
+| 상품 관리 | 카테고리·메뉴·게임 등록 및 수정, 메뉴 Soft Delete와 복원 |
+| 관리자 재고 관리 | 게임별 실물 일련번호 등록, 상태 관리, 재고 조회 |
+| AI 게임 안내 | 음성을 텍스트로 변환하고, DB에서 관련 게임을 검색해 답변과 음성 안내 생성 |
+| AI 안내 화면 | 마이크 녹음, 녹음 종료 버튼, 인식된 질문 수정, 가상 키보드 |
 
-- Language: Java 21
-- Backend: Spring Boot 3.5.11, Spring MVC, Spring Security, Spring Batch, Spring WebSocket
-- Frontend/View: Thymeleaf, HTML, CSS, JavaScript, Thymeleaf Layout Dialect
-- Database: MariaDB, PostgreSQL, pgvector
-- Data Access: MyBatis, JdbcTemplate
-- AI: Spring AI, OpenAI, VectorStore
-- Tools: Gradle, Lombok, ModelMapper
-- External: Toss Payments, SMTP Mail
+**관리자 화면의 실물 재고 등록·관리는 제가 맡았고, 키오스크에서 게임을 대여할 때 대여 가능 재고를 처리하는 기능은 다른 팀원이 맡았습니다.**
+주문·결제·포인트·통계와 대여·반납 처리도 팀원의 담당 영역입니다.
 
-## 3. 프로젝트 주요 기능
+프로젝트 종료 후에는 다른 사람이 개발 환경을 준비하기 쉽도록 Docker Compose를 추가했습니다.
+DB 구조와 기준정보의 변경 이력도 관리하기 위해 Flyway를 적용했습니다. 이 작업은 팀 프로젝트 당시 기능과 구분한 개인 개선입니다.
 
-Board Wave는 고객이 사용하는 키오스크와 매장 관리 화면으로 나누어 개발했습니다. 아래는 프로젝트에 포함된 전체 기능이며, 제가 맡은 부분은 다음 항목에서 따로 정리했습니다.
+## 기술 스택
 
-- 키오스크: 테이블 로그인, 패키지 선택과 이용 시작, 메뉴·보드게임 주문, 장바구니, 포인트, 결제
-- 매장 관리: 관리자·직원 로그인, 이메일·OTP 추가 인증, 대시보드, 테이블·주문 상태 관리
-- 상품 관리: 카테고리, 메뉴, 보드게임과 실물 재고 관리
-- 실시간 처리: WebSocket을 이용한 주문·메시지 처리
-- 게임 안내: Spring AI를 이용한 보드게임 안내
+| 구분 | 사용 기술 |
+| --- | --- |
+| 언어·프레임워크 | Java 21, Spring Boot 3.5.11, Spring MVC, Spring Security |
+| 화면 | Thymeleaf, HTML, CSS, JavaScript |
+| 데이터 접근 | MyBatis, JdbcTemplate |
+| 데이터베이스 | MariaDB, PostgreSQL·pgvector |
+| AI | Spring AI 1.1.4, OpenAI |
+| 기타 기능 | Spring Batch, Spring WebSocket, SMTP Mail, Toss Payments |
+| 개발 환경 | Gradle Wrapper, Docker Compose, Flyway |
 
-## 4. 담당 기능
+의존성과 버전은 [build.gradle](build.gradle)에서 확인할 수 있습니다.
 
-### 상품/카테고리/게임 재고 관리
+## 구조
 
-- 카테고리 타입에 따라 메뉴와 게임 상품을 구분해 관리했습니다.
-- 보드게임은 종목(`game`)과 실물 재고(`game_item`)를 분리해 관리했습니다.
-- 게임을 등록할 때 실물 재고의 일련번호와 `NORMAL`, `DAMAGED`, `LOST` 상태를 입력할 수 있도록 구현했습니다.
-- 게임 등록·수정 시 같은 이름의 키오스크 메뉴 데이터를 생성·수정하고 설명 변경을 함께 반영했습니다.
-- 게임·메뉴·일부 재고 상태가 바뀌면 조건을 다시 확인해 벡터 문서의 갱신 또는 삭제를 시도했습니다.
-- 팀 논의에서 과거 통계 조회에 필요한 메뉴 정보는 삭제 후에도 남겨야 한다는 의견을 반영해 메뉴에 soft delete를 적용했습니다.
-- 카테고리는 아직 삭제 처리하지 않은 연결 메뉴가 없을 때만 실제 삭제하고, 게임은 활성 상태 변경과 실제 삭제 기능을 구분했습니다.
+하나의 Spring Boot 애플리케이션에서 키오스크와 관리자 요청을 처리합니다.
+MariaDB에는 주문·상품 등 업무 데이터를, PostgreSQL의 pgvector에는 AI 검색용 문서와 벡터를 저장합니다.
 
-### 로그인 및 보안 처리
+```mermaid
+flowchart LR
+    K[키오스크 화면] --> A[Spring Boot]
+    M[관리자 화면] --> A
+    A -->|업무 데이터 조회·변경| DB[(MariaDB)]
+    A -->|게임 문서 저장·유사도 검색| V[(PostgreSQL / pgvector)]
+    A -->|음성 변환·임베딩·답변 생성| AI[OpenAI]
+```
 
-- 키오스크 사용자와 관리자 사용자의 인증 방식이 달라 Spring Security의 `SecurityFilterChain`을 분리했습니다.
-- 키오스크는 테이블 번호와 비밀번호 기반으로 로그인합니다.
-- 관리자는 아이디/비밀번호 로그인 후 이메일 확인 또는 OTP 인증 흐름을 거칩니다.
-- 권한은 `ADMIN`, `STAFF`, `SUPER`, `TABLE` 역할을 기준으로 분리했습니다.
-- 관리자 1차 인증 성공 후에는 `PRE_AUTH_USER`만 세션에 임시 저장하고, 추가 인증 완료 전까지는 세션과 현재 스레드의 `SecurityContext`를 제거했습니다.
-- 이메일 또는 OTP 확인이 끝난 뒤 사용자 정보를 다시 조회하고 인증 객체를 만들어 세션에 저장했습니다.
-
-### 이메일/OTP 인증
-
-- 관리자 로그인, 비밀번호 찾기, 프로필 변경 등 보안이 필요한 흐름에 OTP 인증을 적용했습니다.
-- OTP는 서버 메모리 저장소에서 3분 유효 시간과 함께 관리합니다. 만료 후 검증을 시도하거나 검증에 성공하면 저장소에서 제거합니다.
-- 메일 발송 설정은 실제 계정 정보가 코드에 들어가지 않도록 환경 변수 기반으로 분리했습니다.
-- 현재 OTP 저장소는 `ConcurrentHashMap`을 사용하므로 애플리케이션 프로세스 사이에 인증 상태를 공유하지 않습니다.
-- 팀 개발 중 후속 기능을 반복 확인하기 위한 개발·시연용 고정 OTP 경로가 있습니다. 외부 환경에서는 제거하거나 로컬 개발 프로필에서만 활성화하도록 분리해야 합니다.
-
-### 매장 DB 기반 RAG 게임 안내
-
-- MariaDB에서 GAME 카테고리이고 게임이 활성 상태이며, 메뉴가 판매 가능하고 삭제 처리되지 않았고 `NORMAL` 재고가 하나 이상 있는 게임을 조회했습니다.
-- 조회한 게임명, 설명, 플레이 인원과 시간을 자연어 형태의 Spring AI `Document`로 변환해 PostgreSQL pgvector에 저장했습니다.
-- 사용자 질문과 유사한 게임을 상위 3개, 유사도 기준 0.3으로 검색해 LLM 답변의 컨텍스트로 제공했습니다.
-- 검색 결과가 없을 때는 등록된 게임이 없다는 고정 응답을 사용하도록 프롬프트를 제한했습니다.
-- `menu_id`로 만든 고정 UUID를 문서 ID로 사용해 같은 메뉴의 문서를 갱신하거나 삭제할 수 있도록 했습니다.
-- `NORMAL → RENTED` 변경은 벡터 문서에 즉시 반영하지 않으며, 벡터 갱신 실패에 대한 재시도와 검색 정확도 측정은 구현하지 않았습니다.
-
-### AI 안내 화면
-
-- 음성 질문을 STT로 변환하고, 인식된 문장을 사용자가 수정해 다시 질문할 수 있도록 했습니다.
-- 마이크 녹음, 텍스트 보정, 가상 키보드와 TTS 답변 재생 화면을 구현했습니다.
-- 개인 개발 환경에서는 무음 감지 방식이 동작했지만 학원 시연 중 주변 소음으로 녹음이 끝나지 않는 문제를 확인했습니다.
-- 팀원들과 논의한 뒤 마이크 버튼을 다시 눌러 녹음을 종료하는 방식으로 변경했습니다.
-
-### 팀 전체 기능과 연결되는 부분
-
-- 주문 게임에 `game_item` 일련번호를 배정하고 현재 테이블 주문인지 검증하는 기능은 주문·결제 흐름 담당 팀원이 구현했습니다.
-- 대여·반납 시 `game_history`를 기록하고 `NORMAL`, `DAMAGED`, `LOST` 상태로 정리하는 기능도 해당 팀원이 구현했습니다.
-- 주문, 결제, 포인트, 통계, WebSocket 주문 알림은 프로젝트 전체 기능이며 본인 담당 기능과 구분합니다.
-
-### 구현 구성 요약
-
-- MyBatis Mapper와 XML에서 상품 필터, 페이징과 통계 집계 SQL을 관리합니다.
-- 상품 관리 영역은 Service Interface와 구현체를 분리했고, 일부 다른 영역은 Service 클래스를 직접 사용합니다.
-- 업로드 이미지는 `my.upload.path`로 지정한 로컬 경로에 UUID 파일명으로 저장합니다.
-- OpenAI, Toss Payments와 SMTP 비밀값은 `.env`의 환경 변수로 주입합니다.
-- Compose DB 계정은 Git에서 제외되는 `.env.compose`로 관리하고, Flyway가 스키마와 기준정보 변경 이력을 관리합니다.
-
-## 5. 프로젝트 구조
+AI 안내는 **질문 입력 → 관련 게임 검색 → 검색 결과를 포함한 답변 생성 → 음성 재생** 순서로 동작합니다.
+이처럼 검색한 자료를 답변에 활용하는 방식을 RAG라고 합니다. 게임 정보 변경 시 검색 문서도 갱신하지만, 모든 재고 변경을 실시간으로 반영하지는 않습니다.
 
 ```text
 src/main/java/org/example/board_cafe_kiosk_2603
-├── ai              # Spring AI, RAG, 게임 임베딩
-├── config          # Security, DB, Mail, WebSocket, Batch 설정
-├── controller      # 관리자/키오스크/공통 요청 처리
-├── domain          # 도메인 객체
-├── dto             # 요청/응답 DTO
-├── mapper          # MyBatis Mapper 인터페이스
-├── scheduler       # 통계 스케줄러
-├── security        # UserDetailsService, 인증 성공 핸들러, 인가 처리
-├── service         # 비즈니스 로직
-└── websocket       # WebSocket 핸들러
+├── ai             # AI 안내, 게임 문서 생성·검색
+├── config         # Security, DB, Flyway 등 설정
+├── controller     # 관리자·키오스크 요청 처리
+├── domain / dto   # 도메인 객체와 요청·응답 데이터
+├── mapper         # MyBatis 인터페이스
+├── security       # 사용자 조회, 로그인 성공 처리, 인가
+├── service        # 비즈니스 로직
+└── scheduler / websocket
 
 src/main/resources
-├── mapper          # MyBatis XML
-├── sql             # MariaDB/PostgreSQL 초기화 SQL
-├── static          # CSS, JavaScript
-└── templates       # Thymeleaf 화면
+├── db/migration   # MariaDB·pgvector Flyway SQL
+├── mapper         # MyBatis XML
+├── static         # CSS, JavaScript
+└── templates      # Thymeleaf 화면
 ```
 
-## 6. 실행 방법
+## 로컬 실행 방법
 
-### 6.1 사전 요구사항
+DB는 Docker Compose로 실행하고, Spring Boot는 호스트 PC에서 실행합니다.
+새 환경에서의 실행은 추가 확인이 필요합니다. 테스트 준비 상태는 [Testing](docs/testing.md), 외부 공개 전 점검 사항은 [Known Issues](docs/known-issues.md)를 참고해 주세요.
+
+### 1. 실행 환경과 설정 파일 준비
 
 - JDK 21
-- MariaDB
-- PostgreSQL
-- PostgreSQL pgvector 확장
-- OpenAI API Key
-- Gradle Wrapper
+- Docker Desktop 또는 Docker Engine과 Compose
+- OpenAI API 키: 현재 AI 클라이언트 구성에 필요
+- 메일 인증을 확인할 경우 SMTP 계정, 결제를 확인할 경우 Toss Payments 키
 
-결제와 메일 기능까지 확인하려면 아래 값도 필요합니다.
+프로젝트 루트에서 예시 파일을 복사합니다. 기존 설정 파일이 있다면 새로 덮어쓰지 않고 내용을 확인합니다.
 
-- Toss Payments Secret Key / Client Key
-- SMTP 메일 계정 및 앱 비밀번호
-
-### 6.2 환경 변수 파일 준비
-
-DB를 Docker Compose로 실행하려면 [DB 인프라 실행 안내](docker/README.md)를 먼저 따른다.
-Compose는 MariaDB·PostgreSQL/pgvector만 실행하며, Spring Boot는 IntelliJ에서 `compose` 프로필로 실행하는 구성이다.
-Compose가 빈 DB와 계정을 생성하고, 앱의 `compose` 프로필이 Flyway로 테이블·기준정보를 설치한다.
-설치 SQL을 수동으로 실행할 필요는 없다. [Flyway 설치 안내](docs/flyway.md)에 초기화 순서와 다음 RAG 검증 단계를 정리했다.
-
-이 프로젝트는 `application.properties`에서 로컬 `.env` 파일을 읽습니다.
-
-```properties
-spring.config.import=optional:file:.env[.properties]
+```bash
+cp .env.example .env
+cp .env.compose.example .env.compose
 ```
 
-`.env`는 로컬 실행용 파일이며, `.gitignore`에 포함되어 Git에 커밋되지 않습니다.
+| 파일 | 설정할 내용 |
+| --- | --- |
+| [.env.example](.env.example)을 복사한 `.env` | `OPENAI_API_KEY`, `RAG_REINDEX_ON_STARTUP`, 필요한 메일·결제 설정 |
+| [.env.compose.example](.env.compose.example)을 복사한 `.env.compose` | 두 DB의 계정, 비밀번호, 호스트 포트 |
 
-```gitignore
-.env
-.env.*
-!.env.example
-!.env.compose.example
-```
+`.env.compose`의 예시 비밀번호 세 개는 최초 DB 생성 전에 변경합니다.
+`compose` 프로필에서는 DB 접속에 `.env.compose` 값을 사용합니다. `.env.example`의 일반 DB 접속값과 구분합니다.
+두 파일은 Git 제외 대상입니다.
 
-처음 실행할 때는 `.env.example`을 참고해 프로젝트 루트에 `.env`를 만들고 값을 채웁니다.
+시작 시 게임 임베딩을 실행하려면 `.env`의 `RAG_REINDEX_ON_STARTUP=true`를 사용합니다.
+이 과정은 OpenAI API를 호출합니다. DB 설치만 먼저 확인하려면 `false`로 설정할 수 있습니다.
+`false`는 시작 시 임베딩만 건너뛰는 설정으로, AI 클라이언트 설정이나 이후 AI 요청까지 비활성화하지는 않습니다.
 
-Compose의 DB 값은 `.env.compose.example`을 참고해 `.env.compose`에 설정한다. 기존 `.env.example`의 DB URL·계정은 `compose` 프로필을 쓰지 않을 때의 기존 연결 설정이다.
-
-앱의 `.env`에서 AI 기능에 필요한 값:
-
-```properties
-OPENAI_API_KEY=your-openai-api-key
-RAG_REINDEX_ON_STARTUP=true
-```
-
-선택 기능 값:
-
-```properties
-TOSS_PAYMENTS_SECRET_KEY=your-toss-secret-key
-TOSS_PAYMENTS_CLIENT_KEY=your-toss-client-key
-
-SPRING_MAIL_USERNAME=your-mail@example.com
-SPRING_MAIL_PASSWORD=your-mail-app-password
-MYAPP_MAIL_FROM=your-mail@example.com
-MYAPP_MAIL_FROM_NAME=BOARD_WAVE_SYSTEM
-
-PORTFOLIO_SUPER_KEY_ID=your-demo-super-id
-PORTFOLIO_SUPER_KEY_OTP=your-demo-super-otp
-PORTFOLIO_SUPER_KEY_TEMP_PASSWD=your-demo-temp-password
-```
-
-### 6.3 MariaDB 초기화
-
-`compose` 프로필의 Flyway가 아래 파일을 순서대로 실행합니다.
-
-1. `src/main/resources/db/migration/mariadb/V1__create_schema.sql`: 업무 테이블과 Spring Batch 테이블·시퀀스.
-2. `src/main/resources/db/migration/mariadb/V2__insert_reference_data.sql`: 게임 6종, 정상 재고 12개, 일반 메뉴, 로그인 계정, 테이블, 요금제와 안내 문구.
-
-임의의 고객·방문·주문·결제·대여 이력·매출 통계는 생성하지 않습니다. 설치 직후 실제 매장 이용을 시작하기 전에
-`src/main/resources/sql/MariaDB/03_validate_reference_data.sql`의 15개 검사 결과가 모두 `PASS`인지 확인합니다.
-게임 정보의 출처와 시연 질문은 [초기 데이터 안내](src/main/resources/sql/README.md)에 있습니다.
-
-### 6.4 PostgreSQL/pgvector 초기화
-
-`src/main/resources/db/migration/pgvector/V1__create_vector_schema.sql`이 pgvector 등 확장과 1536차원 벡터 테이블·인덱스를 생성합니다.
-DB 이름은 MariaDB와 동일한 `board_cafe_kiosk_2603`이고, 이력 테이블은 각 DB에서 독립적으로 관리합니다.
-앱 시작 시 마이그레이션이 끝난 뒤 게임 임베딩을 수행합니다. 실제 AI API 키와 네트워크가 필요하며, 완료 로그와 문서 6건을 확인해야 합니다.
-
-### 6.5 애플리케이션 실행
-
-Docker Desktop을 켠 뒤 실행합니다. IntelliJ에서는 Active profiles에 `compose`를 지정합니다.
+### 2. DB와 애플리케이션 실행
 
 ```bash
 docker compose --env-file .env.compose up -d --wait
 ./gradlew bootRun --args='--spring.profiles.active=compose'
 ```
 
-Windows:
+Windows에서는 Gradle 명령을 다음과 같이 실행합니다.
 
 ```powershell
 .\gradlew.bat bootRun --args="--spring.profiles.active=compose"
 ```
 
-실행 후 기본 접속 주소:
+IntelliJ에서 실행한다면 JDK를 21로 설정하고, 프로젝트 루트를 작업 디렉터리로 사용하며 Active profiles에 `compose`를 지정합니다.
+접속 주소는 [http://localhost:8080](http://localhost:8080)입니다.
 
-```text
-http://localhost:8080
-```
+### 3. 초기화 흐름과 확인할 내용
 
-### 6.6 실행 실패 시 먼저 확인할 것
+[docker-compose.yml](docker-compose.yml)은 DB와 계정을 생성하고, 애플리케이션의 `compose` 프로필이 Flyway 마이그레이션을 활성화합니다.
+새 DB를 기준으로 다음 파일을 적용하는 구성입니다.
 
-- `OpenAI API key must be set`: `.env`의 `OPENAI_API_KEY` 확인
-- `Access denied for user`: `.env`의 `MARIADB_USERNAME`, `MARIADB_PASSWORD`와 MariaDB 계정 권한 확인
-- `Unknown database`: `board_cafe_kiosk_2603` 데이터베이스 생성 여부 확인
-- `Connection refused`: MariaDB 또는 PostgreSQL 서버 실행 여부 확인
-- `relation/vector table does not exist`: PostgreSQL pgvector 초기화 여부 확인
-- 포트 충돌: `8080` 포트를 사용하는 다른 프로세스 종료 또는 서버 포트 변경
+| DB | 마이그레이션 |
+| --- | --- |
+| MariaDB | [V1: 업무·Batch 스키마](src/main/resources/db/migration/mariadb/V1__create_schema.sql), [V2: 기준정보](src/main/resources/db/migration/mariadb/V2__insert_reference_data.sql) |
+| PostgreSQL | [V1: 벡터 저장소 스키마](src/main/resources/db/migration/pgvector/V1__create_vector_schema.sql) |
 
-## 7. 문제 해결과 설계 판단
+기준정보 SQL에는 게임 6종과 실물 재고 12개 등이 포함되어 있습니다. 주문·결제·매출 이력은 생성하지 않습니다.
+기존 스키마가 있는 DB에 자동으로 맞춰 주는 구성은 아니므로, 처음 설치할 때는 이 프로젝트용 새 DB를 사용합니다.
 
-실제 동작 중 확인한 문제와 구현 과정에서 고려한 설계를 구분해 정리했습니다.
+실행 후에는 DB 연결·마이그레이션 완료 여부와 시작 시 임베딩 결과를 각각 확인해야 합니다.
+임베딩 실패를 로그로 남기고 앱 실행을 계속하는 코드가 있으므로, 서버 기동만으로 AI 검색 준비까지 완료됐다고 판단하지 않습니다.
+테스트 실행 조건과 누락된 검증 자료는 [Testing](docs/testing.md)에 정리했습니다.
 
-### 7.1 추가 인증 완료 전 인증 정보가 남는 문제
+## 설계와 문제 해결 기록
 
-문제 상황:
-
-- 관리자 1차 로그인 직후 추가 인증을 완료하지 않았는데도 이전 `SecurityContext`가 세션에 남아 관리자 권한이 유지될 수 있었습니다.
-
-확인한 원인:
-
-- `SecurityContextHolder.clearContext()`만 호출하면 응답 처리 과정에서 기존 세션 컨텍스트가 다시 저장될 수 있었습니다.
-
-변경한 내용:
-
-- 세션의 `SPRING_SECURITY_CONTEXT`를 먼저 제거한 뒤 `SecurityContextHolder.clearContext()`를 호출했습니다.
-- 추가 인증 완료 후에는 DB에서 사용자 정보를 다시 조회하고 새 인증 토큰을 만들어 세션에 저장했습니다.
-
-### 7.2 탭·필터가 적용된 게임 목록에서 재고 수가 0으로 표시된 문제
-
-문제 상황:
-
-- 게임 관리 화면을 하나의 HTML 페이지 안에서 활성·비활성 탭과 카테고리 필터로 전환하도록 구성했습니다.
-- 게임, 카테고리, 메뉴와 실물 재고 테이블을 JOIN해 조회했을 때 게임별 대여 가능 재고 수가 0으로 표시되는 문제를 확인했습니다.
-
-확인한 원인:
-
-- 초기 조건 집계식이 JOIN 결과에서 `NORMAL` 상태의 재고 행을 원하는 방식으로 집계하지 못하고 있었습니다.
-
-변경한 내용:
-
-- 대여 가능한 게임 재고 수를 `COUNT(CASE WHEN gi.status = 'NORMAL' THEN 1 END)`로 집계하도록 변경했습니다.
-- 활성 상태와 선택한 카테고리를 함께 조회할 수 있도록 MyBatis `<if>` 조건을 적용했습니다.
-- 수정 후 탭과 카테고리 필터를 바꿔가며 게임별 재고 수가 표시되는 것을 화면에서 확인했습니다.
-
-### 7.3 MariaDB의 변경을 AI 검색 데이터에 반영하는 방식
-
-고려한 점:
-
-- 게임 정보를 등록하거나 수정할 때 MariaDB의 데이터와 PostgreSQL pgvector의 문서를 연결해 갱신할 기준이 필요했습니다.
-
-적용한 방식:
-
-- `menu_id`로 고정 UUID를 생성해 같은 메뉴가 항상 같은 문서 ID를 사용하도록 했습니다.
-- 게임 정보를 갱신할 때 기존 문서를 삭제한 뒤 현재 정보를 다시 저장합니다.
-- 판매 불가, 삭제, 게임 비활성 또는 `NORMAL` 재고 없음으로 조회 조건을 충족하지 않으면 해당 문서를 삭제합니다.
-
-현재 한계:
-
-- `NORMAL` 재고가 대여 상태로 바뀌는 시점에는 벡터 문서를 즉시 갱신하지 않습니다.
-- 벡터 저장 실패 시 로그만 남기며 자동 재시도나 MariaDB와 pgvector 사이의 일관성 보장 기능은 구현하지 않았습니다.
-
-### 7.4 검색되지 않던 게임 정보의 유사도 기준 조정
-
-문제 상황:
-
-- AI 보드게임 안내 기능에서 한국어 질문으로 벡터 검색을 수행했을 때 초기 유사도 기준인 0.7에서는 게임이 검색되지 않는 경우가 있었습니다.
-
-확인한 원인:
-
-- 사용자의 질문은 짧은 구어체일 수 있고, STT 결과도 DB의 게임명이나 설명 문장과 정확히 일치하지 않을 수 있었습니다.
-
-변경한 내용:
-
-- `similarityThreshold`를 0.7에서 0.3으로 낮추고 검색 결과를 상위 3개로 제한했습니다.
-- 개발 중 실제 질문을 입력해 화면에서 검색 여부와 답변을 확인했습니다.
-- 검색 결과가 없을 때는 등록된 게임이 없다는 고정 응답을 반환하도록 프롬프트를 작성했습니다.
-
-확인 범위:
-
-- 별도의 평가 데이터셋이나 검색 정확도 지표를 사용하지 않았으므로 정확도 또는 성능 개선으로 표현하지 않습니다.
-- 프롬프트로 답변 범위를 제한했지만 LLM 응답을 완전히 보장하는 장치로 보지는 않습니다.
-
-### 7.5 시연 환경에서 녹음이 종료되지 않던 문제
-
-문제 상황:
-
-- 개인 개발 환경에서는 무음 감지로 녹음이 종료됐지만, 학원에서 팀원들에게 시연할 때는 주변 소음으로 녹음이 계속되어 검색 결과까지 확인하지 못했습니다.
-
-확인한 원인:
-
-- 무음 구간을 기준으로 자동 종료하는 방식이 주변 소음의 영향을 받았습니다.
-
-변경한 내용:
-
-- 문제를 확인한 뒤 팀원들과 논의해 사용자가 버튼을 눌러 녹음을 시작하고 다시 눌러 종료하는 방식으로 변경했습니다.
-- STT로 변환된 문장을 화면에서 수정한 뒤 다시 질문할 수 있도록 했습니다.
-
-## 8. 회고
-
-이 프로젝트에서는 키오스크·관리자 인증, 상품·카테고리·게임 재고 관리와 매장 DB 기반 AI 게임 안내를 맡았습니다. 관리자 1차 로그인과 추가 인증 사이의 인증 상태를 직접 다루면서 Spring Security의 세션 인증 흐름을 구체적으로 확인할 수 있었습니다.
-
-또한 MariaDB의 구조화된 게임 데이터를 Spring AI `Document`로 바꾸고 pgvector 검색 결과를 LLM 컨텍스트로 전달하는 과정을 구현했습니다. 검색 임계값을 조정하거나 음성 입력 방식을 바꾸는 과정에서는 개발 환경에서 동작한 기능도 다른 환경에서 직접 확인하고 수정할 필요가 있다는 점을 경험했습니다.
-
-주문·결제와 대여·반납 처리는 다른 팀원이 담당했지만, 제가 구현한 게임·메뉴·벡터 데이터가 해당 기능과 연결되는 구조를 함께 확인했습니다. 실제 배포와 성능 측정까지 진행하지 못한 점, 벡터 데이터 갱신에 재시도와 일관성 보장 기능이 없는 점은 이후 보완할 부분입니다.
+| 구분 | 문서 | 설명할 내용 |
+| --- | --- | --- |
+| ADR 001 | [키오스크·관리자 인증 분리](docs/adr/001-authentication-design.md) | 서로 다른 로그인 흐름을 나눈 이유 |
+| ADR 002 | [메뉴 Soft Delete](docs/adr/002-menu-soft-delete.md) | 과거 통계 조회에 필요한 메뉴 정보 유지 |
+| ADR 003 | [RAG 데이터 동기화](docs/adr/003-rag-synchronization.md) | 운영 DB의 변경을 검색 문서에 반영하는 방식 |
+| 문제 해결 001 | [음성 녹음 종료 방식 변경](docs/troubleshooting/001-voice-recording.md) | 시연 환경의 잡음에 대응한 입력 방식 변경 |
+| 문제 해결 002 | [신규 게임 재고 집계](docs/troubleshooting/002-game-stock-count.md) | 신규 등록 게임이 집계되지 않았던 경험 |
+| 문제 해결 003 | [RAG 검색 기준 조정](docs/troubleshooting/003-rag-similarity.md) | 임베딩 저장 확인 후 검색 기준을 조정한 과정 |
+| 인증 구현 기록 | [추가 인증과 SecurityContext](docs/troubleshooting/004-security-context.md) | 추가 인증 전후의 인증 상태 처리 |
+| 현황 | [Known Issues](docs/known-issues.md) | 현재 한계와 개선 우선순위 |
+| 검증 | [Testing](docs/testing.md) | 테스트 범위, 실행 조건, 수동 확인과 미검증 항목 |
