@@ -42,11 +42,9 @@ public class AiController {
             @RequestParam(defaultValue = "1.0") Double speed, // TTS 재생 속도
             HttpServletResponse httpResponse
     ) throws IOException {
-        // 1. AI 서비스 호출: STT -> RAG -> LLM -> TTS 흐름 처리
         AiService.AiResult result = aiService.chatVoiceFlux(question.getBytes(), voice, speed);
 
-        // 2. 메타데이터 전달: 오디오 스트림과 별개로 텍스트 정보를 응답 헤더에 포함
-        // 텍스트를 응답 헤더에 담아 전송 (Base64 인코딩으로 한글 깨짐 방지)
+        // 오디오는 응답 본문으로 보냄. 질문과 답변은 한글을 보존하도록 Base64로 인코딩해 헤더에 담음
         String encodedStt = Base64.getEncoder()
                 .encodeToString(result.sttText().getBytes(java.nio.charset.StandardCharsets.UTF_8));
         String encodedAnswer = Base64.getEncoder()
@@ -58,7 +56,6 @@ public class AiController {
         httpResponse.setHeader("Access-Control-Expose-Headers", "X-STT-Text, X-Answer-Text");
 
         log.info("[ai_guide] voice={}, speed={}, stt={}", voice, speed, result.sttText());
-        // 3. Flux를 이용한 실시간 오디오 출력
         return outputStream -> writeFluxToStream(result.audioFlux(), outputStream);
     }
 
@@ -104,20 +101,6 @@ public class AiController {
     public String stt(@RequestParam("speech") MultipartFile speech) throws IOException {
         return aiService.stt(speech.getBytes());
     }
-
-    // 단독 TTS 테스트용 (개발/디버깅 용도)
-//    @PostMapping(
-//            value = "/tts",
-//            consumes = MediaType.APPLICATION_FORM_URLENCODED_VALUE,
-//            produces = MediaType.APPLICATION_OCTET_STREAM_VALUE
-//    )
-//    public byte[] tts(
-//            @RequestParam("text") String text,
-//            @RequestParam(defaultValue = "NOVA") String voice,
-//            @RequestParam(defaultValue = "1.0") Double speed
-//    ) {
-//        return aiService.tts(text, voice, speed);
-//    }
 
     /* Flux 데이터 조각을 응답 스트림에 순차적으로 기록하는 헬퍼 메서드 */
     // [공통] Flux<byte[]> → OutputStream 쓰기

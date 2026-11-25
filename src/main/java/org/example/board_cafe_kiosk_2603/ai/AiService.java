@@ -35,7 +35,7 @@ public class AiService {
     private VectorStore vectorStore;  // PGVector VectorStore (PgVectorConfig에서 빈으로 등록됨)
 
     /* RAG 튜닝 포인트 */
-    // RAG 유사도 검색 임계값 (한국어 특성상 짧은 문장은 점수가 낮을 수 있어 완화된 기준 적용)
+    // 시연 중 검색 누락을 확인해 유사도 기준을 0.7에서 0.3으로 낮춤
     private static final double SIMILARITY_THRESHOLD = 0.3;
     // 검색 결과 최대 개수 (가장 관련성 높은 상위 3개의 게임 정보만 참조)
     private static final int TOP_K = 3;
@@ -112,8 +112,7 @@ public class AiService {
     /* RAG 검색 결과에 따른 결과 처리 */
     private String buildSystemPrompt(String context) {
         if (context == null || context.isBlank()) {
-            // 1. 검색 결과가 없는 경우
-            // 모델이 지식을 지어내지 못하게 차단 (Hallucination 방지)
+            // 검색 결과가 비면 정해진 안내 문구로 답하도록 모델에 지시한다.
             return """
                     당신은 보드카페 키오스크 AI 안내원입니다.
                     사용자가 요청한 게임은 저희 매장에 등록되어 있지 않습니다.
@@ -122,8 +121,6 @@ public class AiService {
                     게임 추천이나 다른 안내는 절대 하지 마세요.
                     """;
         }
-        // 2. 검색 결과가 있는 경우
-        // 제공된 지식(Context) 내에서만 답변하도록 제약
         return """
                 당신은 보드카페 키오스크 AI 안내원입니다.
                 반드시 아래 [게임 정보]에 있는 내용만을 바탕으로 답변하세요.
@@ -152,13 +149,6 @@ public class AiService {
         AudioTranscriptionResponse response = openAiAudioTranscriptionModel.call(prompt);
         return response.getResult().getOutput();
     }
-
-    // TTS 동기: 텍스트 → byte[] (테스트용)
-//    public byte[] tts(String text, String voice, Double speed) {
-//        TextToSpeechPrompt prompt = new TextToSpeechPrompt(text, buildSpeechOptions(voice, speed));
-//        TextToSpeechResponse response = openAiAudioSpeechModel.call(prompt);
-//        return response.getResult().getOutput();
-//    }
 
     /* TTS 스트리밍: 답변을 실시간 오디오 조각(Flux)으로 변환 (텍스트 → Flux<byte[]>) */
     private Flux<byte[]> ttsFlux(String text, String voice, Double speed) {
