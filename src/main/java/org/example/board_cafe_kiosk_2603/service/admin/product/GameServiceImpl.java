@@ -154,8 +154,6 @@ class GameServiceImpl implements GameService {
     }
 
     /* 게임 삭제 (game_item ON DELETE CASCADE 로 자동 삭제, 존재 여부 선확인) */
-    // ★ DB 삭제 전에 menu_id 먼저 조회 → 삭제 후 벡터도 삭제
-    // ※ 삭제 후에는 menu 조회가 불가능하므로 반드시 삭제 전에 menu_id 확보
     @Override
     public void remove(int id) {
 
@@ -167,11 +165,10 @@ class GameServiceImpl implements GameService {
                     return new NoSuchElementException("게임을 찾을 수 없습니다. id=" + id);
                 });
 
-        // 삭제 전에 menu_id 확보 (DB에서 game 삭제 후엔 menu 조회 연결이 끊김)
+        // 게임 삭제 후 검색 문서를 삭제할 수 있도록 연결된 메뉴 ID를 먼저 확보함
         Integer menuId = menuMapper.findMenuIdByGameName(game.getName());
         gameMapper.delete(id);  // DB 삭제 (Cascade 설정에 의해 game_item도 함께 삭제)
 
-        // 벡터 삭제
         if (menuId != null) {
             tryDeleteEmbeddingByMenuId(menuId);
         }
@@ -179,8 +176,6 @@ class GameServiceImpl implements GameService {
     }
 
     /* 게임 활성 상태 토글 (is_active 반전, 존재 여부 선확인) */
-    // 활성화(true → false) : 임베딩 조건(is_active=TRUE) 미충족 → 벡터 자동 삭제
-    // 비활성화(false → true): 임베딩 조건 충족 시 → 벡터 자동 등록
     @Override
     public void toggleActive(int id) {
         log.info("GameServiceImpl.toggleActive() 실행 - id: {}", id);
@@ -192,9 +187,7 @@ class GameServiceImpl implements GameService {
 
         int result = gameMapper.toggleActive(id);
 
-        // 토글 후 임베딩 상태 재확인
-        // 비활성화(is_active=false) → 조건 미충족 → 벡터 자동 삭제
-        // 활성화  (is_active=true)  → 조건 충족  → 벡터 자동 등록
+        // 게임 활성 상태를 변경한 뒤 검색 대상 조건을 다시 확인함
         tryUpsertEmbeddingByGameName(game.getName());
         log.info("게임 활성 상태 토글 결과 - affected rows: {}", result);
     }

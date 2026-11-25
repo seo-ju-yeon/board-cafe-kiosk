@@ -97,12 +97,10 @@ public class MenuServiceImpl implements MenuService {
     }
 
     /* 메뉴 수정 */
-    // GAME 타입 메뉴(categoryName으로 판단)의 description 변경 시 임베딩 갱신
     @Override
     public void modify(int id, MenuRequestDTO dto) {
         log.debug("MenuServiceImpl.modify() 실행 - id: {}, dto: {}", id, dto);
 
-        // 1. 수정 전 기존 메뉴 조회 (GAME 타입 여부 확인용)
         MenuResponseDTO origin = menuMapper.findByIdIncludeDeleted(id)
                 .orElseThrow(() -> new NoSuchElementException("메뉴를 찾을 수 없습니다. id=" + id));
         Menu menu = Menu.builder()
@@ -116,7 +114,7 @@ public class MenuServiceImpl implements MenuService {
                 .build();
         int result = menuMapper.update(menu);
 
-        // GAME 타입 메뉴인 경우에만 임베딩 갱신
+        // 수정 전 카테고리 타입이 GAME이면 검색 문서 갱신을 시도함
         if (isGameCategory(origin.getCategoryType())) {
             tryUpsertEmbeddingByMenuId(id);
         }
@@ -124,8 +122,6 @@ public class MenuServiceImpl implements MenuService {
     }
 
     /* 메뉴 소프트 삭제 (is_deleted = true) */
-    // GAME 타입 메뉴 삭제 시 임베딩도 삭제
-    // AI가 삭제된 게임을 안내하지 않음
     @Override
     public void remove(int id) {
         log.debug("MenuServiceImpl.remove() 실행 - id: {}", id);
@@ -135,7 +131,7 @@ public class MenuServiceImpl implements MenuService {
 
         menuMapper.softDelete(id);
 
-        // GAME 타입 메뉴인 경우 임베딩 삭제
+        // 게임 메뉴를 소프트 삭제한 뒤 검색 문서 삭제를 시도함
         if (isGameCategory(menu.getCategoryType())) {
             tryDeleteEmbeddingByMenuId(id);
         }
@@ -143,8 +139,6 @@ public class MenuServiceImpl implements MenuService {
     }
 
     /* 메뉴 복원 (is_deleted = false) */
-    // GAME 타입 메뉴 복원 시 임베딩 재등록 시도
-    // 다른 조건(재고, is_active) 충족 시에만 실제 등록됨
     @Override
     public void restore(int id) {
         log.debug("MenuServiceImpl.restore() 실행 - id: {}", id);
@@ -153,7 +147,7 @@ public class MenuServiceImpl implements MenuService {
 
         menuMapper.restore(id);
 
-        // GAME 타입 메뉴인 경우 임베딩 재등록 시도
+        // 게임 메뉴 복원 후 검색 대상 조건을 다시 확인함
         if (isGameCategory(menu.getCategoryType())) {
             tryUpsertEmbeddingByMenuId(id);
         }
@@ -161,8 +155,6 @@ public class MenuServiceImpl implements MenuService {
     }
 
     /* 메뉴 판매 상태 토글 */
-    // GAME 타입 메뉴 판매 중지 시 임베딩 삭제 & 판매 재개 시 임베딩 등록
-    // 판매 중지 상태가 되면 AI 안내에서도 자동으로 제외
     @Override
     public void toggleAvailable(int id) {
         log.debug("MenuServiceImpl.toggleAvailable() 실행 - id: {}", id);
@@ -172,7 +164,7 @@ public class MenuServiceImpl implements MenuService {
 
         menuMapper.toggleAvailable(id);
 
-        // GAME 타입 메뉴인 경우 임베딩 상태 재확인
+        // 게임 메뉴의 판매 상태 변경 후 검색 대상 조건을 다시 확인함
         if (isGameCategory(menu.getCategoryType())) {
             tryUpsertEmbeddingByMenuId(id);
         }
