@@ -213,9 +213,7 @@
           AND is_deleted = false
     </update>
 
-    <!-- 1. 게임 이름으로 menu.id 조회                                      -->
-    <!-- GameServiceImpl.tryUpsertEmbeddingByGameName() 에서 사용           -->
-    <!-- game 이름이 menu.name 과 동일하게 저장되어 있는 구조 기준           -->
+    <!-- 입력한 게임명과 이름이 같은 미삭제 GAME 메뉴의 ID를 조회함 -->
     <select id="findMenuIdByGameName" parameterType="String" resultType="Integer">
         SELECT m.id
         FROM menu m
@@ -227,9 +225,7 @@
         LIMIT 1
     </select>
 
-    <!-- 2. game.id → category_id → menu.id 경로로 menu.id 조회             -->
-    <!-- GameItemServiceImpl.tryUpsertEmbeddingByGameId() 에서 사용          -->
-    <!-- game과 menu가 동일한 category_id를 공유하는 구조 기준               -->
+    <!-- 게임 ID로 찾은 게임을 이름이 같은 메뉴와 연결해 미삭제 GAME 메뉴의 ID를 조회함 -->
     <select id="findMenuIdByGameId" parameterType="int" resultType="Integer">
         SELECT m.id
         FROM menu m

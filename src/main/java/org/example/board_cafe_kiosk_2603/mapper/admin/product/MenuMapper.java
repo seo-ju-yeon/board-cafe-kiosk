@@ -92,14 +92,9 @@ public interface MenuMapper {
     int renameGameMenuName(@Param("oldName") String oldName,
                            @Param("newName") String newName);
 
-    /* SpringAI & RAG */
-
-    /* AI 임베딩 연동, 게임 이름을 기반으로 매핑된 메뉴 ID를 조회 (게임 이름으로 menu.id 조회) */
-    // GameServiceImpl.tryUpsertByGameName() 에서 사용
+    /* 게임 이름으로 검색 문서 동기화에 사용할 메뉴 ID 조회 */
     Integer findMenuIdByGameName(String gameName);
 
-    /* AI 임베딩 연동, 게임 ID를 통해 연관된 메뉴 ID를 역추적하여 조회 */
-    // GameItemServiceImpl.tryUpsertByGameId() 에서 사용
-    // game.id → category_id → menu.id 경로로 menu.id 조회
+    /* 게임 ID로 검색 문서 동기화에 사용할 메뉴 ID 조회 */
     Integer findMenuIdByGameId(int gameId);
 }
