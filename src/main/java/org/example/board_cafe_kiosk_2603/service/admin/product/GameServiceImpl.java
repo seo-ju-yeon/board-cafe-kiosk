@@ -72,8 +72,6 @@ class GameServiceImpl implements GameService {
     }
 
     /* 게임 등록 */
-    // 등록 정보 저장 및 AI 지식 등록
-    // game 저장 → menu 동기화 → 임베딩 등록
     @Override
     public int register(GameRequestDTO gameRequestDTO) {
         log.debug("GameServiceImpl.register() 실행 - dto: {}", gameRequestDTO);
@@ -88,20 +86,18 @@ class GameServiceImpl implements GameService {
                 .build();
         gameMapper.insert(game);
 
-        // 1. 키오스크 메뉴 테이블과 데이터 동기화 (가격 0원인 게임 메뉴 생성/수정)
+        // 키오스크의 0원 게임 메뉴가 없으면 생성함
         menuMapper.insertGameMenuIfNotExists(
                 gameRequestDTO.getCategoryId(),
                 gameRequestDTO.getName(),
                 gameRequestDTO.getDescription()
         );
 
-        // 2. AI 임베딩: 새 지식으로 등록 (재고가 NORMAL 상태여야 실질 등록됨)
         menuMapper.updateGameMenuDescriptionByName(
                 gameRequestDTO.getName(),
                 gameRequestDTO.getDescription()
         );
-        // menu 저장 완료 후 menu_id 조회 → 임베딩 시도
-        // game_item 재고가 없으면 GameEmbeddingService 내부에서 자동 스킵
+        // 게임과 메뉴 정보를 저장한 뒤 검색 대상 조건을 다시 확인함
         tryUpsertEmbeddingByGameName(gameRequestDTO.getName());
 
         log.info("게임 등록 완료 - generated id: {}", game.getId());
@@ -109,8 +105,6 @@ class GameServiceImpl implements GameService {
     }
 
     /* 게임 수정 (존재 여부 선확인) */
-    // 정보 변경 및 AI 지식 갱신
-    // 임베딩 조건(game.is_active = TRUE) 미충족 → 자동으로 벡터 삭제
     @Override
     public void modify(int id, GameRequestDTO gameRequestDTO) {
         log.debug("GameServiceImpl.modify() 실행 - id: {}, dto: {}", id, gameRequestDTO);
@@ -133,7 +127,7 @@ class GameServiceImpl implements GameService {
                 .build();
         int result = gameMapper.update(game);
 
-        // 1. 이름 변경 시 메뉴 테이블의 이름도 함께 동기화
+        // 이름 변경 시 메뉴의 이름도 함께 수정함
         if (origin.getName() != null && gameRequestDTO.getName() != null
                 && !origin.getName().equals(gameRequestDTO.getName())) {
             menuMapper.renameGameMenuName(origin.getName(), gameRequestDTO.getName());
@@ -147,8 +141,7 @@ class GameServiceImpl implements GameService {
                 gameRequestDTO.getName(),
                 gameRequestDTO.getDescription()
         );
-        // 2. AI 임베딩 갱신: 수정된 정보를 바탕으로 벡터 데이터 업데이트
-        // is_active = false 로 수정 시 → 조건 미충족 → 자동으로 벡터 삭제
+        // 게임과 메뉴 정보를 수정한 뒤 검색 대상 조건을 다시 확인함
         tryUpsertEmbeddingByGameName(gameRequestDTO.getName());
         log.debug("게임 수정 결과 - affected rows: {}", result);
     }

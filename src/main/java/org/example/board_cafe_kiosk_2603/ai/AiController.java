@@ -83,8 +83,7 @@ public class AiController {
         return outputStream -> writeFluxToStream(result.audioFlux(), outputStream);
     }
 
-    /* 보드게임 데이터의 벡터 임베딩을 수동으로 갱신 */
-    // 새로운 게임 추가 혹은 설명 수정 시 호출하여 지식 베이스를 동기화 함.
+    /* 검색 대상 게임 문서를 수동으로 일괄 저장 */
     @PostMapping("/admin/reindex-games")
     public ResponseEntity<String> reindexGames() {
         log.info("[관리자] 전체 게임 재임베딩 요청");
