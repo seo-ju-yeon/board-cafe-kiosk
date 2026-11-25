@@ -10,13 +10,10 @@ import org.springframework.stereotype.Service;
 import java.util.*;
 
 /**
- * MariaDB의 보드게임 데이터를 PGVector 기반 VectorStore에 동기화하는 서비스입니다.
+ * MariaDB의 게임 정보를 pgvector에 검색 문서로 저장하고 메뉴 ID로 갱신·삭제합니다.
  *
- * <p>키오스크에서 실제 추천 가능한 게임만 임베딩 대상으로 삼기 위해
- * 판매 가능 여부, 삭제 여부, 게임 활성 상태, 정상 재고 존재 여부를 함께 확인합니다.</p>
- *
- * <p>관리자가 게임/메뉴/재고 정보를 변경했을 때 벡터 저장소도 함께 갱신하여
- * 실제 판매 상태와 AI 추천 답변의 데이터 정합성을 맞추는 역할을 합니다.</p>
+ * <p>인덱싱 시점에 판매 가능하고 삭제되지 않은 {@code GAME} 메뉴에 연결된 활성 게임 중
+ * {@code NORMAL} 재고가 있는 게임을 저장 대상으로 삼습니다.</p>
  */
 @Log4j2
 @Service
@@ -32,8 +29,7 @@ public class GameEmbeddingService {
         this.vectorStore = vectorStore;
     }
 
-    /* 임베딩 대상 게임 조회 */
-    // 키오스크에서 실제로 '판매 중'이고 '재고가 있는' '게임'만 선별
+    // 게임과 메뉴는 이름으로 연결하고, NORMAL 재고는 EXISTS로 존재 여부를 확인함
     private static final String GAME_QUERY = """
             SELECT
                 m.id          AS menu_id,
@@ -61,10 +57,9 @@ public class GameEmbeddingService {
             """;
 
     /**
-     * 추천 가능한 전체 게임 데이터를 조회하여 벡터 저장소에 일괄 저장합니다.
+     * 검색 조건을 충족한 조회 결과를 메뉴 ID당 문서 한 건으로 만들어 일괄 저장합니다.
      *
-     * <p>게임 재고 테이블과의 관계 때문에 동일한 게임이 여러 행으로 조회될 수 있으므로,
-     * {@code menu_id} 기준으로 중복을 제거한 뒤 문서를 생성합니다.</p>
+     * <p>일괄 저장은 이번 조회 결과에 한정되며, 기존 문서 삭제는 개별 갱신·삭제 경로에서 처리합니다.</p>
      *
      * @return 벡터 저장소에 저장한 문서 수
      */
@@ -78,7 +73,6 @@ public class GameEmbeddingService {
             log.warn("[임베딩] 임베딩할 게임이 없습니다. (MariaDB 데이터를 확인)");
             return 0;
         }
-        // game_item이 여러 개면 같은 게임이 여러 행으로 조회되므로 menu_id 기준으로 1건만 유지합니다.
         Map<String, Map<String, Object>> deduped = new LinkedHashMap<>();
         for (Map<String, Object> row : games) {
             String menuId = str(row.get("menu_id"));
@@ -99,10 +93,10 @@ public class GameEmbeddingService {
     }
 
     /**
-     * 특정 메뉴 ID에 해당하는 게임 정보를 벡터 저장소에 갱신합니다.
+     * 메뉴 ID로 검색 대상 조건을 다시 확인해 해당 문서를 갱신합니다.
      *
-     * <p>게임이 비활성화되었거나 정상 재고가 없어 추천 대상에서 제외되는 경우,
-     * 기존 벡터 문서를 삭제하여 AI 답변에 노출되지 않도록 처리합니다.</p>
+     * <p>조회 결과가 있으면 기존 문서를 삭제한 뒤 새 문서를 저장합니다. 조회 결과가 비면 기존 문서를 삭제합니다.
+     * 삭제 후 새 문서 저장에 실패하면 해당 메뉴의 검색 문서가 누락될 수 있습니다.</p>
      *
      * @param menuId 갱신할 게임 메뉴 ID
      */
@@ -111,13 +105,11 @@ public class GameEmbeddingService {
         List<Map<String, Object>> result = mariaJdbcTemplate.queryForList(singleQuery, menuId);
 
         if (result.isEmpty()) {
-            // 조건 미충족 (비활성화, 재고 없음 등) → 기존 벡터 삭제
             log.info("[임베딩] menuId={} 조건 미충족 → 벡터에서 제외", menuId);
             deleteByMenuId(menuId);
             return;
         }
 
-        // 기존 데이터를 지우고 새 정보를 저장하여 데이터 정합성 유지
         deleteByMenuId(menuId);
         vectorStore.add(List.of(toDocument(result.get(0))));
 

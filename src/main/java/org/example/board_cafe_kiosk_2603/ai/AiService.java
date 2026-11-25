@@ -78,7 +78,7 @@ public class AiService {
     }
 
     /* [RAG] 질문과 관련된 지식을 VectorStore에서 찾아 LLM에게 전달 */
-    // - PGVector 유사도 검색 → DB에 있는 게임만 컨텍스트 사용
+    // - pgvector에서 검색된 문서의 본문을 답변 생성에 사용한다.
     // - 검색 결과 없음 → "등록된 게임 없음" 프롬프트
     // - 검색 결과 있음 → 해당 게임 정보를 LLM 프롬프트에 주입
     private String generateAnswer(String textQuestion) {
